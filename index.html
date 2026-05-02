@@ -117,26 +117,26 @@ textarea:focus,input:focus{border-color:var(--red)}
 .success-close{width:100%;padding:14px;background:var(--red);color:#fff;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer}
 
 /* ===== ログイン・登録 画面 ===== */
-.auth-overlay{position:fixed;inset:0;background:var(–red);z-index:600;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;overflow-y:auto}
+.auth-overlay{position:fixed;inset:0;background:var(--red);z-index:600;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;overflow-y:auto}
 .auth-overlay.hidden{display:none}
 .auth-logo{font-size:56px;margin-bottom:6px}
 .auth-title{font-size:22px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:0.05em}
 .auth-sub{font-size:12px;color:rgba(255,255,255,0.8);margin-bottom:28px;text-align:center}
-.auth-card{background:#fff;border-radius:var(–radius);padding:20px;width:100%;max-width:360px}
-.auth-tabs{display:flex;border-bottom:2px solid var(–border);margin-bottom:16px}
-.auth-tab{flex:1;padding:10px;border:none;background:none;font-size:14px;font-weight:700;font-family:inherit;color:var(–ink3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
-.auth-tab.active{color:var(–red);border-bottom-color:var(–red)}
+.auth-card{background:#fff;border-radius:var(--radius);padding:20px;width:100%;max-width:360px}
+.auth-tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:16px}
+.auth-tab{flex:1;padding:10px;border:none;background:none;font-size:14px;font-weight:700;font-family:inherit;color:var(--ink3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
+.auth-tab.active{color:var(--red);border-bottom-color:var(--red)}
 .auth-panel{display:none}
 .auth-panel.active{display:block}
-.auth-label{font-size:12px;font-weight:700;color:var(–ink);margin-bottom:6px;margin-top:12px;display:block}
-.auth-input{width:100%;border:1.5px solid var(–border);border-radius:var(–radius-sm);padding:12px;font-size:16px;font-family:inherit;outline:none;letter-spacing:0.1em;text-align:center}
-.auth-input:focus{border-color:var(–red)}
-.auth-btn{width:100%;padding:14px;margin-top:16px;background:var(–red);color:#fff;border:none;border-radius:var(–radius-sm);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:0.05em}
-.auth-hint{font-size:11px;color:var(–ink3);text-align:center;margin-top:8px;line-height:1.6}
-.auth-err{font-size:12px;color:var(–red);text-align:center;margin-top:8px;min-height:18px}
+.auth-label{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px;margin-top:12px;display:block}
+.auth-input{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:16px;font-family:inherit;outline:none;letter-spacing:0.1em;text-align:center}
+.auth-input:focus{border-color:var(--red)}
+.auth-btn{width:100%;padding:14px;margin-top:16px;background:var(--red);color:#fff;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:0.05em}
+.auth-hint{font-size:11px;color:var(--ink3);text-align:center;margin-top:8px;line-height:1.6}
+.auth-err{font-size:12px;color:var(--red);text-align:center;margin-top:8px;min-height:18px}
 .pin-row{display:flex;gap:8px;justify-content:center;margin:8px 0}
-.pin-digit{width:52px;height:60px;border:2px solid var(–border);border-radius:var(–radius-sm);font-size:24px;text-align:center;font-family:inherit;outline:none;background:#fff}
-.pin-digit:focus{border-color:var(–red)}
+.pin-digit{width:52px;height:60px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:24px;text-align:center;font-family:inherit;outline:none;background:#fff}
+.pin-digit:focus{border-color:var(--red)}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 </style>
 
@@ -155,7 +155,6 @@ textarea:focus,input:focus{border-color:var(--red)}
       <button class="auth-tab" onclick="switchAuthTab('register')">はじめて登録</button>
     </div>
 
-```
 <!-- ログインパネル -->
 <div class="auth-panel active" id="auth-login">
   <label class="auth-label">名前</label>
@@ -187,7 +186,6 @@ textarea:focus,input:focus{border-color:var(--red)}
   <button class="auth-btn" onclick="doRegister()">登録してはじめる</button>
   <div class="auth-hint">※ 4桁PINは自分だけの番号です。忘れないようにしよう！</div>
 </div>
-```
 
   </div>
 </div>
@@ -375,7 +373,7 @@ textarea:focus,input:focus{border-color:var(--red)}
 // ============================================
 // 【設定】GASのウェブアプリURLをここに貼る
 // ============================================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyJkx_dIfi1ilA06l9sYjJFxMFtQ6mY_XPYvFQ4akfkp4FgKcIxqrsWntjoTJaBkXbl/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwFD9T8r-cvdszfEQNH6RJMelO-0oT-b5Rkbwn13HtZygWjnnmKVQyPHMem4ZizzGGT/exec";
 
 const COND_EMOJI = ['','☠️','💦','😃','💪','🔥'];
 let selCond = 0;
