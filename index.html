@@ -624,7 +624,15 @@ function closeSuccess() {
 // ============================================
 // ログ取得（GAS GET）
 // ============================================
+function showLoading() {
+  document.getElementById('loadingOverlay').classList.add('show');
+}
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.remove('show');
+}
 async function loadLogs() {
+  showLoading();
+  const _start = Date.now();
   try {
     const url = GAS_URL
       + '?name=' + encodeURIComponent(getName())
@@ -633,10 +641,13 @@ async function loadLogs() {
     const json = await res.json();
     if (json.status === 'ok') {
       cachedLogs = json.logs;
-      // ホームが開いていれば即反映
       if (document.getElementById('screen-home').classList.contains('active')) updateHome();
     }
-  } catch(e) { /* サイレント失敗 */ }
+  } catch(e) { /* サイレント失敗 */ } finally {
+    // 最低500ms表示を保証（一瞬で消えないように）
+    const elapsed = Date.now() - _start;
+    setTimeout(hideLoading, Math.max(0, 500 - elapsed));
+  }
 }
 
 // ============================================
