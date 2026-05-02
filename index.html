@@ -625,11 +625,19 @@ function closeSuccess() {
 // ログ取得（GAS GET）
 // ============================================
 function showLoading() {
-  document.getElementById('loadingOverlay').classList.add('show');
+  // ホーム画面の各要素を「読み込み中」状態に直接変更
+  const m = document.getElementById('missionText');
+  if (m) { m.innerHTML = '<span style="color:var(--red)">⏳ 読み込み中...</span>'; m.className = 'mission-empty'; }
+  const tc = document.getElementById('totalCount');
+  if (tc) tc.textContent = '...';
+  const st = document.getElementById('statTotal');
+  if (st) st.textContent = '...';
+  const sa = document.getElementById('statAvgCond');
+  if (sa) sa.textContent = '⏳';
+  const lc = document.getElementById('logContent');
+  if (lc) lc.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--ink3)">⏳ 読み込み中...しばらくお待ちください</div>';
 }
-function hideLoading() {
-  document.getElementById('loadingOverlay').classList.remove('show');
-}
+function hideLoading() { /* updateHome()・updateLog()が後続処理する */ }
 async function loadLogs() {
   showLoading();
   const _start = Date.now();
@@ -643,10 +651,9 @@ async function loadLogs() {
       cachedLogs = json.logs;
       if (document.getElementById('screen-home').classList.contains('active')) updateHome();
     }
-  } catch(e) { /* サイレント失敗 */ } finally {
-    // 最低500ms表示を保証（一瞬で消えないように）
-    const elapsed = Date.now() - _start;
-    setTimeout(hideLoading, Math.max(0, 500 - elapsed));
+  } catch(e) {
+    const m = document.getElementById('missionText');
+    if (m) { m.textContent = '通信エラー。Wi-Fiを確認してください'; m.className = 'mission-empty'; }
   }
 }
 
