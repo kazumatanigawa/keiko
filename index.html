@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>稽古ノート</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#8B1A1A;--red-light:#C0392B;--red-pale:#FDF0F0;
+  --gold:#C9A84C;--gold-pale:#FFFBF0;
+  --ink:#1a1a1a;--ink2:#444;--ink3:#888;
+  --bg:#FAFAF8;--card:#fff;--border:#E8E0D0;
+  --radius:14px;--radius-sm:8px;
+}
+body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;max-width:430px;margin:0 auto}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+.header{background:var(--red);color:#fff;padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header-title{font-size:16px;font-weight:700;letter-spacing:0.05em}
+.header-sub{font-size:11px;opacity:0.8;margin-top:2px}
+.menu-btn{background:rgba(255,255,255,0.2);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.bottom-nav{background:#fff;border-top:1px solid var(--border);display:flex;padding:8px 0 12px;position:sticky;bottom:0;z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;cursor:pointer;border:none;background:none;color:var(--ink3);font-size:10px;font-family:inherit}
+.nav-item.active{color:var(--red)}
+.nav-icon{font-size:22px;line-height:1}
+.content{flex:1;overflow-y:auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.card-title{font-size:13px;color:var(--ink3);font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.card-title::before{content:'';display:inline-block;width:3px;height:13px;background:var(--red);border-radius:2px}
+.hero{background:linear-gradient(135deg,var(--red) 0%,#6B1111 100%);color:#fff;border-radius:var(--radius);padding:20px;margin-bottom:16px;position:relative;overflow:hidden}
+.hero::after{content:'太鼓';position:absolute;right:-10px;bottom:-20px;font-size:100px;opacity:0.08;font-weight:900;line-height:1}
+.hero-name{font-size:22px;font-weight:700;letter-spacing:0.05em}
+.hero-date{font-size:12px;opacity:0.8;margin-bottom:4px}
+.hero-streak{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.2);border-radius:20px;padding:4px 10px;font-size:12px;margin-top:8px}
+.mission-card{background:var(--gold-pale);border:2px solid var(--gold);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.mission-label{font-size:11px;color:var(--gold);font-weight:700;letter-spacing:0.1em;margin-bottom:6px}
+.mission-text{font-size:16px;font-weight:700;color:var(--ink);line-height:1.5}
+.mission-empty{font-size:14px;color:var(--ink3);font-style:italic}
+.quick-btn{width:100%;padding:14px;border-radius:var(--radius);border:none;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:0.03em}
+.btn-primary{background:var(--red);color:#fff}
+.btn-secondary{background:#fff;color:var(--red);border:2px solid var(--red)}
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center}
+.stat-num{font-size:24px;font-weight:700;color:var(--red)}
+.stat-label{font-size:11px;color:var(--ink3);margin-top:2px}
+.form-section{margin-bottom:16px}
+.form-label{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px;display:block}
+.form-hint{font-size:11px;color:var(--ink3);margin-bottom:6px}
+.cond-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:4px}
+.cond-btn{padding:10px 4px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#fff;cursor:pointer;text-align:center;font-size:22px;line-height:1;transition:border-color 0.15s,background 0.15s}
+.cond-btn.selected{border-color:var(--red);background:var(--red-pale)}
+.cond-label{font-size:9px;color:var(--ink3);margin-top:4px}
+textarea,input[type=text],input[type=url]{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:14px;font-family:inherit;background:#fff;color:var(--ink);outline:none;resize:none;line-height:1.6}
+textarea:focus,input[type=text]:focus,input[type=url]:focus{border-color:var(--red)}
+.char-count{font-size:11px;color:var(--ink3);text-align:right;margin-top:3px}
+.submit-btn{width:100%;padding:16px;background:var(--red);color:#fff;border:none;border-radius:var(--radius);font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:8px;letter-spacing:0.05em}
+.submit-btn:active{opacity:0.85}
+.log-entry{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px}
+.log-date{font-size:12px;color:var(--ink3);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.log-cond{font-size:20px}
+.log-section{margin-top:8px}
+.log-section-label{font-size:10px;color:var(--red);font-weight:700;letter-spacing:0.1em;margin-bottom:3px}
+.log-section-text{font-size:13px;color:var(--ink);line-height:1.5}
+.log-next{background:var(--gold-pale);border-left:3px solid var(--gold);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:8px 10px;margin-top:8px}
+.log-next-label{font-size:10px;color:var(--gold);font-weight:700;margin-bottom:3px}
+.log-next-text{font-size:13px;color:var(--ink);font-weight:700}
+.lib-tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:16px;overflow-x:auto}
+.lib-tab{padding:10px 16px;border:none;background:none;font-size:13px;font-weight:700;font-family:inherit;color:var(--ink3);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px}
+.lib-tab.active{color:var(--red);border-bottom-color:var(--red)}
+.lib-panel{display:none}
+.lib-panel.active{display:block}
+.drive-section{margin-bottom:20px}
+.drive-section-title{font-size:14px;font-weight:700;color:var(--ink);border-bottom:2px solid var(--red);padding-bottom:6px;margin-bottom:10px}
+.drive-item{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none}
+.drive-icon{font-size:24px;width:36px;text-align:center}
+.drive-name{font-size:13px;font-weight:700;flex:1;color:var(--ink)}
+.drive-meta{font-size:11px;color:var(--ink3)}
+.drive-arrow{color:var(--ink3);font-size:16px}
+.slide-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.slide-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:transform 0.15s}
+.slide-card:active{transform:scale(0.97)}
+.slide-thumb{height:90px;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative}
+.slide-thumb-tag{position:absolute;top:6px;right:6px;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px}
+.slide-body{padding:8px 10px}
+.slide-title{font-size:12px;font-weight:700;line-height:1.4;margin-bottom:3px}
+.slide-date{font-size:10px;color:var(--ink3)}
+.drive-url-box{background:#fff;border:1.5px dashed var(--border);border-radius:var(--radius);padding:14px;margin-bottom:16px}
+.drive-url-label{font-size:12px;font-weight:700;color:var(--ink3);margin-bottom:8px}
+.drive-url-row{display:flex;gap:8px}
+.drive-url-row input{flex:1;font-size:12px;padding:8px 10px}
+.drive-url-btn{padding:8px 14px;background:var(--red);color:#fff;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap}
+.slide-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:flex-end;justify-content:center}
+.slide-modal-bg.show{display:flex}
+.slide-modal{background:#fff;border-radius:var(--radius) var(--radius) 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto}
+.slide-modal-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.slide-modal-title{font-size:16px;font-weight:700;flex:1;padding-right:12px;line-height:1.4}
+.slide-modal-close{background:var(--bg);border:none;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;flex-shrink:0}
+.slide-modal-visual{background:var(--bg);border-radius:var(--radius-sm);padding:20px;margin-bottom:14px;text-align:center;font-size:48px}
+.slide-modal-tag{display:inline-block;background:var(--red-pale);color:var(--red);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:10px}
+.slide-modal-body{font-size:13px;color:var(--ink2);line-height:1.8}
+.slide-modal-points{margin:10px 0;padding-left:0;list-style:none}
+.slide-modal-points li{padding:6px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:flex-start}
+.slide-modal-points li::before{content:'▶';color:var(--red);font-size:10px;margin-top:3px;flex-shrink:0}
+.slide-modal-gdrive{display:block;width:100%;margin-top:14px;padding:12px;background:var(--red);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;text-align:center;text-decoration:none}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;opacity:0;transition:all 0.3s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.success-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center}
+.success-overlay.show{display:flex}
+.success-card{background:#fff;border-radius:var(--radius);padding:32px 24px;text-align:center;max-width:320px;width:90%;margin:0 16px}
+.success-icon{font-size:56px;margin-bottom:12px}
+.success-title{font-size:20px;font-weight:700;margin-bottom:8px;color:var(--red)}
+.success-text{font-size:14px;color:var(--ink2);line-height:1.6;margin-bottom:20px}
+.success-close{width:100%;padding:14px;background:var(--red);color:#fff;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer}
+.setup-overlay{position:fixed;inset:0;background:var(--red);z-index:600;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px}
+.setup-overlay.hidden{display:none}
+.setup-logo{font-size:64px;margin-bottom:8px}
+.setup-title{font-size:22px;font-weight:700;color:#fff;margin-bottom:6px;letter-spacing:0.05em}
+.setup-sub{font-size:13px;color:rgba(255,255,255,0.8);margin-bottom:32px;text-align:center}
+.setup-input{width:100%;padding:16px;border-radius:var(--radius);border:none;font-size:16px;font-family:inherit;text-align:center;outline:none;margin-bottom:12px}
+.setup-btn{width:100%;padding:16px;background:#fff;color:var(--red);border:none;border-radius:var(--radius);font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:0.05em}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.streak-fire{animation:pulse 2s ease-in-out infinite;display:inline-block}
+</style>
+</head>
+<body>
+
+<div class="setup-overlay" id="setupOverlay">
+  <div class="setup-logo">🥁</div>
+  <div class="setup-title">稽古ノート</div>
+  <div class="setup-sub">府中東 和太鼓部<br>あなたの名前を入力してください</div>
+  <input class="setup-input" id="setupName" type="text" placeholder="例：田中 太郎" maxlength="20">
+  <button class="setup-btn" onclick="setupUser()">はじめる</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">稽古ログ記録完了！</div>
+    <div class="success-text" id="successText"></div>
+    <button class="success-close" onclick="closeSuccess()">ホームに戻る</button>
+  </div>
+</div>
+
+<div class="slide-modal-bg" id="slideModal">
+  <div class="slide-modal">
+    <div class="slide-modal-header">
+      <div class="slide-modal-title" id="modalTitle"></div>
+      <button class="slide-modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="slide-modal-visual" id="modalVisual"></div>
+    <div class="slide-modal-tag" id="modalTag"></div>
+    <div class="slide-modal-body" id="modalBody"></div>
+    <a class="slide-modal-gdrive" id="modalGdrive" target="_blank">Googleドライブで開く →</a>
+  </div>
+</div>
+
+<!-- HOME -->
+
+<div class="screen active" id="screen-home">
+  <div class="header">
+    <div><div class="header-title">🥁 稽古ノート</div><div class="header-sub">府中東 和太鼓部</div></div>
+    <button class="menu-btn" onclick="showToast('設定機能は準備中です')">⚙</button>
+  </div>
+  <div class="content">
+    <div class="hero">
+      <div class="hero-date" id="heroDate"></div>
+      <div class="hero-name" id="heroName">部員名</div>
+      <div class="hero-streak"><span class="streak-fire">📝</span><span id="streakCount">0</span> 回記録達成！</div>
+    </div>
+    <div class="mission-card">
+      <div class="mission-label">▶ 今日の意識（前回の誓い）</div>
+      <div id="missionText" class="mission-empty">まだ記録がありません</div>
+    </div>
+    <button class="quick-btn btn-primary" onclick="goTo('form')">📝 稽古ログを記録する</button>
+    <button class="quick-btn btn-secondary" onclick="goTo('log')">📖 過去のログを見る</button>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">稽古回数</div></div>
+      <div class="stat-card"><div class="stat-num" id="statAvgCond">-</div><div class="stat-label">平均コンディション</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">使い方</div>
+      <div style="font-size:13px;color:var(--ink2);line-height:1.8">1️⃣ 稽古前：「今日の意識」を確認<br>2️⃣ 稽古後：ログを記録する<br>3️⃣ 次回の稽古でまた確認！</div>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="goTo('home')"><span class="nav-icon">🏠</span>ホーム</button>
+    <button class="nav-item" onclick="goTo('form')"><span class="nav-icon">✏️</span>記録</button>
+    <button class="nav-item" onclick="goTo('log')"><span class="nav-icon">📖</span>ログ</button>
+    <button class="nav-item" onclick="goTo('library')"><span class="nav-icon">🎁</span>ライブラリ</button>
+  </div>
+</div>
+
+<!-- FORM -->
+
+<div class="screen" id="screen-form">
+  <div class="header"><div><div class="header-title">📝 稽古ログ記録</div><div class="header-sub" id="formDate"></div></div></div>
+  <div class="content">
+    <div class="mission-card" style="margin-bottom:16px">
+      <div class="mission-label">▶ 今日意識したこと（確認）</div>
+      <div id="formMission" class="mission-empty">まだ記録がありません</div>
+    </div>
+    <div class="form-section">
+      <label class="form-label">今日のコンディション</label>
+      <div class="cond-grid">
+        <button class="cond-btn" onclick="selectCond(this,1)">☠️<div class="cond-label">つかれた</div></button>
+        <button class="cond-btn" onclick="selectCond(this,2)">💦<div class="cond-label">いまいち</div></button>
+        <button class="cond-btn" onclick="selectCond(this,3)">😃<div class="cond-label">普通</div></button>
+        <button class="cond-btn" onclick="selectCond(this,4)">💪<div class="cond-label">いい感じ</div></button>
+        <button class="cond-btn" onclick="selectCond(this,5)">🔥<div class="cond-label">最高！</div></button>
+      </div>
+    </div>
+    <div class="form-section">
+      <label class="form-label">今日一番の学び</label>
+      <div class="form-hint">稽古で気づいたこと・発見したことを書こう</div>
+      <textarea id="fieldLearning" rows="3" placeholder="例：バチの角度を変えると音が変わることに気づいた" oninput="updateChar(this,'charLearning',100)"></textarea>
+      <div class="char-count" id="charLearning">0/100</div>
+    </div>
+    <div class="form-section">
+      <label class="form-label">次の稽古で必ずやること 1選</label>
+      <div class="form-hint">具体的に1つだけ！「〇〇を練習する」など</div>
+      <textarea id="fieldNext" rows="2" placeholder="例：担ぎ桶の右打ちを10回連続で決める" oninput="updateChar(this,'charNext',60)"></textarea>
+      <div class="char-count" id="charNext">0/60</div>
+    </div>
+    <div class="form-section">
+      <label class="form-label">Good & New</label>
+      <div class="form-hint">今日の「良かったこと」や「新しい発見」を1つ</div>
+      <textarea id="fieldGoodNew" rows="2" placeholder="例：Aパートを止まらずに最後まで叩けた！" oninput="updateChar(this,'charGoodNew',80)"></textarea>
+      <div class="char-count" id="charGoodNew">0/80</div>
+    </div>
+    <button class="submit-btn" onclick="submitLog()">記録を保存する ✓</button>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="goTo('home')"><span class="nav-icon">🏠</span>ホーム</button>
+    <button class="nav-item active" onclick="goTo('form')"><span class="nav-icon">✏️</span>記録</button>
+    <button class="nav-item" onclick="goTo('log')"><span class="nav-icon">📖</span>ログ</button>
+    <button class="nav-item" onclick="goTo('library')"><span class="nav-icon">🎁</span>ライブラリ</button>
+  </div>
+</div>
+
+<!-- LOG -->
+
+<div class="screen" id="screen-log">
+  <div class="header"><div><div class="header-title">📖 稽古ログ</div><div class="header-sub" id="logName"></div></div></div>
+  <div class="content" id="logContent"><div style="text-align:center;padding:40px 0;color:var(--ink3)">まだ記録がありません</div></div>
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="goTo('home')"><span class="nav-icon">🏠</span>ホーム</button>
+    <button class="nav-item" onclick="goTo('form')"><span class="nav-icon">✏️</span>記録</button>
+    <button class="nav-item active" onclick="goTo('log')"><span class="nav-icon">📖</span>ログ</button>
+    <button class="nav-item" onclick="goTo('library')"><span class="nav-icon">🎁</span>ライブラリ</button>
+  </div>
+</div>
+
+<!-- LIBRARY -->
+
+<div class="screen" id="screen-library">
+  <div class="header"><div><div class="header-title">🎁 ライブラリ</div><div class="header-sub">スライド・楽譜・音源</div></div></div>
+  <div class="content">
+    <div class="lib-tabs">
+      <button class="lib-tab active" onclick="switchLibTab(this,'slides')">🎓 指導スライド</button>
+      <button class="lib-tab" onclick="switchLibTab(this,'scores')">🎵 楽譜</button>
+      <button class="lib-tab" onclick="switchLibTab(this,'audio')">🔊 音源</button>
+    </div>
+
+```
+<div class="lib-panel active" id="panel-slides">
+  <div class="drive-url-box">
+    <div class="drive-url-label">📁 Googleドライブ フォルダURL（指導員が設定）</div>
+    <div class="drive-url-row">
+      <input type="url" id="gdriveUrl" placeholder="https://drive.google.com/drive/folders/...">
+      <button class="drive-url-btn" onclick="saveGdriveUrl()">保存</button>
+    </div>
+    <div style="font-size:11px;color:var(--ink3);margin-top:6px">設定するとスライドからドライブへ直接リンクできます</div>
+  </div>
+  <div style="font-size:12px;color:var(--ink3);margin-bottom:10px">サンプル表示 — 実際のスライドはGoogleドライブに追加します</div>
+  <div class="slide-grid" id="slideGrid"></div>
+  <div id="gdriveOpenBtn" style="display:none">
+    <a id="gdriveOpenLink" target="_blank" style="display:block;width:100%;padding:14px;background:var(--bg);color:var(--red);border:2px solid var(--red);border-radius:var(--radius);font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;text-align:center;text-decoration:none;margin-bottom:12px">📁 Googleドライブ フォルダを開く →</a>
+  </div>
+</div>
+
+<div class="lib-panel" id="panel-scores">
+  <div class="drive-section">
+    <div class="drive-section-title">楽譜一覧</div>
+    <div style="background:var(--gold-pale);border:1.5px solid var(--gold);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--ink2);line-height:1.7">
+      📁 Googleドライブの楽譜フォルダをタップして開いてください。<br>PDFは各自ダウンロードして保存しておこう！
+    </div>
+    <a class="drive-item" href="https://drive.google.com/drive/folders/1t5tPnh8C-bZ6BP5EnJqLW1z0f_eUOUVE?usp=drive_link" target="_blank">
+      <div class="drive-icon">📂</div>
+      <div><div class="drive-name">楽譜フォルダを開く</div><div class="drive-meta">Googleドライブ · タップで開く</div></div>
+      <div class="drive-arrow">›</div>
+    </a>
+    <a class="drive-item" href="https://drive.google.com/file/d/1naoakaJR207Se6UJ1jdDG04CG7GtpGBz/view?usp=drive_link" target="_blank">
+      <div class="drive-icon">📄</div>
+      <div><div class="drive-name">楽譜ファイル</div><div class="drive-meta">PDF · タップで開く</div></div>
+      <div class="drive-arrow">›</div>
+    </a>
+    <a class="drive-item" href="https://drive.google.com/drive/folders/1rfn4Bq90Fd_dST_-WkTh2-FKgGOF_7lD?usp=drive_link" target="_blank">
+      <div class="drive-icon">📂</div>
+      <div><div class="drive-name">楽譜フォルダ②</div><div class="drive-meta">Googleドライブ · タップで開く</div></div>
+      <div class="drive-arrow">›</div>
+    </a>
+  </div>
+</div>
+
+<div class="lib-panel" id="panel-audio">
+  <div class="drive-section">
+    <div class="drive-section-title">音源・参考動画</div>
+    <div style="background:var(--gold-pale);border:1.5px solid var(--gold);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--ink2);line-height:1.7">
+      📁 Googleドライブの音源フォルダをタップして開いてください。<br>稽古前に聴いてイメージを作っておこう！
+    </div>
+    <a class="drive-item" href="https://drive.google.com/drive/folders/1CA73z1IefnQhmcaa3AJ-BqqEt-fdUFop?usp=drive_link" target="_blank">
+      <div class="drive-icon">📂</div>
+      <div><div class="drive-name">音源フォルダを開く</div><div class="drive-meta">Googleドライブ · タップで開く</div></div>
+      <div class="drive-arrow">›</div>
+    </a>
+    <div class="drive-item" style="opacity:0.5;pointer-events:none"><div class="drive-icon">🎧</div><div><div class="drive-name">演目 参考音源</div><div class="drive-meta">フォルダ内に追加予定</div></div></div>
+    <div class="drive-item" style="opacity:0.5;pointer-events:none"><div class="drive-icon">🎬</div><div><div class="drive-name">手本動画</div><div class="drive-meta">フォルダ内に追加予定</div></div></div>
+  </div>
+</div>
+```
+
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="goTo('home')"><span class="nav-icon">🏠</span>ホーム</button>
+    <button class="nav-item" onclick="goTo('form')"><span class="nav-icon">✏️</span>記録</button>
+    <button class="nav-item" onclick="goTo('log')"><span class="nav-icon">📖</span>ログ</button>
+    <button class="nav-item active" onclick="goTo('library')"><span class="nav-icon">🎁</span>ライブラリ</button>
+  </div>
+</div>
+
+<script>
+const COND_EMOJI=['','☠️','💦','😃','💪','🔥'];
+let selCond=0,userName='',logs=[],gdriveUrl='';
+
+const SLIDES=[
+  {id:1,emoji:'🥁',color:'#FDF0F0',tag:'リズム・基礎',title:'打ちの基本：腕ではなく体幹で叩く',date:'2025年4月10日',points:['腰から力を生み出し腕に伝える','バチを握りしめず、指で支える感覚','呼吸と打点を合わせることで音が揃う'],body:'今日のキーワードは「脱力」。力を入れるほど音は死ぬ。体幹を使って振り、バチを「落とす」イメージを掴もう。'},
+  {id:2,emoji:'🎯',color:'#F0F8FF',tag:'メンタル・習慣',title:'習慣化で時間の複利を活かす',date:'2025年4月17日',points:['1回の稽古で1つだけ意識を決める','小さな意識を積み重ねると半年で別人になる','ログを書くことで「意識」が記憶に定着する'],body:'複利の力は演奏にも使える。毎回「1つの意識」を守り続けることが、半年後・1年後の自分を劇的に変える。'},
+  {id:3,emoji:'👂',color:'#F0FFF4',tag:'アンサンブル',title:'聴く力が演奏を変える：全体を感じる耳',date:'2025年4月24日',points:['自分の音だけ聴くと周りとズレる','隣の人の音を「感じながら」叩く','間（ま）は音と同じくらい大事'],body:'和太鼓は会話だ。一人で話し続けるのではなく、周りの音を「聴いて」「答える」ことで演奏に命が宿る。'},
+  {id:4,emoji:'⚡',color:'#FFFBF0',tag:'発表・本番',title:'本番で力を出す：緊張をエネルギーに変える',date:'2025年5月1日',points:['緊張は「準備ができた証拠」と捉え直す','舞台に出る前に3回深呼吸する','ミスを恐れるより「今この瞬間」に集中する'],body:'緊張しない人間はいない。プロは緊張を消すのではなく、緊張をエネルギーに変える技術を持っている。'},
+];
+
+function getDateStr(){const d=new Date();return`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${'日月火水木金土'[d.getDay()]}）`;}
+
+function loadData(){
+  try{
+    userName=localStorage.getItem('taiko_name')||'';
+    logs=JSON.parse(localStorage.getItem('taiko_logs')||'[]');
+    gdriveUrl=localStorage.getItem('taiko_gdrive')||'';
+  }catch(e){userName='';logs=[];gdriveUrl='';}
+}
+function saveData(){
+  try{
+    localStorage.setItem('taiko_name',userName);
+    localStorage.setItem('taiko_logs',JSON.stringify(logs));
+    localStorage.setItem('taiko_gdrive',gdriveUrl);
+  }catch(e){}
+}
+function setupUser(){
+  const n=document.getElementById('setupName').value.trim();
+  if(!n){showToast('名前を入力してください');return;}
+  userName=n;saveData();
+  document.getElementById('setupOverlay').classList.add('hidden');
+  updateHome();
+}
+function goTo(s){
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  document.getElementById('screen-'+s).classList.add('active');
+  if(s==='home') updateHome();
+  if(s==='form') updateForm();
+  if(s==='log'){updateLog();document.getElementById('logName').textContent=userName;}
+  if(s==='library') updateLibrary();
+}
+function getLatestNext(){return logs.length?logs[logs.length-1].next||null:null;}
+function updateHome(){
+  document.getElementById('heroDate').textContent=getDateStr();
+  document.getElementById('heroName').textContent=userName+'さん';
+  const lat=getLatestNext();
+  const m=document.getElementById('missionText');
+  if(lat){m.textContent=lat;m.className='mission-text';}else{m.textContent='まだ記録がありません';m.className='mission-empty';}
+  document.getElementById('statTotal').textContent=logs.length;
+  if(logs.length){
+    const avg=logs.reduce((s,l)=>s+l.cond,0)/logs.length;
+    document.getElementById('statAvgCond').textContent=COND_EMOJI[Math.round(avg)];
+  }
+  document.getElementById('streakCount').textContent=logs.length;
+}
+function updateForm(){
+  document.getElementById('formDate').textContent=getDateStr();
+  const lat=getLatestNext();
+  const m=document.getElementById('formMission');
+  if(lat){m.textContent=lat;m.className='mission-text';}else{m.textContent='まだ記録がありません';m.className='mission-empty';}
+  selCond=0;
+  document.querySelectorAll('.cond-btn').forEach(b=>b.classList.remove('selected'));
+  ['fieldLearning','fieldNext','fieldGoodNew'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('charLearning').textContent='0/100';
+  document.getElementById('charNext').textContent='0/60';
+  document.getElementById('charGoodNew').textContent='0/80';
+}
+function selectCond(btn,val){document.querySelectorAll('.cond-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');selCond=val;}
+function updateChar(el,outId,max){document.getElementById(outId).textContent=el.value.length+'/'+max;if(el.value.length>max)el.value=el.value.substring(0,max);}
+function submitLog(){
+  if(!selCond){showToast('コンディションを選んでください');return;}
+  const learning=document.getElementById('fieldLearning').value.trim();
+  const next=document.getElementById('fieldNext').value.trim();
+  const goodNew=document.getElementById('fieldGoodNew').value.trim();
+  if(!learning){showToast('今日の学びを入力してください');return;}
+  if(!next){showToast('次の稽古でやることを入力してください');return;}
+  if(!goodNew){showToast('Good&Newを入力してください');return;}
+  logs.push({ts:Date.now(),cond:selCond,learning,next,goodNew});
+  saveData();
+  document.getElementById('successText').textContent=`今日の学び「${learning.substring(0,20)}${learning.length>20?'…':''}」を記録しました。次の稽古では「${next.substring(0,20)}${next.length>20?'…':''}」を意識しましょう！`;
+  document.getElementById('successOverlay').classList.add('show');
+}
+function closeSuccess(){document.getElementById('successOverlay').classList.remove('show');goTo('home');}
+function updateLog(){
+  const el=document.getElementById('logContent');
+  if(!logs.length){el.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--ink3)">まだ記録がありません<br><br><button onclick="goTo(\'form\')" style="background:var(--red);color:#fff;border:none;padding:12px 24px;border-radius:30px;font-size:14px;font-family:inherit;cursor:pointer">最初のログを記録する</button></div>';return;}
+  el.innerHTML=[...logs].reverse().map(l=>{
+    const d=new Date(l.ts);
+    const ds=`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+    return`<div class="log-entry"><div class="log-date"><span>${ds}</span><span class="log-cond">${COND_EMOJI[l.cond]}</span></div><div class="log-section"><div class="log-section-label">今日の学び</div><div class="log-section-text">${esc(l.learning)}</div></div><div class="log-next"><div class="log-next-label">▶ 次の稽古でやること</div><div class="log-next-text">${esc(l.next)}</div></div><div class="log-section" style="margin-top:8px"><div class="log-section-label">Good & New</div><div class="log-section-text">${esc(l.goodNew)}</div></div></div>`;
+  }).join('');
+}
+function updateLibrary(){
+  const urlInput=document.getElementById('gdriveUrl');
+  if(gdriveUrl) urlInput.value=gdriveUrl;
+  renderSlides();updateGdriveBtn();
+}
+function renderSlides(){
+  document.getElementById('slideGrid').innerHTML=SLIDES.map(s=>`
+    <div class="slide-card" onclick="openSlide(${s.id})">
+      <div class="slide-thumb" style="background:${s.color}">
+        <span style="font-size:36px">${s.emoji}</span>
+        <span class="slide-thumb-tag">${s.tag}</span>
+      </div>
+      <div class="slide-body">
+        <div class="slide-title">${s.title}</div>
+        <div class="slide-date">${s.date}</div>
+      </div>
+    </div>`).join('');
+}
+function openSlide(id){
+  const s=SLIDES.find(x=>x.id===id);if(!s) return;
+  document.getElementById('modalTitle').textContent=s.title;
+  document.getElementById('modalVisual').textContent=s.emoji;
+  document.getElementById('modalTag').textContent=s.tag;
+  document.getElementById('modalBody').innerHTML=`<p style="margin-bottom:10px">${s.body}</p><ul class="slide-modal-points">${s.points.map(p=>`<li>${p}</li>`).join('')}</ul>`;
+  const gdBtn=document.getElementById('modalGdrive');
+  if(gdriveUrl){gdBtn.href=gdriveUrl;gdBtn.style.display='block';}else{gdBtn.style.display='none';}
+  document.getElementById('slideModal').classList.add('show');
+}
+function closeModal(){document.getElementById('slideModal').classList.remove('show');}
+function saveGdriveUrl(){
+  gdriveUrl=document.getElementById('gdriveUrl').value.trim();
+  saveData();updateGdriveBtn();
+  showToast(gdriveUrl?'Googleドライブを保存しました':'URLをクリアしました');
+}
+function updateGdriveBtn(){
+  const btn=document.getElementById('gdriveOpenBtn');
+  const link=document.getElementById('gdriveOpenLink');
+  if(gdriveUrl){btn.style.display='block';link.href=gdriveUrl;}else{btn.style.display='none';}
+}
+function switchLibTab(btn,panel){
+  document.querySelectorAll('.lib-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.lib-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-'+panel).classList.add('active');
+}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+loadData();
+if(userName){document.getElementById('setupOverlay').classList.add('hidden');updateHome();}
+</script>
+
+</body>
+</html>
