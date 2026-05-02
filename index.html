@@ -622,22 +622,37 @@ function closeSuccess() {
 }
 
 // ============================================
-// ログ取得（GAS GET）
+// ログ取得（GAS GET）- ローディングオーバーレイ
 // ============================================
+let _loadingEl = null;
 function showLoading() {
-  // ホーム画面の各要素を「読み込み中」状態に直接変更
-  const m = document.getElementById('missionText');
-  if (m) { m.innerHTML = '<span style="color:var(--red)">⏳ 読み込み中...</span>'; m.className = 'mission-empty'; }
-  const tc = document.getElementById('totalCount');
-  if (tc) tc.textContent = '...';
-  const st = document.getElementById('statTotal');
-  if (st) st.textContent = '...';
-  const sa = document.getElementById('statAvgCond');
-  if (sa) sa.textContent = '⏳';
-  const lc = document.getElementById('logContent');
-  if (lc) lc.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--ink3)">⏳ 読み込み中...しばらくお待ちください</div>';
+  if (!_loadingEl) {
+    // スピナーのキーフレームをDOMに追加
+    if (!document.getElementById('_spinStyle')) {
+      const s = document.createElement('style');
+      s.id = '_spinStyle';
+      s.textContent = '@keyframes _spin{to{transform:rotate(360deg)}}';
+      document.head.appendChild(s);
+    }
+    // オーバーレイ要素をJSで動的生成（HTML依存なし）
+    _loadingEl = document.createElement('div');
+    _loadingEl.style.cssText = [
+      'position:fixed', 'inset:0', 'z-index:900',
+      'background:rgba(250,250,248,0.96)',
+      'display:flex', 'flex-direction:column',
+      'align-items:center', 'justify-content:center', 'gap:14px'
+    ].join(';');
+    _loadingEl.innerHTML =
+      '<div style="width:48px;height:48px;border:4px solid #E8E0D0;border-top-color:#8B1A1A;border-radius:50%;animation:_spin 0.75s linear infinite"></div>' +
+      '<div style="font-size:14px;font-weight:700;color:#444;letter-spacing:0.05em">データを読み込み中...</div>' +
+      '<div style="font-size:11px;color:#888">しばらくお待ちください 🥁</div>';
+    document.body.appendChild(_loadingEl);
+  }
+  _loadingEl.style.display = 'flex';
 }
-function hideLoading() { /* updateHome()・updateLog()が後続処理する */ }
+function hideLoading() {
+  if (_loadingEl) _loadingEl.style.display = 'none';
+}
 async function loadLogs() {
   showLoading();
   const _start = Date.now();
@@ -654,6 +669,10 @@ async function loadLogs() {
   } catch(e) {
     const m = document.getElementById('missionText');
     if (m) { m.textContent = '通信エラー。Wi-Fiを確認してください'; m.className = 'mission-empty'; }
+  } finally {
+    // 最低500ms表示を保証
+    const elapsed = Date.now() - _start;
+    setTimeout(hideLoading, Math.max(0, 500 - elapsed));
   }
 }
 
