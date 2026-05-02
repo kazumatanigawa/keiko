@@ -373,7 +373,7 @@ textarea:focus,input:focus{border-color:var(--red)}
 // ============================================
 // 【設定】GASのウェブアプリURLをここに貼る
 // ============================================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwFD9T8r-cvdszfEQNH6RJMelO-0oT-b5Rkbwn13HtZygWjnnmKVQyPHMem4ZizzGGT/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwB0XT3BkzP5IWnMqPayt-Vs2yOJhrGq8pXPLZqcukghDVxW-th1x_K2-nOyDRqLXAs/exec";
 
 const COND_EMOJI = ['','☠️','💦','😃','💪','🔥'];
 let selCond = 0;
@@ -642,6 +642,12 @@ async function loadLogs() {
 // ============================================
 // ログ一覧表示
 // ============================================
+function fmtDate(val) {
+  if (!val) return '';
+  const d = new Date(val);
+  if (isNaN(d)) return String(val);
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${'日月火水木金土'[d.getDay()]}）`;
+}
 function updateLog() {
   document.getElementById('logName').textContent = getName() + ' さんの記録';
   const el = document.getElementById('logContent');
@@ -651,7 +657,7 @@ function updateLog() {
   }
   el.innerHTML = cachedLogs.map(l => `
     <div class="log-entry">
-      <div class="log-date"><span>${esc(l.date)}</span><span class="log-cond">${COND_EMOJI[l.cond]||''}</span></div>
+      <div class="log-date"><span>${esc(fmtDate(l.date))}</span><span class="log-cond">${COND_EMOJI[l.cond]||''}</span></div>
       <div class="log-section"><div class="log-section-label">今日の学び</div><div class="log-section-text">${esc(l.learning)}</div></div>
       <div class="log-next"><div class="log-next-label">▶ 次の稽古でやること</div><div class="log-next-text">${esc(l.next)}</div></div>
       <div class="log-section" style="margin-top:8px"><div class="log-section-label">Good & New</div><div class="log-section-text">${esc(l.goodNew)}</div></div>
