@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>教材ライブラリ | Keiko</title>
+  <meta
+    name="description"
+    content="Google Drive の公開フォルダを教材CMSとして利用し、教材をカード型UIで自動表示するライブラリページ。"
+  >
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="page-header">
+      <div class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Google Drive Library</p>
+          <h1>教材ライブラリ</h1>
+          <p class="hero-text">
+            Google Drive の公開フォルダをそのまま教材CMSとして使い、更新内容を自動で反映します。
+          </p>
+          <p class="hero-actions">
+            <a class="hero-link" href="./index.html">稽古ノートに戻る</a>
+          </p>
+        </div>
+        <div class="hero-meta" id="heroMeta">
+          <div class="meta-chip">
+            <span class="meta-label">表示件数</span>
+            <strong id="fileCount">0</strong>
+          </div>
+          <div class="meta-chip">
+            <span class="meta-label">最終更新</span>
+            <strong id="lastUpdated">-</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <label class="search-field" for="searchInput">
+          <span class="search-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img" aria-hidden="true">
+              <path d="M10.5 4a6.5 6.5 0 1 0 4.03 11.6l4.43 4.43 1.41-1.41-4.43-4.43A6.5 6.5 0 0 0 10.5 4Zm0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z"/>
+            </svg>
+          </span>
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="ファイル名で検索"
+            autocomplete="off"
+            spellcheck="false"
+          >
+        </label>
+
+        <div class="category-tabs" id="categoryTabs" aria-label="カテゴリ">
+          <button class="category-tab is-active" data-category="all" type="button">すべて</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-main">
+      <section class="status-panel" id="statusPanel" aria-live="polite">
+        <div class="status-message">
+          <strong>設定が必要です。</strong>
+          <span>
+            <code>script.js</code> の <code>DRIVE_FOLDER_ID</code> と <code>API_KEY</code> を設定してください。
+          </span>
+        </div>
+      </section>
+
+      <section class="library-section">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Library Items</p>
+            <h2>教材一覧</h2>
+          </div>
+          <p class="section-note" id="resultSummary">読み込み待機中</p>
+        </div>
+
+        <div class="skeleton-grid" id="loadingGrid" aria-hidden="true"></div>
+        <div class="cards-grid" id="libraryGrid"></div>
+        <div class="empty-state is-hidden" id="emptyState">
+          <div class="empty-visual" aria-hidden="true">0</div>
+          <h3>該当する教材がありません</h3>
+          <p>検索条件またはカテゴリを変更してください。</p>
+        </div>
+      </section>
+
+      <section class="setup-card">
+        <h2>セットアップメモ</h2>
+        <ul>
+          <li>Google Drive の対象フォルダは「リンクを知っている全員が閲覧可能」に設定してください。</li>
+          <li>Google Drive API v3 を有効化した API Key を <code>script.js</code> に設定してください。</li>
+          <li>Drive 側のファイル追加・更新だけで、GitHub Pages 側の表示が更新されます。</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+
+  <script src="./script.js"></script>
+</body>
+</html>
