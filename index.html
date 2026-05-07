@@ -138,6 +138,61 @@ textarea:focus,input:focus{border-color:var(--red)}
 .pin-digit{width:52px;height:60px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:24px;text-align:center;font-family:inherit;outline:none;background:#fff}
 .pin-digit:focus{border-color:var(--red)}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+/* ===== Drive Library ===== */
+.library-hero{background:linear-gradient(135deg,#fff 0%,#F8FAFF 100%);border:1px solid #E4E9F5;border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 12px 30px rgba(15,23,42,.06)}
+.library-eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;color:#2563eb;text-transform:uppercase;margin-bottom:8px}
+.library-title{font-size:24px;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.15}
+.library-description{font-size:13px;color:var(--ink2);line-height:1.7;margin-top:10px}
+.library-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.library-chip{background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.12);border-radius:14px;padding:12px}
+.library-chip-label{display:block;font-size:10px;color:#5b6475;margin-bottom:4px}
+.library-chip-value{display:block;font-size:13px;font-weight:700;color:var(--ink);word-break:break-word}
+.library-toolbar{background:rgba(255,255,255,.9);border:1px solid #E4E9F5;border-radius:18px;padding:14px;margin-bottom:14px;box-shadow:0 12px 30px rgba(15,23,42,.05)}
+.library-search{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #E4E9F5;border-radius:999px;padding:0 14px;min-height:48px}
+.library-search:focus-within{border-color:#7aa2ff;box-shadow:0 0 0 4px rgba(37,99,235,.08)}
+.library-search-icon{font-size:16px;color:var(--ink3)}
+.library-search input{width:100%;border:none;background:transparent;outline:none;font-size:14px;color:var(--ink)}
+.library-categories{display:flex;gap:8px;overflow-x:auto;padding-top:12px}
+.library-categories::-webkit-scrollbar{display:none}
+.library-category{border:1px solid #E4E9F5;background:#fff;color:var(--ink2);border-radius:999px;padding:9px 14px;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer}
+.library-category.active{background:#2563eb;color:#fff;border-color:#2563eb;box-shadow:0 10px 24px rgba(37,99,235,.18)}
+.library-status{display:none;background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:14px;border:1px solid #E4E9F5;line-height:1.6}
+.library-status.show{display:block}
+.library-status.info{border-color:#D6E4FF}
+.library-status.success{border-color:#C6F6D5}
+.library-status.error{border-color:#F6C7C7}
+.library-summary{font-size:12px;color:var(--ink3);margin-bottom:12px}
+.library-grid,.library-skeleton-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.library-card{background:#fff;border:1px solid #E4E9F5;border-radius:16px;overflow:hidden;box-shadow:0 12px 24px rgba(15,23,42,.05);transition:transform .18s,box-shadow .18s}
+.library-card:hover{transform:translateY(-2px);box-shadow:0 18px 30px rgba(15,23,42,.09)}
+.library-card-media{aspect-ratio:16/10;background:linear-gradient(135deg,#EEF4FF 0%,#FFFFFF 100%);border-bottom:1px solid #E4E9F5;overflow:hidden}
+.library-card-media img{width:100%;height:100%;object-fit:cover}
+.library-fallback{display:grid;place-items:center;width:100%;height:100%;padding:14px}
+.library-card-body{padding:14px}
+.library-card-type{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;background:#EEF4FF;color:#2563eb;font-size:11px;font-weight:700}
+.library-card-title{font-size:14px;font-weight:700;line-height:1.55;margin:10px 0 8px;color:var(--ink);word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.library-card-meta{font-size:11px;color:var(--ink3);line-height:1.6}
+.library-card-link{display:flex;align-items:center;justify-content:center;margin-top:12px;padding:12px;background:var(--red);color:#fff;text-decoration:none;border-radius:12px;font-size:13px;font-weight:700}
+.library-empty{display:none;background:#fff;border:1px dashed #D5DBE8;border-radius:18px;padding:30px 20px;text-align:center;color:var(--ink2)}
+.library-empty.show{display:block}
+.library-empty-visual{width:58px;height:58px;background:var(--red);color:#fff;border-radius:18px;display:grid;place-items:center;font-size:20px;font-weight:800;margin:0 auto 12px}
+.library-skeleton-card{background:#fff;border:1px solid #E4E9F5;border-radius:16px;overflow:hidden}
+.library-skeleton-media,.library-skeleton-pill,.library-skeleton-line{background:linear-gradient(90deg,rgba(226,232,240,.85) 25%,rgba(241,245,249,.98) 50%,rgba(226,232,240,.85) 75%);background-size:200% 100%;animation:libraryShimmer 1.2s linear infinite}
+.library-skeleton-media{aspect-ratio:16/10}
+.library-skeleton-body{padding:14px}
+.library-skeleton-pill{width:82px;height:28px;border-radius:999px}
+.library-skeleton-line{height:12px;border-radius:999px;margin-top:10px}
+.library-skeleton-line.long{width:100%}
+.library-skeleton-line.mid{width:74%}
+.library-skeleton-line.short{width:48%}
+.library-actions{margin-top:14px}
+.library-folder-link{display:flex;align-items:center;justify-content:center;width:100%;padding:12px;border-radius:14px;border:2px solid var(--red);background:#fff;color:var(--red);text-decoration:none;font-size:13px;font-weight:700}
+@keyframes libraryShimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+@media (max-width:430px){
+  .library-meta{grid-template-columns:1fr}
+  .library-grid,.library-skeleton-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+}
 </style>
 
 </head>
@@ -322,43 +377,50 @@ textarea:focus,input:focus{border-color:var(--red)}
 <!-- LIBRARY -->
 
 <div class="screen" id="screen-library">
-  <div class="header"><div><div class="header-title">🎁 ライブラリ</div><div class="header-sub">スライド・楽譜・音源</div></div></div>
+  <div class="header"><div><div class="header-title">🎁 ライブラリ</div><div class="header-sub">Google Drive 教材CMS</div></div></div>
   <div class="content">
-    <div class="lib-tabs">
-      <button class="lib-tab active" onclick="switchLibTab(this,'slides')">🎓 指導スライド</button>
-      <button class="lib-tab" onclick="switchLibTab(this,'scores')">🎵 楽譜</button>
-      <button class="lib-tab" onclick="switchLibTab(this,'audio')">🔊 音源</button>
-    </div>
-    <div class="lib-panel active" id="panel-slides">
-      <div class="drive-url-box">
-        <div class="drive-url-label">📁 Googleドライブ フォルダURL（指導員が設定）</div>
-        <div class="drive-url-row">
-          <input type="url" id="gdriveUrl" placeholder="https://drive.google.com/drive/folders/...">
-          <button class="drive-url-btn" onclick="saveGdriveUrl()">保存</button>
+    <div class="library-hero">
+      <div class="library-eyebrow">Google Drive Library</div>
+      <div class="library-title">教材ライブラリ</div>
+      <div class="library-description">Google Drive の指定フォルダを教材CMSとして使い、PDF・動画・画像・Google Docs・Google Slides を自動反映します。</div>
+      <div class="library-meta">
+        <div class="library-chip">
+          <span class="library-chip-label">表示件数</span>
+          <strong class="library-chip-value" id="libraryFileCount">0</strong>
         </div>
-        <div style="font-size:11px;color:var(--ink3);margin-top:6px">設定するとスライドからドライブへ直接リンクできます</div>
-      </div>
-      <div style="font-size:12px;color:var(--ink3);margin-bottom:10px">サンプル表示 — 実際のスライドはGoogleドライブに追加します</div>
-      <div class="slide-grid" id="slideGrid"></div>
-      <div id="gdriveOpenBtn" style="display:none">
-        <a id="gdriveOpenLink" target="_blank" style="display:block;width:100%;padding:14px;background:var(--bg);color:var(--red);border:2px solid var(--red);border-radius:var(--radius);font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;text-align:center;text-decoration:none;margin-bottom:12px">📁 Googleドライブ フォルダを開く →</a>
+        <div class="library-chip">
+          <span class="library-chip-label">最終更新</span>
+          <strong class="library-chip-value" id="libraryLastUpdated">-</strong>
+        </div>
       </div>
     </div>
-    <div class="lib-panel" id="panel-scores">
-      <div class="drive-section">
-        <div class="drive-section-title">楽譜一覧</div>
-        <div style="background:var(--gold-pale);border:1.5px solid var(--gold);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--ink2);line-height:1.7">📁 Googleドライブの楽譜フォルダをタップして開いてください。</div>
-        <a class="drive-item" href="https://drive.google.com/drive/folders/1t5tPnh8C-bZ6BP5EnJqLW1z0f_eUOUVE?usp=drive_link" target="_blank"><div class="drive-icon">📂</div><div><div class="drive-name">楽譜フォルダを開く</div><div class="drive-meta">Googleドライブ · タップで開く</div></div><div class="drive-arrow">›</div></a>
-        <a class="drive-item" href="https://drive.google.com/file/d/1naoakaJR207Se6UJ1jdDG04CG7GtpGBz/view?usp=drive_link" target="_blank"><div class="drive-icon">📄</div><div><div class="drive-name">楽譜ファイル</div><div class="drive-meta">PDF · タップで開く</div></div><div class="drive-arrow">›</div></a>
-        <a class="drive-item" href="https://drive.google.com/drive/folders/1rfn4Bq90Fd_dST_-WkTh2-FKgGOF_7lD?usp=drive_link" target="_blank"><div class="drive-icon">📂</div><div><div class="drive-name">楽譜フォルダ②</div><div class="drive-meta">Googleドライブ · タップで開く</div></div><div class="drive-arrow">›</div></a>
+
+    <div class="library-toolbar">
+      <label class="library-search" for="librarySearchInput">
+        <span class="library-search-icon">🔎</span>
+        <input id="librarySearchInput" type="search" placeholder="ファイル名で検索" autocomplete="off" spellcheck="false">
+      </label>
+      <div class="library-categories" id="libraryCategoryTabs">
+        <button class="library-category active" type="button" data-category="all">すべて</button>
       </div>
     </div>
-    <div class="lib-panel" id="panel-audio">
-      <div class="drive-section">
-        <div class="drive-section-title">音源・参考動画</div>
-        <div style="background:var(--gold-pale);border:1.5px solid var(--gold);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--ink2);line-height:1.7">📁 Googleドライブの音源フォルダをタップして開いてください。</div>
-        <a class="drive-item" href="https://drive.google.com/drive/folders/1CA73z1IefnQhmcaa3AJ-BqqEt-fdUFop?usp=drive_link" target="_blank"><div class="drive-icon">📂</div><div><div class="drive-name">音源フォルダを開く</div><div class="drive-meta">Googleドライブ · タップで開く</div></div><div class="drive-arrow">›</div></a>
-      </div>
+
+    <div class="library-status show info" id="libraryStatus">
+      <strong>設定が必要です。</strong> <span><code>API_KEY</code> を入力すると Google Drive から教材一覧を取得できます。</span>
+    </div>
+
+    <div class="library-summary" id="libraryResultSummary">読み込み待機中</div>
+
+    <div class="library-skeleton-grid" id="libraryLoadingGrid"></div>
+    <div class="library-grid" id="libraryGrid" style="display:none"></div>
+    <div class="library-empty" id="libraryEmptyState">
+      <div class="library-empty-visual">0</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:6px">該当する教材がありません</div>
+      <div style="font-size:13px;line-height:1.7">検索条件またはカテゴリを変更してください。</div>
+    </div>
+
+    <div class="library-actions">
+      <a class="library-folder-link" id="libraryFolderLink" href="https://drive.google.com/drive/folders/1a9iaxd2OKBywSuRZvPib1gyGciL22HpM?usp=drive_link" target="_blank" rel="noopener noreferrer">📁 Google Drive フォルダを開く →</a>
     </div>
   </div>
   <div class="bottom-nav">
@@ -375,16 +437,83 @@ textarea:focus,input:focus{border-color:var(--red)}
 // ============================================
 const GAS_URL = "https://script.google.com/macros/s/AKfycbz55G2GOryMBvDWabjsDHwS2rDe6_cXPfWsXOhH84siHtQseSgk0i91TGYfepZIolHL/exec";
 
+// ============================================
+// 【設定】Google Drive ライブラリ
+// ============================================
+const DRIVE_FOLDER_ID = "1a9iaxd2OKBywSuRZvPib1gyGciL22HpM";
+const DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1a9iaxd2OKBywSuRZvPib1gyGciL22HpM?usp=drive_link";
+const API_KEY = "AIzaSyBvD4bw5zAdaDcsI3cyBRb4q5mbKJTG2J8";
+const DRIVE_API_URL = "https://www.googleapis.com/drive/v3/files";
+const DRIVE_PAGE_SIZE = 100;
+
 const COND_EMOJI = ['','☠️','💦','😃','💪','🔥'];
 let selCond = 0;
 let cachedLogs = [];
-let gdriveUrl = '';
 
+const libraryState = {
+  files: [],
+  filteredFiles: [],
+  activeCategory: "all",
+  searchQuery: "",
+  loaded: false
+};
+
+const libraryElements = {
+  fileCount: () => document.getElementById('libraryFileCount'),
+  lastUpdated: () => document.getElementById('libraryLastUpdated'),
+  status: () => document.getElementById('libraryStatus'),
+  summary: () => document.getElementById('libraryResultSummary'),
+  searchInput: () => document.getElementById('librarySearchInput'),
+  categoryTabs: () => document.getElementById('libraryCategoryTabs'),
+  loadingGrid: () => document.getElementById('libraryLoadingGrid'),
+  grid: () => document.getElementById('libraryGrid'),
+  emptyState: () => document.getElementById('libraryEmptyState'),
+  folderLink: () => document.getElementById('libraryFolderLink')
+};
+
+document.addEventListener('DOMContentLoaded', initializeDriveLibrary);
+
+function initializeDriveLibrary() {
+  renderLibraryLoadingSkeleton();
+  bindLibraryEvents();
+  const folderLink = libraryElements.folderLink();
+  if (folderLink) folderLink.href = DRIVE_FOLDER_URL;
+}
+function bindLibraryEvents() {
+  const searchInput = libraryElements.searchInput();
+  if (searchInput) {
+    searchInput.addEventListener('input', (event) => {
+      libraryState.searchQuery = event.target.value.trim().toLowerCase();
+      filterLibraryFiles();
+    });
+  }
+
+  const categoryTabs = libraryElements.categoryTabs();
+  if (categoryTabs) {
+    categoryTabs.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-category]');
+      if (!button) return;
+      libraryState.activeCategory = button.dataset.category;
+      updateLibraryActiveTab();
+      filterLibraryFiles();
+    });
+  }
+
+  const grid = libraryElements.grid();
+  if (grid) {
+    grid.addEventListener('click', (event) => {
+      const trigger = event.target.closest('[data-open-url]');
+      if (!trigger) return;
+      event.preventDefault();
+      const url = trigger.dataset.openUrl;
+      if (url) window.open(url, '_blank', 'noopener');
+    });
+  }
+}
 // ============================================
 // 起動処理
 // ============================================
 window.onload = function() {
-  gdriveUrl = localStorage.getItem('taiko_gdrive') || '';
   const name = localStorage.getItem('taiko_name');
   const pin  = localStorage.getItem('taiko_pin');
   if (name && pin) {
@@ -704,57 +833,281 @@ function updateLog() {
 // ============================================
 // ライブラリ
 // ============================================
-const SLIDES=[
-  {id:1,emoji:'🥁',color:'#FDF0F0',tag:'リズム・基礎',title:'打ちの基本：腕ではなく体幹で叩く',date:'2025年4月10日',points:['腰から力を生み出し腕に伝える','バチを握りしめず、指で支える感覚','呼吸と打点を合わせることで音が揃う'],body:'今日のキーワードは「脱力」。力を入れるほど音は死ぬ。体幹を使って振り、バチを「落とす」イメージを掴もう。'},
-  {id:2,emoji:'🎯',color:'#F0F8FF',tag:'メンタル・習慣',title:'習慣化で時間の複利を活かす',date:'2025年4月17日',points:['1回の稽古で1つだけ意識を決める','小さな意識を積み重ねると半年で別人になる','ログを書くことで「意識」が記憶に定着する'],body:'複利の力は演奏にも使える。毎回「1つの意識」を守り続けることが、半年後・1年後の自分を劇的に変える。'},
-  {id:3,emoji:'👂',color:'#F0FFF4',tag:'アンサンブル',title:'聴く力が演奏を変える：全体を感じる耳',date:'2025年4月24日',points:['自分の音だけ聴くと周りとズレる','隣の人の音を「感じながら」叩く','間（ま）は音と同じくらい大事'],body:'和太鼓は会話だ。一人で話し続けるのではなく、周りの音を「聴いて」「答える」ことで演奏に命が宿る。'},
-  {id:4,emoji:'⚡',color:'#FFFBF0',tag:'発表・本番',title:'本番で力を出す：緊張をエネルギーに変える',date:'2025年5月1日',points:['緊張は「準備ができた証拠」と捉え直す','舞台に出る前に3回深呼吸する','ミスを恐れるより「今この瞬間」に集中する'],body:'緊張しない人間はいない。プロは緊張を消すのではなく、緊張をエネルギーに変える技術を持っている。'},
-];
-
 function updateLibrary() {
-  const urlInput = document.getElementById('gdriveUrl');
-  if (gdriveUrl) urlInput.value = gdriveUrl;
-  renderSlides(); updateGdriveBtn();
+  if (libraryState.loaded) {
+    return;
+  }
+
+  loadDriveFiles();
 }
-function renderSlides() {
-  document.getElementById('slideGrid').innerHTML = SLIDES.map(s => `
-    <div class="slide-card" onclick="openSlide(${s.id})">
-      <div class="slide-thumb" style="background:${s.color}">
-        <span style="font-size:36px">${s.emoji}</span>
-        <span class="slide-thumb-tag">${s.tag}</span>
+
+async function loadDriveFiles() {
+  if (!isDriveConfigured()) {
+    showLibraryStatus('info', 'API_KEY を入力すると Google Drive から教材一覧を取得できます。');
+    updateLibrarySummary('設定待ち');
+    toggleLibraryLoading(false);
+    libraryState.loaded = true;
+    return;
+  }
+
+  showLibraryStatus('info', 'Google Drive から教材一覧を読み込んでいます。');
+  toggleLibraryLoading(true);
+
+  try {
+    const files = await fetchDriveFiles();
+    libraryState.files = files.sort((a, b) => new Date(b.modifiedTime) - new Date(a.modifiedTime));
+    renderLibraryCategories();
+    filterLibraryFiles();
+    updateLibraryHero();
+    showLibraryStatus('success', `${libraryState.files.length} 件の教材を読み込みました。`);
+  } catch (error) {
+    console.error(error);
+    libraryState.files = [];
+    libraryState.filteredFiles = [];
+    renderLibraryCategories();
+    renderLibraryFiles();
+    updateLibraryHero();
+    handleLibraryError(error);
+  } finally {
+    toggleLibraryLoading(false);
+    libraryState.loaded = true;
+  }
+}
+
+async function fetchDriveFiles() {
+  const allFiles = [];
+  let pageToken = '';
+
+  do {
+    const requestUrl = new URL(DRIVE_API_URL);
+    requestUrl.searchParams.set('key', API_KEY);
+    requestUrl.searchParams.set('q', `'${DRIVE_FOLDER_ID}' in parents and trashed=false`);
+    requestUrl.searchParams.set('fields', 'nextPageToken,files(id,name,mimeType,thumbnailLink,webViewLink,modifiedTime)');
+    requestUrl.searchParams.set('orderBy', 'modifiedTime desc');
+    requestUrl.searchParams.set('pageSize', String(DRIVE_PAGE_SIZE));
+    requestUrl.searchParams.set('includeItemsFromAllDrives', 'true');
+    requestUrl.searchParams.set('supportsAllDrives', 'true');
+    if (pageToken) requestUrl.searchParams.set('pageToken', pageToken);
+
+    const response = await fetch(requestUrl.toString());
+    if (!response.ok) {
+      const errorPayload = await response.json().catch(() => ({}));
+      throw new Error(`${response.status}: ${errorPayload.error?.message || 'Drive API request failed.'}`);
+    }
+
+    const data = await response.json();
+    allFiles.push(...(data.files || []));
+    pageToken = data.nextPageToken || '';
+  } while (pageToken);
+
+  return allFiles;
+}
+
+function filterLibraryFiles() {
+  libraryState.filteredFiles = libraryState.files.filter((file) => {
+    const category = getDriveFileType(file.mimeType).category;
+    const matchesCategory = libraryState.activeCategory === 'all' || libraryState.activeCategory === category;
+    const matchesSearch = !libraryState.searchQuery || file.name.toLowerCase().includes(libraryState.searchQuery);
+    return matchesCategory && matchesSearch;
+  });
+
+  renderLibraryFiles();
+}
+
+function renderLibraryFiles() {
+  const grid = libraryElements.grid();
+  const emptyState = libraryElements.emptyState();
+  grid.innerHTML = libraryState.filteredFiles.map((file) => createLibraryCard(file)).join('');
+  const hasFiles = libraryState.filteredFiles.length > 0;
+  grid.style.display = hasFiles ? 'grid' : 'none';
+  emptyState.classList.toggle('show', !hasFiles);
+  updateLibrarySummary(hasFiles ? `${libraryState.filteredFiles.length} 件を表示中` : '0 件');
+}
+
+function createLibraryCard(file) {
+  const fileType = getDriveFileType(file.mimeType);
+  const thumbnail = file.thumbnailLink
+    ? `<img src="${escapeAttr(file.thumbnailLink)}" alt="${escapeAttr(file.name)} のサムネイル" loading="lazy" referrerpolicy="no-referrer">`
+    : `<div class="library-fallback"><img src="${getLibraryFallbackIcon(fileType.iconKey)}" alt="${escapeAttr(fileType.label)} アイコン" loading="lazy"></div>`;
+
+  return `
+    <article class="library-card">
+      <div class="library-card-media">${thumbnail}</div>
+      <div class="library-card-body">
+        <span class="library-card-type">${escapeHtmlText(fileType.label)}</span>
+        <div class="library-card-title">${escapeHtmlText(file.name)}</div>
+        <div class="library-card-meta">
+          <div>種別: ${escapeHtmlText(fileType.description)}</div>
+          <div>更新日: ${formatLibraryDate(file.modifiedTime)}</div>
+        </div>
+        <a class="library-card-link" href="${escapeAttr(file.webViewLink || '#')}" data-open-url="${escapeAttr(file.webViewLink || '')}" target="_blank" rel="noopener noreferrer">開く</a>
       </div>
-      <div class="slide-body">
-        <div class="slide-title">${s.title}</div>
-        <div class="slide-date">${s.date}</div>
+    </article>
+  `;
+}
+
+function renderLibraryCategories() {
+  const labels = {
+    all: 'すべて',
+    pdf: 'PDF',
+    video: '動画',
+    image: '画像',
+    docs: 'Docs',
+    slides: 'Slides',
+    folder: 'Folder',
+    other: 'その他'
+  };
+
+  const counts = libraryState.files.reduce((acc, file) => {
+    const category = getDriveFileType(file.mimeType).category;
+    acc[category] = (acc[category] || 0) + 1;
+    return acc;
+  }, {});
+
+  const categories = ['all', ...Object.keys(labels).filter((key) => counts[key])];
+  libraryElements.categoryTabs().innerHTML = categories.map((category) => `
+    <button class="library-category${libraryState.activeCategory === category ? ' active' : ''}" type="button" data-category="${category}">
+      ${labels[category]} (${category === 'all' ? libraryState.files.length : counts[category]})
+    </button>
+  `).join('');
+}
+
+function updateLibraryActiveTab() {
+  document.querySelectorAll('.library-category').forEach((button) => {
+    button.classList.toggle('active', button.dataset.category === libraryState.activeCategory);
+  });
+}
+
+function renderLibraryLoadingSkeleton() {
+  const html = Array.from({ length: 6 }, () => `
+    <div class="library-skeleton-card">
+      <div class="library-skeleton-media"></div>
+      <div class="library-skeleton-body">
+        <div class="library-skeleton-pill"></div>
+        <div class="library-skeleton-line long"></div>
+        <div class="library-skeleton-line mid"></div>
+        <div class="library-skeleton-line short"></div>
       </div>
-    </div>`).join('');
+    </div>
+  `).join('');
+
+  libraryElements.loadingGrid().innerHTML = html;
 }
-function openSlide(id) {
-  const s = SLIDES.find(x => x.id === id); if (!s) return;
-  document.getElementById('modalTitle').textContent = s.title;
-  document.getElementById('modalVisual').textContent = s.emoji;
-  document.getElementById('modalTag').textContent = s.tag;
-  document.getElementById('modalBody').innerHTML = `<p style="margin-bottom:10px">${s.body}</p><ul class="slide-modal-points">${s.points.map(p=>`<li>${p}</li>`).join('')}</ul>`;
-  const gdBtn = document.getElementById('modalGdrive');
-  if (gdriveUrl) { gdBtn.href = gdriveUrl; gdBtn.style.display = 'block'; } else { gdBtn.style.display = 'none'; }
-  document.getElementById('slideModal').classList.add('show');
+
+function updateLibraryHero() {
+  const files = libraryState.files;
+  libraryElements.fileCount().textContent = String(files.length);
+  libraryElements.lastUpdated().textContent = files.length ? formatLibraryDate(files[0].modifiedTime) : '-';
 }
-function closeModal() { document.getElementById('slideModal').classList.remove('show'); }
-function saveGdriveUrl() {
-  gdriveUrl = document.getElementById('gdriveUrl').value.trim();
-  localStorage.setItem('taiko_gdrive', gdriveUrl);
-  updateGdriveBtn(); showToast(gdriveUrl ? 'Googleドライブを保存しました' : 'URLをクリアしました');
+
+function updateLibrarySummary(text) {
+  libraryElements.summary().textContent = text;
 }
-function updateGdriveBtn() {
-  const btn = document.getElementById('gdriveOpenBtn');
-  const link = document.getElementById('gdriveOpenLink');
-  if (gdriveUrl) { btn.style.display = 'block'; link.href = gdriveUrl; } else { btn.style.display = 'none'; }
+
+function toggleLibraryLoading(isLoading) {
+  libraryElements.loadingGrid().style.display = isLoading ? 'grid' : 'none';
+  if (isLoading) {
+    libraryElements.grid().style.display = 'none';
+    libraryElements.emptyState().classList.remove('show');
+  }
 }
-function switchLibTab(btn, panel) {
-  document.querySelectorAll('.lib-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.lib-panel').forEach(p => p.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('panel-' + panel).classList.add('active');
+
+function showLibraryStatus(type, message) {
+  const status = libraryElements.status();
+  status.className = `library-status show ${type}`;
+  status.innerHTML = `<strong>${getLibraryStatusTitle(type)}</strong> <span>${escapeHtmlText(message)}</span>`;
+}
+
+function getLibraryStatusTitle(type) {
+  if (type === 'error') return '読み込みに失敗しました。';
+  if (type === 'success') return '読み込み完了。';
+  return 'お知らせ';
+}
+
+function handleLibraryError(error) {
+  const message = error.message || '';
+  const isLocalFile = window.location.protocol === 'file:';
+  if (message.includes('403')) {
+    if (isLocalFile) {
+      showLibraryStatus('error', 'このページを file:// で開いているため、GitHub Pages 用に制限した API Key では拒否されています。GitHub Pages URL で確認するか、localhost で配信して動作確認してください。');
+      updateLibrarySummary('ローカル表示では API 制限により取得不可');
+      return;
+    }
+    showLibraryStatus('error', 'API Key の設定、または対象フォルダの公開権限を確認してください。');
+    updateLibrarySummary('アクセスエラー');
+    return;
+  }
+  if (message.includes('400')) {
+    showLibraryStatus('error', 'フォルダID、API Key、または Drive API の設定を確認してください。');
+    updateLibrarySummary('設定エラー');
+    return;
+  }
+  showLibraryStatus('error', '通信に失敗しました。ネットワーク接続と Google Drive API の状態を確認してください。');
+  updateLibrarySummary('通信エラー');
+}
+
+function getDriveFileType(mimeType) {
+  const types = [
+    { match: ['application/pdf'], category: 'pdf', label: 'PDF', description: 'PDFファイル', iconKey: 'pdf' },
+    { match: ['video/'], category: 'video', label: '動画', description: '動画ファイル', iconKey: 'video' },
+    { match: ['image/'], category: 'image', label: '画像', description: '画像ファイル', iconKey: 'image' },
+    { match: ['application/vnd.google-apps.document'], category: 'docs', label: 'Docs', description: 'Google Docs', iconKey: 'docs' },
+    { match: ['application/vnd.google-apps.presentation'], category: 'slides', label: 'Slides', description: 'Google Slides', iconKey: 'slides' },
+    { match: ['application/vnd.google-apps.folder'], category: 'folder', label: 'Folder', description: 'Google Drive フォルダ', iconKey: 'folder' }
+  ];
+
+  const matched = types.find((type) => type.match.some((pattern) => mimeType?.startsWith(pattern) || mimeType === pattern));
+  return matched || { category: 'other', label: 'その他', description: 'その他のファイル', iconKey: 'other' };
+}
+
+function formatLibraryDate(dateString) {
+  if (!dateString) return '-';
+  return new Intl.DateTimeFormat('ja-JP', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(new Date(dateString));
+}
+
+function isDriveConfigured() {
+  return API_KEY && API_KEY !== 'ここにAPIキー';
+}
+
+function getLibraryFallbackIcon(iconKey) {
+  const colors = {
+    pdf: '#ef4444',
+    video: '#f59e0b',
+    image: '#10b981',
+    docs: '#2563eb',
+    slides: '#ea580c',
+    folder: '#7c3aed',
+    other: '#475569'
+  };
+  const labels = {
+    pdf: 'PDF',
+    video: 'MOV',
+    image: 'IMG',
+    docs: 'DOC',
+    slides: 'SLD',
+    folder: 'DIR',
+    other: 'FILE'
+  };
+  const color = colors[iconKey] || colors.other;
+  const label = labels[iconKey] || labels.other;
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400">
+      <rect width="640" height="400" rx="36" fill="#f8fafc"/>
+      <rect x="48" y="48" width="544" height="304" rx="28" fill="${color}" opacity="0.14"/>
+      <rect x="72" y="86" width="132" height="160" rx="20" fill="${color}" opacity="0.92"/>
+      <rect x="230" y="108" width="230" height="26" rx="13" fill="#cbd5e1"/>
+      <rect x="230" y="156" width="168" height="22" rx="11" fill="#e2e8f0"/>
+      <rect x="230" y="196" width="210" height="22" rx="11" fill="#e2e8f0"/>
+      <text x="138" y="184" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="700" fill="#ffffff">${label}</text>
+    </svg>
+  `;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
 // ============================================
@@ -767,6 +1120,12 @@ function showToast(msg) {
 }
 function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+function escapeHtmlText(value) {
+  return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function escapeAttr(value) {
+  return escapeHtmlText(value).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 </script>
 
