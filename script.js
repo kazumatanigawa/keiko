@@ -1,7 +1,7 @@
 // Google Drive の公開フォルダを教材ライブラリとして使うための設定です。
 // ここだけ差し替えれば、GitHub Pages 側のコードはそのまま使えます。
-const DRIVE_FOLDER_ID = "ここにフォルダID";
-const API_KEY = "ここにAPIキー";
+const DRIVE_FOLDER_ID = "1a9iaxd2OKBywSuRZvPib1gyGciL22HpM";
+const API_KEY = "AIzaSyBvD4bw5zAdaDcsI3cyBRb4q5mbKJTG2J8";
 
 const DRIVE_API_URL = "https://www.googleapis.com/drive/v3/files";
 const PAGE_SIZE = 100;
