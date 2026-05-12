@@ -35,6 +35,19 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;backgroun
 .hero-name{font-size:22px;font-weight:700;letter-spacing:0.05em}
 .hero-date{font-size:12px;opacity:0.8;margin-bottom:4px}
 .hero-count{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.2);border-radius:20px;padding:4px 10px;font-size:12px;margin-top:8px}
+.goodnews-card{background:linear-gradient(135deg,#fffdf6 0%,#fff 100%);border:1px solid #F0DFC0;border-radius:var(--radius);padding:16px 16px 14px;margin-bottom:14px;box-shadow:0 12px 28px rgba(139,26,26,0.06);position:relative;overflow:hidden}
+.goodnews-card::after{content:'';position:absolute;inset:auto -40px -55px auto;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.16) 0%,rgba(201,168,76,0) 68%)}
+.goodnews-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;position:relative;z-index:1}
+.goodnews-title{font-size:13px;font-weight:800;letter-spacing:0.06em;color:var(--red)}
+.goodnews-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;background:rgba(201,168,76,0.16);color:#8B6A16;font-size:10px;font-weight:800;letter-spacing:0.08em}
+.goodnews-badge::before{content:'';width:7px;height:7px;border-radius:50%;background:#D4A72C;box-shadow:0 0 0 4px rgba(212,167,44,0.16)}
+.goodnews-text{font-size:19px;font-weight:800;line-height:1.65;color:var(--ink);letter-spacing:0.01em;min-height:6.6em;display:flex;align-items:center;position:relative;z-index:1;transition:opacity .28s ease,transform .28s ease}
+.goodnews-text.is-transitioning{opacity:.18;transform:translateY(6px)}
+.goodnews-text.is-placeholder{font-size:15px;font-weight:600;color:var(--ink3);min-height:auto}
+.goodnews-meta{font-size:11px;color:var(--ink3);line-height:1.7;margin-top:10px;position:relative;z-index:1}
+.goodnews-card.is-error .goodnews-meta{color:var(--red-light)}
+.goodnews-card.is-empty .goodnews-badge{background:rgba(232,224,208,0.6);color:var(--ink3)}
+.goodnews-card.is-empty .goodnews-badge::before{background:#C6B899;box-shadow:none}
 .mission-card{background:var(--gold-pale);border:2px solid var(--gold);border-radius:var(--radius);padding:16px;margin-bottom:12px}
 .mission-label{font-size:11px;color:var(--gold);font-weight:700;letter-spacing:0.1em;margin-bottom:6px}
 .mission-text{font-size:16px;font-weight:700;color:var(--ink);line-height:1.5}
@@ -286,6 +299,14 @@ textarea:focus,input:focus{border-color:var(--red)}
     </div>
   </div>
   <div class="content">
+    <div class="goodnews-card" id="goodNewsCard">
+      <div class="goodnews-header">
+        <div class="goodnews-title">みんなの Good&New</div>
+        <div class="goodnews-badge">3 SEC</div>
+      </div>
+      <div class="goodnews-text is-placeholder" id="goodNewsText">読み込み中...</div>
+      <div class="goodnews-meta" id="goodNewsMeta">みんなの前向きな変化が3秒ごとに流れます</div>
+    </div>
     <div class="hero">
       <div class="hero-date" id="heroDate"></div>
       <div class="hero-name" id="heroName"></div>
@@ -445,10 +466,25 @@ const DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1a9iaxd2OKBywSu
 const API_KEY = "AIzaSyBvD4bw5zAdaDcsI3cyBRb4q5mbKJTG2J8";
 const DRIVE_API_URL = "https://www.googleapis.com/drive/v3/files";
 const DRIVE_PAGE_SIZE = 100;
+const GOOD_NEWS_ROTATE_MS = 3000;
+const GOOD_NEWS_REFRESH_MS = 60000;
+const GOOD_NEWS_RECENT_LIMIT = 4;
 
 const COND_EMOJI = ['','☠️','💦','😃','💪','🔥'];
 let selCond = 0;
 let cachedLogs = [];
+const goodNewsState = {
+  items: [],
+  timerId: null,
+  refreshTimerId: null,
+  loading: false,
+  loaded: false,
+  lastFetchedAt: 0,
+  currentItemId: null,
+  recentIds: [],
+  recentNames: [],
+  error: ''
+};
 
 const libraryState = {
   files: [],
@@ -471,7 +507,14 @@ const libraryElements = {
   folderLink: () => document.getElementById('libraryFolderLink')
 };
 
+const goodNewsElements = {
+  card: () => document.getElementById('goodNewsCard'),
+  text: () => document.getElementById('goodNewsText'),
+  meta: () => document.getElementById('goodNewsMeta')
+};
+
 document.addEventListener('DOMContentLoaded', initializeDriveLibrary);
+document.addEventListener('DOMContentLoaded', initializeGoodNewsFeed);
 
 function initializeDriveLibrary() {
   renderLibraryLoadingSkeleton();
@@ -509,6 +552,11 @@ function bindLibraryEvents() {
       if (url) window.open(url, '_blank', 'noopener');
     });
   }
+}
+
+function initializeGoodNewsFeed() {
+  renderGoodNewsPlaceholder('loading', '読み込み中...', 'みんなの前向きな変化が3秒ごとに流れます');
+  document.addEventListener('visibilitychange', syncGoodNewsTickerWithView);
 }
 // ============================================
 // 起動処理
@@ -621,6 +669,8 @@ function hideAuth() {
 // ============================================
 function doLogout() {
   if (!confirm('ログアウトしますか？')) return;
+  stopGoodNewsTicker();
+  stopGoodNewsRefresh();
   localStorage.removeItem('taiko_name');
   localStorage.removeItem('taiko_pin');
   cachedLogs = [];
@@ -637,6 +687,7 @@ function goTo(s) {
   if (s === 'form')    updateForm();
   if (s === 'log')     updateLog();
   if (s === 'library') updateLibrary();
+  syncGoodNewsTickerWithView();
 }
 
 function getName()  { return localStorage.getItem('taiko_name') || ''; }
@@ -666,7 +717,231 @@ function updateHome() {
   if (cachedLogs.length) {
     const avg = cachedLogs.reduce((s,l) => s + (parseInt(l.cond)||0), 0) / cachedLogs.length;
     document.getElementById('statAvgCond').textContent = COND_EMOJI[Math.round(avg)] || '-';
+  } else {
+    document.getElementById('statAvgCond').textContent = '-';
   }
+  ensureGoodNewsFeed();
+}
+
+function isHomeScreenActive() {
+  const homeScreen = document.getElementById('screen-home');
+  return !!homeScreen && homeScreen.classList.contains('active');
+}
+
+function canRunGoodNewsTicker() {
+  return isHomeScreenActive() && !document.hidden && !!getName() && !!getPin2();
+}
+
+function ensureGoodNewsFeed(force = false) {
+  if (!getName() || !getPin2()) return;
+  const isStale = Date.now() - goodNewsState.lastFetchedAt > GOOD_NEWS_REFRESH_MS;
+  if ((force || !goodNewsState.loaded || isStale) && !goodNewsState.loading) {
+    loadGoodNewsFeed({ force, background: goodNewsState.loaded && !force });
+  } else {
+    syncGoodNewsTickerWithView();
+  }
+}
+
+async function loadGoodNewsFeed({ force = false, background = false } = {}) {
+  if (!getName() || !getPin2()) return;
+  if (goodNewsState.loading) return;
+  if (!force && goodNewsState.loaded && Date.now() - goodNewsState.lastFetchedAt < GOOD_NEWS_REFRESH_MS) {
+    syncGoodNewsTickerWithView();
+    return;
+  }
+
+  goodNewsState.loading = true;
+  if (!background || !goodNewsState.items.length) {
+    renderGoodNewsPlaceholder('loading', '読み込み中...', 'みんなの前向きな変化が3秒ごとに流れます');
+  }
+
+  try {
+    const requestUrl = new URL(GAS_URL);
+    requestUrl.searchParams.set('action', 'getGoodNews');
+    requestUrl.searchParams.set('name', getName());
+    requestUrl.searchParams.set('pin', getPin2());
+
+    const response = await fetch(requestUrl.toString());
+    const json = await response.json();
+    if (!response.ok || json.status !== 'ok') {
+      throw new Error(json.message || 'Good&New feed request failed.');
+    }
+
+    goodNewsState.items = normalizeGoodNewsItems(json.items);
+    goodNewsState.loaded = true;
+    goodNewsState.error = '';
+    goodNewsState.lastFetchedAt = Date.now();
+
+    if (!goodNewsState.items.length) {
+      goodNewsState.currentItemId = null;
+      goodNewsState.recentIds = [];
+      goodNewsState.recentNames = [];
+      renderGoodNewsPlaceholder('empty', 'まだ投稿がありません', '最初の Good&New を記録すると、ここに流れ始めます。');
+    } else {
+      if (!goodNewsState.items.some(item => item.id === goodNewsState.currentItemId)) {
+        goodNewsState.currentItemId = null;
+      }
+      renderGoodNewsItem(pickNextGoodNews());
+    }
+  } catch (error) {
+    console.error(error);
+    goodNewsState.error = 'feed-unavailable';
+    goodNewsState.loaded = true;
+    if (!goodNewsState.items.length) {
+      renderGoodNewsPlaceholder('error', 'みんなの Good&New は準備中です', 'GAS 側に getGoodNews を追加するとここに全員分が流れます。');
+    } else {
+      const meta = goodNewsElements.meta();
+      if (meta) meta.textContent = '最新の取得に失敗したため、前回の内容を表示しています。';
+    }
+  } finally {
+    goodNewsState.loading = false;
+    syncGoodNewsTickerWithView();
+  }
+}
+
+function normalizeGoodNewsItems(items) {
+  if (!Array.isArray(items)) return [];
+  return items
+    .map((item, index) => {
+      const goodNew = String(item?.goodNew || '').trim();
+      if (!goodNew) return null;
+      const createdAt = item?.createdAt || item?.timestamp || item?.date || '';
+      const name = String(item?.name || '').trim();
+      return {
+        id: String(item?.id || `${name || 'anon'}-${createdAt || index}-${goodNew.slice(0, 24)}`),
+        name,
+        goodNew,
+        date: String(item?.date || ''),
+        createdAt,
+        timestamp: getGoodNewsTimestamp(createdAt || item?.date)
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.timestamp - a.timestamp);
+}
+
+function getGoodNewsTimestamp(value) {
+  const parsed = new Date(value).getTime();
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function pickNextGoodNews() {
+  const items = goodNewsState.items;
+  if (!items.length) return null;
+  if (items.length === 1) return items[0];
+
+  const now = Date.now();
+  const recentIds = goodNewsState.recentIds;
+  const recentNames = goodNewsState.recentNames;
+
+  const weightedCandidates = items
+    .filter(item => item.id !== goodNewsState.currentItemId)
+    .map((item) => {
+      const ageHours = Math.max(0, (now - item.timestamp) / (1000 * 60 * 60));
+      const freshnessWeight = 1 + 4 / Math.sqrt(ageHours + 1);
+      let weight = freshnessWeight;
+
+      const recentIndex = recentIds.indexOf(item.id);
+      if (recentIndex !== -1) weight *= 0.12 + recentIndex * 0.15;
+      if (item.name && recentNames[0] === item.name) weight *= 0.22;
+      else if (item.name && recentNames.includes(item.name)) weight *= 0.62;
+
+      return { item, weight };
+    })
+    .filter(candidate => candidate.weight > 0);
+
+  const totalWeight = weightedCandidates.reduce((sum, candidate) => sum + candidate.weight, 0);
+  if (!weightedCandidates.length || totalWeight <= 0) {
+    return items.find(item => item.id !== goodNewsState.currentItemId) || items[0];
+  }
+
+  let pick = Math.random() * totalWeight;
+  for (const candidate of weightedCandidates) {
+    pick -= candidate.weight;
+    if (pick <= 0) return candidate.item;
+  }
+  return weightedCandidates[weightedCandidates.length - 1].item;
+}
+
+function renderGoodNewsItem(item) {
+  if (!item) {
+    renderGoodNewsPlaceholder('empty', 'まだ投稿がありません', '最初の Good&New を記録すると、ここに流れ始めます。');
+    return;
+  }
+
+  const card = goodNewsElements.card();
+  const text = goodNewsElements.text();
+  const meta = goodNewsElements.meta();
+  if (!card || !text || !meta) return;
+
+  card.classList.remove('is-empty', 'is-error');
+  text.classList.add('is-transitioning');
+
+  window.setTimeout(() => {
+    text.textContent = item.goodNew;
+    text.classList.remove('is-placeholder');
+    text.classList.remove('is-transitioning');
+    meta.textContent = 'みんなの前向きな変化が3秒ごとに流れます';
+  }, 120);
+
+  goodNewsState.currentItemId = item.id;
+  goodNewsState.recentIds = [item.id, ...goodNewsState.recentIds.filter(id => id !== item.id)].slice(0, Math.min(GOOD_NEWS_RECENT_LIMIT, Math.max(1, goodNewsState.items.length - 1)));
+  if (item.name) {
+    goodNewsState.recentNames = [item.name, ...goodNewsState.recentNames.filter(name => name !== item.name)].slice(0, GOOD_NEWS_RECENT_LIMIT);
+  }
+}
+
+function renderGoodNewsPlaceholder(state, message, metaMessage) {
+  const card = goodNewsElements.card();
+  const text = goodNewsElements.text();
+  const meta = goodNewsElements.meta();
+  if (!card || !text || !meta) return;
+
+  card.classList.toggle('is-empty', state === 'empty' || state === 'loading');
+  card.classList.toggle('is-error', state === 'error');
+  text.textContent = message;
+  text.classList.add('is-placeholder');
+  text.classList.remove('is-transitioning');
+  meta.textContent = metaMessage;
+}
+
+function startGoodNewsTicker() {
+  if (goodNewsState.timerId || goodNewsState.items.length <= 1 || !canRunGoodNewsTicker()) return;
+  goodNewsState.timerId = window.setInterval(() => {
+    renderGoodNewsItem(pickNextGoodNews());
+  }, GOOD_NEWS_ROTATE_MS);
+}
+
+function stopGoodNewsTicker() {
+  if (!goodNewsState.timerId) return;
+  window.clearInterval(goodNewsState.timerId);
+  goodNewsState.timerId = null;
+}
+
+function startGoodNewsRefresh() {
+  if (goodNewsState.refreshTimerId || !canRunGoodNewsTicker()) return;
+  goodNewsState.refreshTimerId = window.setInterval(() => {
+    loadGoodNewsFeed({ background: true });
+  }, GOOD_NEWS_REFRESH_MS);
+}
+
+function stopGoodNewsRefresh() {
+  if (!goodNewsState.refreshTimerId) return;
+  window.clearInterval(goodNewsState.refreshTimerId);
+  goodNewsState.refreshTimerId = null;
+}
+
+function syncGoodNewsTickerWithView() {
+  if (canRunGoodNewsTicker()) {
+    if (goodNewsState.loaded && goodNewsState.items.length && !goodNewsState.currentItemId) {
+      renderGoodNewsItem(pickNextGoodNews());
+    }
+    startGoodNewsTicker();
+    startGoodNewsRefresh();
+    return;
+  }
+  stopGoodNewsTicker();
+  stopGoodNewsRefresh();
 }
 
 // ============================================
@@ -732,6 +1007,7 @@ async function submitLog() {
     if (json.status === 'ok') {
       // ローカルにも追記してすぐ反映
       cachedLogs.unshift({ cond:selCond, learning, next, goodNew, date:getDateStr() });
+      loadGoodNewsFeed({ force: true, background: true });
       document.getElementById('successText').textContent =
         `「${next.substring(0,20)}${next.length>20?'…':''}」を次の稽古の誓いに登録しました！`;
       document.getElementById('successOverlay').classList.add('show');
@@ -794,6 +1070,7 @@ async function loadLogs() {
     if (json.status === 'ok') {
       cachedLogs = json.logs;
       if (document.getElementById('screen-home').classList.contains('active')) updateHome();
+      else ensureGoodNewsFeed();
     }
   } catch(e) {
     const m = document.getElementById('missionText');
