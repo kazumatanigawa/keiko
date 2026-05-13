@@ -35,23 +35,32 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;backgroun
 .hero-name{font-size:22px;font-weight:700;letter-spacing:0.05em}
 .hero-date{font-size:12px;opacity:0.8;margin-bottom:4px}
 .hero-count{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.2);border-radius:20px;padding:4px 10px;font-size:12px;margin-top:8px}
-.goodnews-card{background:linear-gradient(135deg,#fffdf6 0%,#fff 100%);border:1px solid #F0DFC0;border-radius:var(--radius);padding:16px 16px 14px;margin-bottom:14px;box-shadow:0 12px 28px rgba(139,26,26,0.06);position:relative;overflow:hidden}
-.goodnews-card::after{content:'';position:absolute;inset:auto -40px -55px auto;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.16) 0%,rgba(201,168,76,0) 68%)}
-.goodnews-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;position:relative;z-index:1}
-.goodnews-title{font-size:13px;font-weight:800;letter-spacing:0.06em;color:var(--red)}
-.goodnews-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;background:rgba(201,168,76,0.16);color:#8B6A16;font-size:10px;font-weight:800;letter-spacing:0.08em}
+.goodnews-card{background:linear-gradient(135deg,#fffdf6 0%,#fff 100%);border:1px solid #F0DFC0;border-radius:var(--radius);padding:10px 12px;margin-bottom:12px;box-shadow:0 8px 20px rgba(139,26,26,0.05);position:relative;overflow:hidden}
+.goodnews-card::after{content:'';position:absolute;inset:auto -32px -48px auto;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.14) 0%,rgba(201,168,76,0) 68%)}
+.goodnews-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;position:relative;z-index:1}
+.goodnews-title{font-size:11px;font-weight:800;letter-spacing:0.1em;color:var(--red)}
+.goodnews-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;background:rgba(201,168,76,0.16);color:#8B6A16;font-size:9px;font-weight:800;letter-spacing:0.08em}
 .goodnews-badge::before{content:'';width:7px;height:7px;border-radius:50%;background:#D4A72C;box-shadow:0 0 0 4px rgba(212,167,44,0.16)}
-.goodnews-text{font-size:19px;font-weight:800;line-height:1.65;color:var(--ink);letter-spacing:0.01em;min-height:6.6em;display:flex;align-items:center;position:relative;z-index:1;transition:opacity .28s ease,transform .28s ease}
+.goodnews-text{font-size:14px;font-weight:700;line-height:1.65;color:var(--ink);letter-spacing:0.01em;min-height:2.8em;display:flex;align-items:center;position:relative;z-index:1;transition:opacity .28s ease,transform .28s ease}
 .goodnews-text.is-transitioning{opacity:.18;transform:translateY(6px)}
-.goodnews-text.is-placeholder{font-size:15px;font-weight:600;color:var(--ink3);min-height:auto}
-.goodnews-meta{font-size:11px;color:var(--ink3);line-height:1.7;margin-top:10px;position:relative;z-index:1}
+.goodnews-text.is-placeholder{font-size:13px;font-weight:600;color:var(--ink3);min-height:auto}
+.goodnews-meta{font-size:10px;color:var(--ink3);line-height:1.6;margin-top:6px;position:relative;z-index:1}
 .goodnews-card.is-error .goodnews-meta{color:var(--red-light)}
 .goodnews-card.is-empty .goodnews-badge{background:rgba(232,224,208,0.6);color:var(--ink3)}
 .goodnews-card.is-empty .goodnews-badge::before{background:#C6B899;box-shadow:none}
 .mission-card{background:var(--gold-pale);border:2px solid var(--gold);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.mission-card.primary-focus{padding:18px;border-width:2.5px;box-shadow:0 16px 30px rgba(201,168,76,0.16)}
 .mission-label{font-size:11px;color:var(--gold);font-weight:700;letter-spacing:0.1em;margin-bottom:6px}
 .mission-text{font-size:16px;font-weight:700;color:var(--ink);line-height:1.5}
+.mission-card.primary-focus .mission-text{font-size:20px;line-height:1.6}
 .mission-empty{font-size:14px;color:var(--ink3);font-style:italic}
+.mission-status-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.mission-status-copy{font-size:12px;color:#8B6A16;font-weight:700;letter-spacing:0.08em}
+.mission-status-badge{display:none;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:800}
+.mission-status-badge.show{display:inline-flex}
+.mission-status-badge.done{background:#E8F7EE;color:#177245}
+.mission-status-badge.pending{background:#FDF1F1;color:#8B1A1A}
+.mission-status-badge.unknown{background:rgba(255,255,255,0.65);color:var(--ink3)}
 .quick-btn{width:100%;padding:14px;border-radius:var(--radius);border:none;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:0.03em}
 .btn-primary{background:var(--red);color:#fff}
 .btn-secondary{background:#fff;color:var(--red);border:2px solid var(--red)}
@@ -62,6 +71,15 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;backgroun
 .form-section{margin-bottom:16px}
 .form-label{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px;display:block}
 .form-hint{font-size:11px;color:var(--ink3);margin-bottom:6px}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.check-btn{padding:12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#fff;color:var(--ink2);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer}
+.check-btn.selected.done{border-color:#1B7A48;background:#ECF9F1;color:#16673E}
+.check-btn.selected.pending{border-color:var(--red);background:var(--red-pale);color:var(--red)}
+.conditional-box{display:none;background:#fff7f7;border:1px solid #F3CACA;border-radius:var(--radius-sm);padding:12px;margin-top:10px}
+.conditional-box.show{display:block}
+.conditional-title{font-size:11px;color:var(--red);font-weight:800;letter-spacing:.08em;margin-bottom:8px}
+.form-note{font-size:12px;color:var(--ink3);line-height:1.7}
+.inline-status{margin-top:8px;font-size:12px;color:var(--ink3);line-height:1.7}
 .cond-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:4px}
 .cond-btn{padding:10px 4px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#fff;cursor:pointer;text-align:center;font-size:22px;line-height:1}
 .cond-btn.selected{border-color:var(--red);background:var(--red-pale)}
@@ -81,6 +99,13 @@ textarea:focus,input:focus{border-color:var(--red)}
 .log-next{background:var(--gold-pale);border-left:3px solid var(--gold);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:8px 10px;margin-top:8px}
 .log-next-label{font-size:10px;color:var(--gold);font-weight:700;margin-bottom:3px}
 .log-next-text{font-size:13px;color:var(--ink);font-weight:700}
+.log-achievement{margin-top:10px;padding:10px 12px;border-radius:var(--radius-sm);background:#F9F8F3;border:1px solid var(--border)}
+.log-achievement-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.log-achievement-label{font-size:10px;color:var(--ink3);font-weight:700;letter-spacing:.08em}
+.log-achievement-badge{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800}
+.log-achievement-badge.done{background:#E8F7EE;color:#177245}
+.log-achievement-badge.pending{background:#FDF1F1;color:#8B1A1A}
+.log-achievement-text{font-size:12px;color:var(--ink2);line-height:1.6}
 .lib-tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:16px;overflow-x:auto}
 .lib-tab{padding:10px 16px;border:none;background:none;font-size:13px;font-weight:700;font-family:inherit;color:var(--ink3);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px}
 .lib-tab.active{color:var(--red);border-bottom-color:var(--red)}
@@ -312,8 +337,12 @@ textarea:focus,input:focus{border-color:var(--red)}
       <div class="hero-name" id="heroName"></div>
       <div class="hero-count">📝 <span id="totalCount">0</span> 回記録達成！</div>
     </div>
-    <div class="mission-card">
-      <div class="mission-label">▶ 今日の意識（前回の誓い）</div>
+    <div class="mission-card primary-focus">
+      <div class="mission-status-row">
+        <div class="mission-status-copy">TODAY'S FOCUS</div>
+        <div class="mission-status-badge unknown" id="missionStatusBadge">前回の結果は未記録</div>
+      </div>
+      <div class="mission-label">▶ 前回決めた「今日のやること」</div>
       <div id="missionText" class="mission-empty">読み込み中...</div>
     </div>
     <button class="quick-btn btn-primary" onclick="goTo('form')">📝 稽古ログを記録する</button>
@@ -341,8 +370,30 @@ textarea:focus,input:focus{border-color:var(--red)}
   <div class="header"><div><div class="header-title">📝 稽古ログ記録</div><div class="header-sub" id="formDate"></div></div></div>
   <div class="content">
     <div class="mission-card" style="margin-bottom:16px">
-      <div class="mission-label">▶ 今日意識したこと（確認）</div>
+      <div class="mission-label">▶ 前回決めた「今日のやること」</div>
       <div id="formMission" class="mission-empty">記録なし</div>
+      <div class="inline-status" id="formMissionHint">前回決めたことが達成できたかをこのあと確認します。</div>
+    </div>
+    <div class="form-section" id="achievementSection">
+      <label class="form-label">前回決めたことは達成できた？</label>
+      <div class="check-grid">
+        <button class="check-btn" id="achievementDoneBtn" type="button" onclick="selectAchievement('done')">できた</button>
+        <button class="check-btn" id="achievementPendingBtn" type="button" onclick="selectAchievement('pending')">まだできなかった</button>
+      </div>
+      <div class="conditional-box" id="failureFields">
+        <div class="conditional-title">未達だったときだけ振り返る</div>
+        <div class="form-section" style="margin-bottom:12px">
+          <label class="form-label">なぜ？</label>
+          <textarea id="fieldWhyMissed" rows="2" placeholder="例：基礎練習の時間配分が足りず、右打ちの反復まで届かなかった" oninput="updateChar(this,'charWhyMissed',80)"></textarea>
+          <div class="char-count" id="charWhyMissed">0/80</div>
+        </div>
+        <div class="form-section" style="margin-bottom:0">
+          <label class="form-label">次どうする？</label>
+          <textarea id="fieldRetryPlan" rows="2" placeholder="例：最初の10分で右打ちだけ先にやる" oninput="updateChar(this,'charRetryPlan',80)"></textarea>
+          <div class="char-count" id="charRetryPlan">0/80</div>
+        </div>
+      </div>
+      <div class="form-note" id="achievementNote">初回の記録まではこのチェックは不要です。</div>
     </div>
     <div class="form-section">
       <label class="form-label">今日のコンディション</label>
@@ -456,7 +507,7 @@ textarea:focus,input:focus{border-color:var(--red)}
 // ============================================
 // 【設定】GASのウェブアプリURLをここに貼る
 // ============================================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxEcSkzSPmziSwiqIPY5vrPvrmdz760Vpdn8zwV28CgBcBccZaPd0BrL-h7-th5uEsb/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwdWybwji3A2eq-AYTxpF7jXgyygf1lgYuwAgDzqt0bs8npBcTLFE6NFTY-ar6ElXL4/exec";
 
 // ============================================
 // 【設定】Google Drive ライブラリ
@@ -472,6 +523,7 @@ const GOOD_NEWS_RECENT_LIMIT = 4;
 
 const COND_EMOJI = ['','☠️','💦','😃','💪','🔥'];
 let selCond = 0;
+let selAchievement = '';
 let cachedLogs = [];
 const goodNewsState = {
   items: [],
@@ -709,10 +761,25 @@ function updateHome() {
   document.getElementById('statTotal').textContent  = total;
 
   const m = document.getElementById('missionText');
+  const statusBadge = document.getElementById('missionStatusBadge');
   if (cachedLogs.length && cachedLogs[0].next) {
     m.textContent = cachedLogs[0].next; m.className = 'mission-text';
   } else {
     m.textContent = 'まだ記録がありません'; m.className = 'mission-empty';
+  }
+  if (statusBadge) {
+    const latest = cachedLogs[0];
+    statusBadge.className = 'mission-status-badge show';
+    if (!latest || !latest.achievementStatus) {
+      statusBadge.classList.add('unknown');
+      statusBadge.textContent = '前回の結果は未記録';
+    } else if (latest.achievementStatus === 'done') {
+      statusBadge.classList.add('done');
+      statusBadge.textContent = '前回の結果: 達成';
+    } else {
+      statusBadge.classList.add('pending');
+      statusBadge.textContent = '前回の結果: 未達';
+    }
   }
   if (cachedLogs.length) {
     const avg = cachedLogs.reduce((s,l) => s + (parseInt(l.cond)||0), 0) / cachedLogs.length;
@@ -950,23 +1017,49 @@ function syncGoodNewsTickerWithView() {
 function updateForm() {
   document.getElementById('formDate').textContent = getDateStr();
   const m = document.getElementById('formMission');
+  const note = document.getElementById('achievementNote');
+  const hint = document.getElementById('formMissionHint');
   if (cachedLogs.length && cachedLogs[0].next) {
     m.textContent = cachedLogs[0].next; m.className = 'mission-text';
+    note.textContent = '達成できたかを選んでから、今日の記録を入力します。';
+    hint.textContent = 'この1選を達成できたかどうかを最初に振り返ります。';
   } else {
     m.textContent = '記録なし'; m.className = 'mission-empty';
+    note.textContent = '初回の記録まではこのチェックは不要です。';
+    hint.textContent = '最初の記録なので、今回は下の達成チェックはスキップできます。';
   }
   selCond = 0;
+  selAchievement = '';
   document.querySelectorAll('.cond-btn').forEach(b => b.classList.remove('selected'));
-  ['fieldLearning','fieldNext','fieldGoodNew'].forEach(id => document.getElementById(id).value = '');
+  document.querySelectorAll('.check-btn').forEach(b => b.classList.remove('selected', 'done', 'pending'));
+  ['fieldLearning','fieldNext','fieldGoodNew','fieldWhyMissed','fieldRetryPlan'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('charLearning').textContent = '0/100';
   document.getElementById('charNext').textContent     = '0/60';
   document.getElementById('charGoodNew').textContent  = '0/80';
+  document.getElementById('charWhyMissed').textContent = '0/80';
+  document.getElementById('charRetryPlan').textContent = '0/80';
+  toggleFailureFields(false);
+  document.getElementById('achievementSection').style.display = cachedLogs.length && cachedLogs[0].next ? 'block' : 'none';
   document.getElementById('submitBtn').disabled = false;
 }
 
 function selectCond(btn, val) {
   document.querySelectorAll('.cond-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected'); selCond = val;
+}
+function selectAchievement(val) {
+  selAchievement = val;
+  const doneBtn = document.getElementById('achievementDoneBtn');
+  const pendingBtn = document.getElementById('achievementPendingBtn');
+  [doneBtn, pendingBtn].forEach(btn => btn.classList.remove('selected', 'done', 'pending'));
+  if (val === 'done') doneBtn.classList.add('selected', 'done');
+  if (val === 'pending') pendingBtn.classList.add('selected', 'pending');
+  toggleFailureFields(val === 'pending');
+}
+function toggleFailureFields(show) {
+  const box = document.getElementById('failureFields');
+  if (!box) return;
+  box.classList.toggle('show', show);
 }
 function updateChar(el, outId, max) {
   document.getElementById(outId).textContent = el.value.length + '/' + max;
@@ -981,9 +1074,15 @@ async function submitLog() {
   const learning = document.getElementById('fieldLearning').value.trim();
   const next     = document.getElementById('fieldNext').value.trim();
   const goodNew  = document.getElementById('fieldGoodNew').value.trim();
+  const whyMissed = document.getElementById('fieldWhyMissed').value.trim();
+  const retryPlan = document.getElementById('fieldRetryPlan').value.trim();
+  const hasPreviousMission = cachedLogs.length && cachedLogs[0].next;
+  if (hasPreviousMission && !selAchievement) { showToast('前回の達成チェックを選んでください'); return; }
   if (!learning) { showToast('今日の学びを入力してください'); return; }
   if (!next)     { showToast('次の稽古でやることを入力してください'); return; }
   if (!goodNew)  { showToast('Good&Newを入力してください'); return; }
+  if (selAchievement === 'pending' && !whyMissed) { showToast('できなかった理由を入力してください'); return; }
+  if (selAchievement === 'pending' && !retryPlan) { showToast('次どうするかを入力してください'); return; }
 
   const btn = document.getElementById('submitBtn');
   btn.disabled = true; btn.textContent = '送信中...';
@@ -995,6 +1094,9 @@ async function submitLog() {
     date:     getDateStr(),
     cond:     selCond,
     learning, next, goodNew,
+    achievementStatus: hasPreviousMission ? selAchievement : '',
+    whyMissed: selAchievement === 'pending' ? whyMissed : '',
+    retryPlan: selAchievement === 'pending' ? retryPlan : '',
   };
 
   try {
@@ -1006,7 +1108,16 @@ async function submitLog() {
     const json = await res.json();
     if (json.status === 'ok') {
       // ローカルにも追記してすぐ反映
-      cachedLogs.unshift({ cond:selCond, learning, next, goodNew, date:getDateStr() });
+      cachedLogs.unshift({
+        cond: selCond,
+        learning,
+        next,
+        goodNew,
+        date: getDateStr(),
+        achievementStatus: hasPreviousMission ? selAchievement : '',
+        whyMissed: selAchievement === 'pending' ? whyMissed : '',
+        retryPlan: selAchievement === 'pending' ? retryPlan : ''
+      });
       loadGoodNewsFeed({ force: true, background: true });
       document.getElementById('successText').textContent =
         `「${next.substring(0,20)}${next.length>20?'…':''}」を次の稽古の誓いに登録しました！`;
@@ -1103,8 +1214,25 @@ function updateLog() {
       <div class="log-date"><span>${esc(fmtDate(l.date))}</span><span class="log-cond">${COND_EMOJI[l.cond]||''}</span></div>
       <div class="log-section"><div class="log-section-label">今日の学び</div><div class="log-section-text">${esc(l.learning)}</div></div>
       <div class="log-next"><div class="log-next-label">▶ 次の稽古でやること</div><div class="log-next-text">${esc(l.next)}</div></div>
+      ${renderAchievementLog(l)}
       <div class="log-section" style="margin-top:8px"><div class="log-section-label">Good & New</div><div class="log-section-text">${esc(l.goodNew)}</div></div>
     </div>`).join('');
+}
+
+function renderAchievementLog(log) {
+  if (!log.achievementStatus) return '';
+  const done = log.achievementStatus === 'done';
+  const detail = done
+    ? '前回決めたことを達成できた。'
+    : `${log.whyMissed ? `なぜ？ ${esc(log.whyMissed)}` : ''}${log.retryPlan ? `<br>次どうする？ ${esc(log.retryPlan)}` : ''}`;
+  return `
+    <div class="log-achievement">
+      <div class="log-achievement-head">
+        <div class="log-achievement-label">前回の1選の結果</div>
+        <div class="log-achievement-badge ${done ? 'done' : 'pending'}">${done ? '達成' : '未達'}</div>
+      </div>
+      <div class="log-achievement-text">${detail || '記録あり'}</div>
+    </div>`;
 }
 
 // ============================================
