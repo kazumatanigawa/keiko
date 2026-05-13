@@ -507,7 +507,7 @@ textarea:focus,input:focus{border-color:var(--red)}
 // ============================================
 // 【設定】GASのウェブアプリURLをここに貼る
 // ============================================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzocBklNyIJGSWrCaJayO-ztsytxdrQXRz22xH6vCaJO4BaiLPm1AnK0439IKmwXbhq/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbz55G2GOryMBvDWabjsDHwS2rDe6_cXPfWsXOhH84siHtQseSgk0i91TGYfepZIolHL/exec";
 
 // ============================================
 // 【設定】Google Drive ライブラリ
@@ -520,6 +520,8 @@ const DRIVE_PAGE_SIZE = 100;
 const GOOD_NEWS_ROTATE_MS = 3000;
 const GOOD_NEWS_REFRESH_MS = 60000;
 const GOOD_NEWS_RECENT_LIMIT = 4;
+const APP_VERSION = '2026-05-13-01';
+const APP_VERSION_KEY = 'taiko_app_version';
 
 const COND_EMOJI = ['','☠️','💦','😃','💪','🔥'];
 let selCond = 0;
@@ -614,17 +616,46 @@ function initializeGoodNewsFeed() {
 // 起動処理
 // ============================================
 window.onload = function() {
+  const versionStatus = enforceAppVersion();
   const name = localStorage.getItem('taiko_name');
   const pin  = localStorage.getItem('taiko_pin');
+  if (name) document.getElementById('loginName').value = name;
+
+  if (versionStatus.requiresRelogin) {
+    const err = document.getElementById('loginErr');
+    if (err) err.textContent = 'アプリが更新されました。もう一度ログインしてください。';
+    showToast('アプリ更新のため再ログインしてください');
+    return;
+  }
+
   if (name && pin) {
     // 自動ログイン
     document.getElementById('authOverlay').classList.add('hidden');
     goTo('home');
     loadLogs();
   }
-  // ログイン画面の名前欄に前回の名前を入れておく
-  if (name) document.getElementById('loginName').value = name;
 };
+
+function enforceAppVersion() {
+  const storedVersion = localStorage.getItem(APP_VERSION_KEY);
+  const hasSession = !!localStorage.getItem('taiko_name') || !!localStorage.getItem('taiko_pin');
+
+  if (!storedVersion) {
+    localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
+    return { requiresRelogin: false };
+  }
+
+  if (storedVersion !== APP_VERSION) {
+    localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
+    if (hasSession) {
+      localStorage.removeItem('taiko_name');
+      localStorage.removeItem('taiko_pin');
+      return { requiresRelogin: true };
+    }
+  }
+
+  return { requiresRelogin: false };
+}
 
 // ============================================
 // 認証タブ切り替え
@@ -710,6 +741,7 @@ async function doLogin() {
 function saveSession(name, pin) {
   localStorage.setItem('taiko_name', name);
   localStorage.setItem('taiko_pin',  pin);
+  localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
 }
 
 function hideAuth() {
@@ -725,6 +757,7 @@ function doLogout() {
   stopGoodNewsRefresh();
   localStorage.removeItem('taiko_name');
   localStorage.removeItem('taiko_pin');
+  localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
   cachedLogs = [];
   location.reload();
 }
