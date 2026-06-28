@@ -1,5 +1,5 @@
 const CONFIG = {
-  schemaVersion: '2026-06-28-02',
+  schemaVersion: '2026-06-28-04',
   spreadsheetIdProperty: 'SPREADSHEET_ID',
   setupVersionProperty: 'KEIKO_SETUP_VERSION',
   setupAtProperty: 'KEIKO_SETUP_COMPLETED_AT',
@@ -9,15 +9,19 @@ const CONFIG = {
     logs: '稽古ログ',
     members: '部員一覧',
     teams: 'チーム一覧',
+    notes: 'チームノート',
+    noteComments: 'チームノートコメント',
     review: '移行要確認',
   },
   userHeaders: ['name', 'lastName', 'firstName', 'lastNameKana', 'firstNameKana', 'pin', 'userId', 'teamId', 'group', 'teamType', 'userType', 'role', 'createdAt', 'updatedAt'],
   teamHeaders: ['teamId', 'teamName', 'teamType', 'createdByUserId', 'adminUserIds', 'createdAt', 'status'],
   rosterHeaders: ['userId', 'teamId', 'group', 'teamType', 'userType', 'name', 'lastName', 'firstName', 'lastNameKana', 'firstNameKana', 'displayName', 'grade', 'term', 'role', 'updatedAt'],
   logHeaders: ['userId', 'teamId', 'group', 'teamType', 'userType', 'name', 'displayName', 'date', 'cond', 'learning', 'next', 'goodNew', 'achievementStatus', 'whyMissed', 'retryPlan', 'grade', 'term', 'createdAt', 'updatedAt'],
+  noteHeaders: ['noteId', 'teamId', 'group', 'teamType', 'userType', 'authorUserId', 'authorName', 'title', 'body', 'createdAt', 'updatedAt', 'status'],
+  noteCommentHeaders: ['commentId', 'noteId', 'teamId', 'group', 'authorUserId', 'authorName', 'body', 'createdAt', 'updatedAt', 'status'],
   reviewHeaders: ['timestamp', 'sheetName', 'rowNumber', 'reason', 'name', 'group', 'candidateUserIds', 'candidateNames'],
   memberViewHeaders: ['所属', '学年', '名前', '期', '役職', 'userId', 'teamId'],
-  sourceBackupSheets: ['ユーザー', '生徒一覧', '稽古ログ', '部員一覧'],
+  sourceBackupSheets: [],
 };
 
 const FIELD_ALIASES = {
@@ -79,6 +83,12 @@ function routeRequest_(params, method) {
         return jsonOutput_(handleGetGoodNews_(context, params));
       case 'getLogs':
         return jsonOutput_(handleGetLogs_(context, params));
+      case 'getNotes':
+        return jsonOutput_(handleGetNotes_(context, params));
+      case 'saveNote':
+        return jsonOutput_(handleSaveNote_(context, params));
+      case 'addNoteComment':
+        return jsonOutput_(handleAddNoteComment_(context, params));
       default:
         return jsonOutput_({ status: 'error', message: 'Unsupported action.' });
     }
@@ -242,7 +252,7 @@ function handleSaveLog_(context, params) {
     userType: auth.user.userType,
     name: auth.user.name,
     displayName: displayName,
-    date: cleanText_(params.date) || formatDateKey_(new Date()),
+    date: normalizeLogDate_(params.date) || formatDateKey_(new Date()),
     cond: cleanText_(params.cond),
     learning: learning,
     next: nextAction,
@@ -331,6 +341,88 @@ function handleGetGoodNews_(context, params) {
   return { status: 'ok', items: items };
 }
 
+function handleGetNotes_(context, params) {
+  const auth = authenticateUser_(context, params);
+  if (!auth.ok) return { status: 'error', message: auth.message };
+
+  return {
+    status: 'ok',
+    notes: getNotesForTeam_(context, auth.user),
+  };
+}
+
+function handleSaveNote_(context, params) {
+  const auth = authenticateUser_(context, params);
+  if (!auth.ok) return { status: 'error', message: auth.message };
+
+  const title = cleanText_(params.title);
+  const body = cleanText_(params.body);
+  if (!title) return { status: 'error', message: 'title is required.' };
+  if (!body) return { status: 'error', message: 'body is required.' };
+
+  const notesTable = readTable_(context.sheets.notes);
+  const rosterProfile = findRosterByUserId_(context, auth.user.userId);
+  const authorName = rosterProfile.displayName || auth.user.name;
+  const now = isoNow_();
+
+  appendRecord_(notesTable, {
+    noteId: generateId_('note'),
+    teamId: auth.user.teamId,
+    group: auth.user.group,
+    teamType: auth.user.teamType,
+    userType: auth.user.userType,
+    authorUserId: auth.user.userId,
+    authorName: authorName,
+    title: title,
+    body: body,
+    createdAt: now,
+    updatedAt: now,
+    status: 'active',
+  });
+
+  return {
+    status: 'ok',
+    notes: getNotesForTeam_(context, auth.user),
+  };
+}
+
+function handleAddNoteComment_(context, params) {
+  const auth = authenticateUser_(context, params);
+  if (!auth.ok) return { status: 'error', message: auth.message };
+
+  const noteId = cleanText_(params.noteId);
+  const body = cleanText_(params.body);
+  if (!noteId) return { status: 'error', message: 'noteId is required.' };
+  if (!body) return { status: 'error', message: 'body is required.' };
+
+  const notesTable = readTable_(context.sheets.notes);
+  const noteRow = findVisibleNoteById_(notesTable, auth.user, noteId);
+  if (!noteRow) return { status: 'error', message: 'Note not found.' };
+
+  const commentsTable = readTable_(context.sheets.noteComments);
+  const rosterProfile = findRosterByUserId_(context, auth.user.userId);
+  const authorName = rosterProfile.displayName || auth.user.name;
+  const now = isoNow_();
+
+  appendRecord_(commentsTable, {
+    commentId: generateId_('cmt'),
+    noteId: noteId,
+    teamId: auth.user.teamId,
+    group: auth.user.group,
+    authorUserId: auth.user.userId,
+    authorName: authorName,
+    body: body,
+    createdAt: now,
+    updatedAt: now,
+    status: 'active',
+  });
+
+  return {
+    status: 'ok',
+    notes: getNotesForTeam_(context, auth.user),
+  };
+}
+
 function listTeams_(context) {
   const teamsTable = readTable_(context.sheets.teams);
   return teamsTable.rows
@@ -355,6 +447,88 @@ function listTeams_(context) {
         teamType: team.teamType,
       };
     });
+}
+
+function getNotesForTeam_(context, user) {
+  const notesTable = readTable_(context.sheets.notes);
+  const commentsTable = readTable_(context.sheets.noteComments);
+  const teamNotes = notesTable.rows
+    .filter(function (row) {
+      return noteRowBelongsToUserTeam_(notesTable, row, user) &&
+        (cleanText_(getField_(notesTable, row, 'status')) || 'active') === 'active';
+    })
+    .map(function (row) {
+      return {
+        noteId: cleanText_(getField_(notesTable, row, 'noteId')),
+        teamId: cleanText_(getField_(notesTable, row, 'teamId')),
+        group: cleanText_(getField_(notesTable, row, 'group')),
+        authorUserId: cleanText_(getField_(notesTable, row, 'authorUserId')),
+        authorName: cleanText_(getField_(notesTable, row, 'authorName')),
+        title: cleanText_(getField_(notesTable, row, 'title')),
+        body: cleanText_(getField_(notesTable, row, 'body')),
+        createdAt: cleanText_(getField_(notesTable, row, 'createdAt')),
+        updatedAt: cleanText_(getField_(notesTable, row, 'updatedAt')),
+      };
+    })
+    .sort(function (a, b) {
+      return sortByDateDesc_(a.createdAt, b.createdAt);
+    });
+
+  const noteIds = teamNotes.map(function (note) {
+    return note.noteId;
+  });
+  const commentsByNoteId = commentsTable.rows.reduce(function (acc, row) {
+    const noteId = cleanText_(getField_(commentsTable, row, 'noteId'));
+    if (!noteId || noteIds.indexOf(noteId) === -1) return acc;
+    if ((cleanText_(getField_(commentsTable, row, 'status')) || 'active') !== 'active') return acc;
+    if (!commentRowBelongsToUserTeam_(commentsTable, row, user)) return acc;
+    if (!acc[noteId]) acc[noteId] = [];
+    acc[noteId].push({
+      commentId: cleanText_(getField_(commentsTable, row, 'commentId')),
+      noteId: noteId,
+      teamId: cleanText_(getField_(commentsTable, row, 'teamId')),
+      group: cleanText_(getField_(commentsTable, row, 'group')),
+      authorUserId: cleanText_(getField_(commentsTable, row, 'authorUserId')),
+      authorName: cleanText_(getField_(commentsTable, row, 'authorName')),
+      body: cleanText_(getField_(commentsTable, row, 'body')),
+      createdAt: cleanText_(getField_(commentsTable, row, 'createdAt')),
+      updatedAt: cleanText_(getField_(commentsTable, row, 'updatedAt')),
+    });
+    return acc;
+  }, {});
+
+  Object.keys(commentsByNoteId).forEach(function (noteId) {
+    commentsByNoteId[noteId].sort(function (a, b) {
+      return (Date.parse(a.createdAt || '') || 0) - (Date.parse(b.createdAt || '') || 0);
+    });
+  });
+
+  return teamNotes.map(function (note) {
+    note.comments = commentsByNoteId[note.noteId] || [];
+    return note;
+  });
+}
+
+function findVisibleNoteById_(notesTable, user, noteId) {
+  return notesTable.rows.find(function (record) {
+    return cleanText_(getField_(notesTable, record, 'noteId')) === cleanText_(noteId) &&
+      noteRowBelongsToUserTeam_(notesTable, record, user) &&
+      (cleanText_(getField_(notesTable, record, 'status')) || 'active') === 'active';
+  }) || null;
+}
+
+function noteRowBelongsToUserTeam_(notesTable, row, user) {
+  const rowTeamId = cleanText_(getField_(notesTable, row, 'teamId'));
+  const rowGroup = cleanText_(getField_(notesTable, row, 'group'));
+  if (user.teamId && rowTeamId) return rowTeamId === user.teamId;
+  return !!user.group && normalizeText_(rowGroup) === normalizeText_(user.group);
+}
+
+function commentRowBelongsToUserTeam_(commentsTable, row, user) {
+  const rowTeamId = cleanText_(getField_(commentsTable, row, 'teamId'));
+  const rowGroup = cleanText_(getField_(commentsTable, row, 'group'));
+  if (user.teamId && rowTeamId) return rowTeamId === user.teamId;
+  return !!user.group && normalizeText_(rowGroup) === normalizeText_(user.group);
 }
 
 function getLogsForUser_(context, user) {
@@ -572,22 +746,15 @@ function ensureSystemReady_() {
   ensureHeaders_(sheets.teams, CONFIG.teamHeaders);
   ensureHeaders_(sheets.roster, CONFIG.rosterHeaders);
   ensureHeaders_(sheets.logs, CONFIG.logHeaders);
+  ensureHeaders_(sheets.notes, CONFIG.noteHeaders);
+  ensureHeaders_(sheets.noteComments, CONFIG.noteCommentHeaders);
   ensureHeaders_(sheets.review, CONFIG.reviewHeaders);
   ensureHeaders_(sheets.members, CONFIG.memberViewHeaders);
-
-  const props = PropertiesService.getScriptProperties();
-  if (props.getProperty(CONFIG.setupVersionProperty) !== CONFIG.schemaVersion) {
-    runMigration_(spreadsheet, sheets);
-    props.setProperty(CONFIG.setupVersionProperty, CONFIG.schemaVersion);
-    props.setProperty(CONFIG.setupAtProperty, isoNow_());
-  }
-
-  syncTeamsFromUserGroupDropdown_(sheets.users, sheets.teams);
 
   return {
     spreadsheet: spreadsheet,
     sheets: sheets,
-    props: props,
+    props: PropertiesService.getScriptProperties(),
   };
 }
 
@@ -599,7 +766,7 @@ function runMigration_(spreadsheet, sheets) {
   const teamsTable = readTable_(sheets.teams);
   const reviewTable = readTable_(sheets.review);
 
-  const groupSeedMap = collectDeclaredGroupsFromUsersDropdown_(sheets.users, usersTable);
+  const groupSeedMap = collectObservedGroups_(usersTable, rosterTable, logsTable);
   ensureTeamsFromGroups_(teamsTable, groupSeedMap);
   flushChangedRows_(teamsTable);
 
@@ -619,10 +786,14 @@ function runMigration_(spreadsheet, sheets) {
   });
 }
 
-function collectDeclaredGroupsFromUsersDropdown_(usersSheet, usersTable) {
+function collectObservedGroups_(usersTable, rosterTable, logsTable) {
   const groups = {};
-  getDeclaredTeamOptions_(usersSheet, usersTable).forEach(function (group) {
-    groups[normalizeText_(group)] = group;
+  [usersTable, rosterTable, logsTable].forEach(function (table) {
+    table.rows.forEach(function (row) {
+      const group = cleanText_(getField_(table, row, 'group'));
+      if (!group) return;
+      groups[normalizeText_(group)] = group;
+    });
   });
   return groups;
 }
@@ -1114,97 +1285,34 @@ function enrichUserRecord_(context, usersTable, row) {
   return user;
 }
 
-function syncTeamsFromUserGroupDropdown_(usersSheet, teamsSheet) {
-  const usersTable = readTable_(usersSheet);
+function syncUserGroupDropdownFromTeams_(usersSheet, teamsSheet) {
   const teamsTable = readTable_(teamsSheet);
-  const declaredOptions = getDeclaredTeamOptions_(usersSheet, usersTable);
-  if (!declaredOptions.length) return;
-
-  const declaredMap = {};
-  declaredOptions.forEach(function (teamName) {
-    declaredMap[normalizeText_(teamName)] = teamName;
-    const existing = findTeamByName_(teamsTable, teamName);
-    if (!existing) {
-      appendRecord_(teamsTable, {
-        teamId: generateId_('team'),
-        teamName: teamName,
-        teamType: inferTeamTypeFromName_(teamName),
-        createdByUserId: '',
-        adminUserIds: '',
-        createdAt: isoNow_(),
-        status: 'active',
-      });
-      return;
-    }
-    if (cleanText_(getField_(teamsTable, existing.row, 'status')) !== 'active') {
-      setField_(teamsTable, existing.row, 'status', 'active');
-    }
-    if (!cleanText_(getField_(teamsTable, existing.row, 'teamType'))) {
-      setField_(teamsTable, existing.row, 'teamType', inferTeamTypeFromName_(teamName));
-    }
-  });
-
-  teamsTable.rows.forEach(function (row) {
-    const teamName = cleanText_(getField_(teamsTable, row, 'teamName'));
-    const createdByUserId = cleanText_(getField_(teamsTable, row, 'createdByUserId'));
-    if (!teamName || createdByUserId) return;
-    if (!declaredMap[normalizeText_(teamName)]) {
-      setField_(teamsTable, row, 'status', 'inactive');
-    }
-  });
-
-  flushChangedRows_(teamsTable);
-}
-
-function getDeclaredTeamOptions_(usersSheet, usersTable) {
+  const usersTable = readTable_(usersSheet);
   const groupColumnIndex = resolveExistingColumnIndex_(usersTable, 'group');
   if (groupColumnIndex < 0) return [];
-  const rowCount = Math.max(usersSheet.getLastRow() - 1, 1);
-  const validationRules = usersSheet.getRange(2, groupColumnIndex + 1, rowCount, 1).getDataValidations();
-  const optionsMap = {};
-  const assignedGroupMap = {};
-
-  usersTable.rows.forEach(function (row) {
-    const group = cleanText_(getField_(usersTable, row, 'group'));
-    if (group) assignedGroupMap[normalizeText_(group)] = group;
-  });
-
-  validationRules.forEach(function (ruleRow) {
-    ruleRow.forEach(function (rule) {
-      extractTeamOptionsFromValidationRule_(rule).forEach(function (value) {
-        optionsMap[normalizeText_(value)] = value;
-      });
-    });
-  });
-
-  const filteredKeys = Object.keys(optionsMap).filter(function (key) {
-    if (!Object.keys(assignedGroupMap).length) return true;
-    return !!assignedGroupMap[key];
-  });
-
-  return filteredKeys
-    .map(function (key) { return optionsMap[key]; })
+  const teamNames = teamsTable.rows
+    .filter(function (row) {
+      return cleanText_(getField_(teamsTable, row, 'status')) !== 'inactive';
+    })
+    .map(function (row) {
+      return cleanText_(getField_(teamsTable, row, 'teamName'));
+    })
     .filter(Boolean)
+    .filter(function (value, index, list) {
+      return list.indexOf(value) === index;
+    })
     .sort(function (a, b) {
       return a.localeCompare(b, 'ja');
     });
-}
+  if (!teamNames.length) return [];
 
-function extractTeamOptionsFromValidationRule_(rule) {
-  if (!rule) return [];
-  const criteriaType = rule.getCriteriaType();
-  const criteriaValues = rule.getCriteriaValues();
-  if (criteriaType === SpreadsheetApp.DataValidationCriteria.VALUE_IN_LIST) {
-    return uniqueNonEmpty_(criteriaValues[0] || []);
-  }
-  if (criteriaType === SpreadsheetApp.DataValidationCriteria.VALUE_IN_RANGE) {
-    const sourceRange = criteriaValues[0];
-    if (!sourceRange) return [];
-    return uniqueNonEmpty_(sourceRange.getDisplayValues().reduce(function (acc, row) {
-      return acc.concat(row);
-    }, []));
-  }
-  return [];
+  const rowCount = Math.max(usersSheet.getMaxRows() - 1, 1);
+  const rule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(teamNames, true)
+    .setAllowInvalid(true)
+    .build();
+  usersSheet.getRange(2, groupColumnIndex + 1, rowCount, 1).setDataValidation(rule);
+  return teamNames;
 }
 
 function resolveExistingColumnIndex_(table, fieldName) {
@@ -1229,6 +1337,7 @@ function uniqueNonEmpty_(values) {
 
 function normalizeTeamType_(value) {
   const text = cleanText_(value).toLowerCase();
+  if (text === 'sutudent') return 'student';
   if (text === 'student' || text === 'general') return text;
   return '';
 }
@@ -1259,8 +1368,44 @@ function ensureSheets_(spreadsheet) {
     logs: getOrCreateSheet_(spreadsheet, CONFIG.sheetNames.logs),
     members: getOrCreateSheet_(spreadsheet, CONFIG.sheetNames.members),
     teams: getOrCreateSheet_(spreadsheet, CONFIG.sheetNames.teams),
+    notes: getOrCreateSheet_(spreadsheet, CONFIG.sheetNames.notes),
+    noteComments: getOrCreateSheet_(spreadsheet, CONFIG.sheetNames.noteComments),
     review: getOrCreateSheet_(spreadsheet, CONFIG.sheetNames.review),
   };
+}
+
+function repairTeamTypeValidation_(sheet) {
+  const table = readTable_(sheet);
+  const columnIndex = resolveExistingColumnIndex_(table, 'teamType');
+  if (columnIndex < 0) return;
+
+  const rowCount = Math.max(sheet.getMaxRows() - 1, 1);
+  const rule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(['general', 'student'], true)
+    .setAllowInvalid(false)
+    .build();
+
+  sheet.getRange(2, columnIndex + 1, rowCount, 1).setDataValidation(rule);
+}
+
+function repairLegacyTeamTypeValues_(sheet) {
+  const table = readTable_(sheet);
+  const columnIndex = resolveExistingColumnIndex_(table, 'teamType');
+  if (columnIndex < 0) return;
+
+  let changed = false;
+  table.rows.forEach(function (row) {
+    const raw = cleanText_(row[columnIndex]).toLowerCase();
+    if (raw === 'sutudent') {
+      row[columnIndex] = 'student';
+      table.changedRows[row.__rowNumber] = row;
+      changed = true;
+    }
+  });
+
+  if (changed) {
+    flushChangedRows_(table);
+  }
 }
 
 function getOrCreateSheet_(spreadsheet, name) {
@@ -1268,6 +1413,7 @@ function getOrCreateSheet_(spreadsheet, name) {
 }
 
 function backupSourceSheets_(spreadsheet) {
+  if (!CONFIG.sourceBackupSheets.length) return;
   const stamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd_HHmm');
   CONFIG.sourceBackupSheets.forEach(function (name) {
     const sheet = spreadsheet.getSheetByName(name);
@@ -1420,6 +1566,27 @@ function formatDateKey_(date) {
   return Utilities.formatDate(date, Session.getScriptTimeZone(), 'yyyy-MM-dd');
 }
 
+function normalizeLogDate_(value) {
+  const text = cleanText_(value);
+  if (!text) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+
+  const jpMatch = text.match(/^(\d{4})年(\d{1,2})月(\d{1,2})日/);
+  if (jpMatch) {
+    return [
+      jpMatch[1],
+      String(Number(jpMatch[2])).padStart(2, '0'),
+      String(Number(jpMatch[3])).padStart(2, '0'),
+    ].join('-');
+  }
+
+  const parsed = new Date(text);
+  if (!Number.isNaN(parsed.getTime())) {
+    return formatDateKey_(parsed);
+  }
+  return text;
+}
+
 function sortByDateDesc_(a, b) {
   const aTime = Date.parse(a || '') || 0;
   const bTime = Date.parse(b || '') || 0;
@@ -1433,11 +1600,122 @@ function publicRole_(role) {
 }
 
 function runInitialMigration() {
-  const context = ensureSystemReady_();
-  rebuildMemberDirectory_(context);
+  withScriptLock_(function () {
+    const spreadsheet = openSpreadsheet_();
+    const sheets = ensureSheets_(spreadsheet);
+    ensureHeaders_(sheets.users, CONFIG.userHeaders);
+    ensureHeaders_(sheets.teams, CONFIG.teamHeaders);
+    ensureHeaders_(sheets.roster, CONFIG.rosterHeaders);
+    ensureHeaders_(sheets.logs, CONFIG.logHeaders);
+    ensureHeaders_(sheets.notes, CONFIG.noteHeaders);
+    ensureHeaders_(sheets.noteComments, CONFIG.noteCommentHeaders);
+    ensureHeaders_(sheets.review, CONFIG.reviewHeaders);
+    ensureHeaders_(sheets.members, CONFIG.memberViewHeaders);
+
+    runMigration_(spreadsheet, sheets);
+    syncUserGroupDropdownFromTeams_(sheets.users, sheets.teams);
+
+    const props = PropertiesService.getScriptProperties();
+    props.setProperty(CONFIG.setupVersionProperty, CONFIG.schemaVersion);
+    props.setProperty(CONFIG.setupAtProperty, isoNow_());
+  });
+}
+
+function repairLogSheetLayout() {
+  const spreadsheet = openSpreadsheet_();
+  const sheets = ensureSheets_(spreadsheet);
+  ensureHeaders_(sheets.logs, CONFIG.logHeaders);
+  rewriteSheetToCanonicalHeaders_(sheets.logs, CONFIG.logHeaders);
+}
+
+function repairNoteSheetsLayout() {
+  const spreadsheet = openSpreadsheet_();
+  const sheets = ensureSheets_(spreadsheet);
+  ensureHeaders_(sheets.notes, CONFIG.noteHeaders);
+  ensureHeaders_(sheets.noteComments, CONFIG.noteCommentHeaders);
+  rewriteSheetToCanonicalHeaders_(sheets.notes, CONFIG.noteHeaders);
+  rewriteSheetToCanonicalHeaders_(sheets.noteComments, CONFIG.noteCommentHeaders);
+}
+
+function repairKeikoDataLayout() {
+  withScriptLock_(function () {
+    const spreadsheet = openSpreadsheet_();
+    const sheets = ensureSheets_(spreadsheet);
+    ensureHeaders_(sheets.users, CONFIG.userHeaders);
+    ensureHeaders_(sheets.teams, CONFIG.teamHeaders);
+    ensureHeaders_(sheets.roster, CONFIG.rosterHeaders);
+    ensureHeaders_(sheets.logs, CONFIG.logHeaders);
+    ensureHeaders_(sheets.notes, CONFIG.noteHeaders);
+    ensureHeaders_(sheets.noteComments, CONFIG.noteCommentHeaders);
+
+    rewriteSheetToCanonicalHeaders_(sheets.users, CONFIG.userHeaders);
+    rewriteSheetToCanonicalHeaders_(sheets.teams, CONFIG.teamHeaders);
+    rewriteSheetToCanonicalHeaders_(sheets.roster, CONFIG.rosterHeaders);
+    rewriteSheetToCanonicalHeaders_(sheets.logs, CONFIG.logHeaders);
+    rewriteSheetToCanonicalHeaders_(sheets.notes, CONFIG.noteHeaders);
+    rewriteSheetToCanonicalHeaders_(sheets.noteComments, CONFIG.noteCommentHeaders);
+
+    syncUserGroupDropdownFromTeams_(sheets.users, sheets.teams);
+    rebuildMemberDirectory_({ spreadsheet: spreadsheet, sheets: sheets });
+  });
+}
+
+function rewriteSheetToCanonicalHeaders_(sheet, requiredHeaders) {
+  const table = readTable_(sheet);
+  if (!table.headers.length) {
+    sheet.getRange(1, 1, 1, requiredHeaders.length).setValues([requiredHeaders]);
+    return;
+  }
+
+  const knownHeaders = {};
+  requiredHeaders.forEach(function (header) {
+    knownHeaders[header] = true;
+    (FIELD_ALIASES[header] || []).forEach(function (alias) {
+      knownHeaders[alias] = true;
+    });
+  });
+
+  const extraHeaders = table.headers.filter(function (header) {
+    return header && !knownHeaders[header];
+  });
+  const finalHeaders = requiredHeaders.concat(extraHeaders);
+  const output = [finalHeaders];
+
+  table.rows.forEach(function (row) {
+    const normalizedRow = requiredHeaders.map(function (header) {
+      if (header === 'date') return normalizeLogDate_(getField_(table, row, header));
+      return getField_(table, row, header);
+    });
+    extraHeaders.forEach(function (header) {
+      const index = table.indexMap[header];
+      normalizedRow.push(typeof index === 'number' ? row[index] : '');
+    });
+    output.push(normalizedRow);
+  });
+
+  sheet.clearContents();
+  sheet.getRange(1, 1, output.length, finalHeaders.length).setValues(output);
 }
 
 function rebuildMemberDirectory() {
   const context = ensureSystemReady_();
   rebuildMemberDirectory_(context);
+}
+
+function syncUserGroupDropdownFromTeams() {
+  const spreadsheet = openSpreadsheet_();
+  const sheets = ensureSheets_(spreadsheet);
+  ensureHeaders_(sheets.users, CONFIG.userHeaders);
+  ensureHeaders_(sheets.teams, CONFIG.teamHeaders);
+  syncUserGroupDropdownFromTeams_(sheets.users, sheets.teams);
+}
+
+function withScriptLock_(callback) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    return callback();
+  } finally {
+    lock.releaseLock();
+  }
 }

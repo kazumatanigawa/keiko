@@ -110,6 +110,25 @@ textarea:focus,input:focus{border-color:var(--red)}
 .log-achievement-badge.done{background:#E8F7EE;color:#177245}
 .log-achievement-badge.pending{background:#FDF1F1;color:#8B1A1A}
 .log-achievement-text{font-size:12px;color:var(--ink2);line-height:1.6}
+.note-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.note-title{font-size:16px;font-weight:700;color:var(--ink);line-height:1.5}
+.note-meta{font-size:11px;color:var(--ink3);margin-top:6px}
+.note-body{font-size:13px;color:var(--ink2);line-height:1.8;margin-top:10px;white-space:pre-wrap}
+.note-comments{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.note-comments-title{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--red);margin-bottom:8px}
+.note-comment{background:#faf7f1;border:1px solid #efe2cb;border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.note-comment-meta{font-size:10px;color:var(--ink3);margin-bottom:4px}
+.note-comment-body{font-size:12px;color:var(--ink2);line-height:1.7;white-space:pre-wrap}
+.note-empty{font-size:13px;color:var(--ink3);text-align:center;padding:32px 0}
+.note-compose{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.note-compose-title{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:12px}
+.note-compose-actions{display:flex;justify-content:flex-end;margin-top:12px}
+.note-submit-btn{border:none;background:var(--red);color:#fff;border-radius:999px;padding:10px 18px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer}
+.note-submit-btn:disabled{opacity:.5;cursor:not-allowed}
+.note-comment-box{margin-top:10px}
+.note-comment-box textarea{min-height:88px}
+.note-inline-btn{border:none;background:var(--gold);color:#fff;border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer}
+.note-inline-btn:disabled{opacity:.5;cursor:not-allowed}
 .lib-tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:16px;overflow-x:auto}
 .lib-tab{padding:10px 16px;border:none;background:none;font-size:13px;font-weight:700;font-family:inherit;color:var(--ink3);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px}
 .lib-tab.active{color:var(--red);border-bottom-color:var(--red)}
@@ -407,6 +426,7 @@ textarea:focus,input:focus{border-color:var(--red)}
     <button class="nav-item active" onclick="goTo('home')"><span class="nav-icon">🏠</span>ホーム</button>
     <button class="nav-item" onclick="goTo('form')"><span class="nav-icon">✏️</span>記録</button>
     <button class="nav-item" onclick="goTo('log')"><span class="nav-icon">📖</span>ログ</button>
+    <button class="nav-item" onclick="goTo('notes')"><span class="nav-icon">🗒️</span>ノート</button>
     <button class="nav-item" onclick="goTo('library')"><span class="nav-icon">🎁</span>ライブラリ</button>
   </div>
 </div>
@@ -476,6 +496,7 @@ textarea:focus,input:focus{border-color:var(--red)}
     <button class="nav-item" onclick="goTo('home')"><span class="nav-icon">🏠</span>ホーム</button>
     <button class="nav-item active" onclick="goTo('form')"><span class="nav-icon">✏️</span>記録</button>
     <button class="nav-item" onclick="goTo('log')"><span class="nav-icon">📖</span>ログ</button>
+    <button class="nav-item" onclick="goTo('notes')"><span class="nav-icon">🗒️</span>ノート</button>
     <button class="nav-item" onclick="goTo('library')"><span class="nav-icon">🎁</span>ライブラリ</button>
   </div>
 </div>
@@ -489,6 +510,37 @@ textarea:focus,input:focus{border-color:var(--red)}
     <button class="nav-item" onclick="goTo('home')"><span class="nav-icon">🏠</span>ホーム</button>
     <button class="nav-item" onclick="goTo('form')"><span class="nav-icon">✏️</span>記録</button>
     <button class="nav-item active" onclick="goTo('log')"><span class="nav-icon">📖</span>ログ</button>
+    <button class="nav-item" onclick="goTo('notes')"><span class="nav-icon">🗒️</span>ノート</button>
+    <button class="nav-item" onclick="goTo('library')"><span class="nav-icon">🎁</span>ライブラリ</button>
+  </div>
+</div>
+
+<!-- NOTES -->
+
+<div class="screen" id="screen-notes">
+  <div class="header"><div><div class="header-title">🗒️ チームノート</div><div class="header-sub" id="notesGroupName">同じチーム内だけで共有されます</div></div></div>
+  <div class="content">
+    <div class="note-compose">
+      <div class="note-compose-title">指導内容メモを共有する</div>
+      <div class="form-section" style="margin-bottom:12px">
+        <label class="form-label">タイトル</label>
+        <input type="text" id="noteTitleInput" placeholder="例：本日の基礎打ちで意識すること">
+      </div>
+      <div class="form-section" style="margin-bottom:0">
+        <label class="form-label">コメント</label>
+        <textarea id="noteBodyInput" rows="6" placeholder="指導内容を聞いて、自分がどう学んだかを自由に言語化してください。"></textarea>
+      </div>
+      <div class="note-compose-actions">
+        <button class="note-submit-btn" id="noteSubmitBtn" type="button" onclick="submitNote()">記録</button>
+      </div>
+    </div>
+    <div id="notesContent"><div class="note-empty">読み込み中...</div></div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="goTo('home')"><span class="nav-icon">🏠</span>ホーム</button>
+    <button class="nav-item" onclick="goTo('form')"><span class="nav-icon">✏️</span>記録</button>
+    <button class="nav-item" onclick="goTo('log')"><span class="nav-icon">📖</span>ログ</button>
+    <button class="nav-item active" onclick="goTo('notes')"><span class="nav-icon">🗒️</span>ノート</button>
     <button class="nav-item" onclick="goTo('library')"><span class="nav-icon">🎁</span>ライブラリ</button>
   </div>
 </div>
@@ -546,6 +598,7 @@ textarea:focus,input:focus{border-color:var(--red)}
     <button class="nav-item" onclick="goTo('home')"><span class="nav-icon">🏠</span>ホーム</button>
     <button class="nav-item" onclick="goTo('form')"><span class="nav-icon">✏️</span>記録</button>
     <button class="nav-item" onclick="goTo('log')"><span class="nav-icon">📖</span>ログ</button>
+    <button class="nav-item" onclick="goTo('notes')"><span class="nav-icon">🗒️</span>ノート</button>
     <button class="nav-item active" onclick="goTo('library')"><span class="nav-icon">🎁</span>ライブラリ</button>
   </div>
 </div>
@@ -593,6 +646,12 @@ const goodNewsState = {
   recentIds: [],
   recentNames: [],
   error: ''
+};
+const notesState = {
+  items: [],
+  loading: false,
+  loaded: false,
+  submitting: false,
 };
 
 const libraryState = {
@@ -1139,6 +1198,7 @@ function goTo(s) {
   if (s === 'home')    updateHome();
   if (s === 'form')    updateForm();
   if (s === 'log')     updateLog();
+  if (s === 'notes')   updateNotes();
   if (s === 'library') updateLibrary();
   syncGoodNewsTickerWithView();
 }
@@ -1153,6 +1213,14 @@ function getUserType() { return localStorage.getItem('taiko_user_type') || ''; }
 function getDateStr() {
   const d = new Date();
   return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${'日月火水木金土'[d.getDay()]}）`;
+}
+
+function getDateKey() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 function getTeamNameFromState(teamId) {
@@ -1495,7 +1563,7 @@ async function submitLog() {
     group:    getGroup(),
     name:     getName(),
     pin:      getPin2(),
-    date:     getDateStr(),
+    date:     getDateKey(),
     cond:     selCond,
     learning, next, goodNew,
     achievementStatus: hasPreviousMission ? selAchievement : '',
@@ -1519,7 +1587,8 @@ async function submitLog() {
         learning,
         next,
         goodNew,
-        date: getDateStr(),
+        date: getDateKey(),
+        createdAt: new Date().toISOString(),
         achievementStatus: hasPreviousMission ? selAchievement : '',
         whyMissed: selAchievement === 'pending' ? whyMissed : '',
         retryPlan: selAchievement === 'pending' ? retryPlan : ''
@@ -1663,6 +1732,192 @@ function renderAchievementLog(log) {
       </div>
       <div class="log-achievement-text">${detail || '記録あり'}</div>
     </div>`;
+}
+
+// ============================================
+// チームノート
+// ============================================
+function updateNotes() {
+  const groupName = getGroup();
+  const sub = document.getElementById('notesGroupName');
+  if (sub) {
+    sub.textContent = groupName ? `${groupName} のメンバーだけで共有されます` : '同じチーム内だけで共有されます';
+  }
+  renderNotes();
+  ensureNotesLoaded(true);
+}
+
+function renderNotes() {
+  const content = document.getElementById('notesContent');
+  if (!content) return;
+
+  if (notesState.loading && !notesState.items.length) {
+    content.innerHTML = '<div class="note-empty">ノートを読み込み中...</div>';
+    return;
+  }
+
+  if (!notesState.items.length) {
+    content.innerHTML = '<div class="note-empty">まだチームノートがありません。最初の1件を記録してください。</div>';
+    return;
+  }
+
+  content.innerHTML = notesState.items.map((note) => `
+    <article class="note-card">
+      <div class="note-title">${esc(note.title)}</div>
+      <div class="note-meta">投稿者: ${esc(note.authorName || '未設定')} / ${esc(fmtDateTime(note.createdAt))}</div>
+      <div class="note-body">${esc(note.body)}</div>
+      <div class="note-comments">
+        <div class="note-comments-title">コメント ${Array.isArray(note.comments) ? `(${note.comments.length})` : '(0)'}</div>
+        ${renderNoteComments(note.comments)}
+        <div class="note-comment-box">
+          <textarea id="noteCommentInput_${escapeAttr(note.noteId)}" rows="3" placeholder="この指導内容から自分が得た学びや気づきをコメントできます。"></textarea>
+          <button class="note-inline-btn" type="button" onclick="submitNoteComment('${escapeAttr(note.noteId)}')">コメントする</button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+function renderNoteComments(comments) {
+  if (!Array.isArray(comments) || !comments.length) {
+    return '<div class="note-empty" style="padding:12px 0 0">まだコメントはありません。</div>';
+  }
+
+  return comments.map((comment) => `
+    <div class="note-comment">
+      <div class="note-comment-meta">${esc(comment.authorName || '未設定')} / ${esc(fmtDateTime(comment.createdAt))}</div>
+      <div class="note-comment-body">${esc(comment.body)}</div>
+    </div>
+  `).join('');
+}
+
+async function ensureNotesLoaded(force = false) {
+  if (!getName() || !getPin2()) return;
+  if (notesState.loading) return;
+  if (!force && notesState.loaded) return;
+
+  notesState.loading = true;
+  if (!notesState.items.length) renderNotes();
+
+  try {
+    const requestUrl = new URL(GAS_URL);
+    requestUrl.searchParams.set('action', 'getNotes');
+    requestUrl.searchParams.set('name', getName());
+    requestUrl.searchParams.set('pin', getPin2());
+    if (getUserId()) requestUrl.searchParams.set('userId', getUserId());
+    if (getTeamId()) requestUrl.searchParams.set('teamId', getTeamId());
+
+    const response = await fetch(requestUrl.toString());
+    const json = await response.json();
+    if (!response.ok || json.status !== 'ok') {
+      throw new Error(json.message || 'note fetch failed');
+    }
+
+    notesState.items = Array.isArray(json.notes) ? json.notes : [];
+    notesState.loaded = true;
+  } catch (error) {
+    console.error(error);
+    showToast('ノートの取得に失敗しました');
+  } finally {
+    notesState.loading = false;
+    renderNotes();
+  }
+}
+
+async function submitNote() {
+  const titleInput = document.getElementById('noteTitleInput');
+  const bodyInput = document.getElementById('noteBodyInput');
+  const button = document.getElementById('noteSubmitBtn');
+  const title = titleInput?.value.trim() || '';
+  const body = bodyInput?.value.trim() || '';
+
+  if (!title) { showToast('タイトルを入力してください'); return; }
+  if (!body) { showToast('コメントを入力してください'); return; }
+  if (notesState.submitting) return;
+
+  notesState.submitting = true;
+  if (button) {
+    button.disabled = true;
+    button.textContent = '記録中...';
+  }
+
+  try {
+    const response = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action: 'saveNote',
+        userId: getUserId(),
+        teamId: getTeamId(),
+        name: getName(),
+        pin: getPin2(),
+        title,
+        body,
+      }),
+    });
+    const json = await response.json();
+    if (!response.ok || json.status !== 'ok') {
+      throw new Error(json.message || 'save note failed');
+    }
+
+    notesState.items = Array.isArray(json.notes) ? json.notes : [];
+    notesState.loaded = true;
+    titleInput.value = '';
+    bodyInput.value = '';
+    renderNotes();
+    showToast('チームノートを記録しました');
+  } catch (error) {
+    console.error(error);
+    showToast('ノートの記録に失敗しました');
+  } finally {
+    notesState.submitting = false;
+    if (button) {
+      button.disabled = false;
+      button.textContent = '記録';
+    }
+  }
+}
+
+async function submitNoteComment(noteId) {
+  const input = document.getElementById(`noteCommentInput_${noteId}`);
+  const body = input?.value.trim() || '';
+  if (!body) { showToast('コメントを入力してください'); return; }
+
+  try {
+    const response = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action: 'addNoteComment',
+        userId: getUserId(),
+        teamId: getTeamId(),
+        name: getName(),
+        pin: getPin2(),
+        noteId,
+        body,
+      }),
+    });
+    const json = await response.json();
+    if (!response.ok || json.status !== 'ok') {
+      throw new Error(json.message || 'add comment failed');
+    }
+
+    notesState.items = Array.isArray(json.notes) ? json.notes : [];
+    notesState.loaded = true;
+    if (input) input.value = '';
+    renderNotes();
+    showToast('コメントを記録しました');
+  } catch (error) {
+    console.error(error);
+    showToast('コメントの記録に失敗しました');
+  }
+}
+
+function fmtDateTime(val) {
+  if (!val) return '';
+  const d = new Date(val);
+  if (Number.isNaN(d.getTime())) return String(val);
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
 // ============================================
