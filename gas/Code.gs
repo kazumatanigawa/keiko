@@ -11,9 +11,9 @@ const CONFIG = {
     teams: 'チーム一覧',
     review: '移行要確認',
   },
-  userHeaders: ['name', 'pin', 'userId', 'teamId', 'group', 'teamType', 'userType', 'role', 'createdAt', 'updatedAt'],
+  userHeaders: ['name', 'lastName', 'firstName', 'lastNameKana', 'firstNameKana', 'pin', 'userId', 'teamId', 'group', 'teamType', 'userType', 'role', 'createdAt', 'updatedAt'],
   teamHeaders: ['teamId', 'teamName', 'teamType', 'createdByUserId', 'adminUserIds', 'createdAt', 'status'],
-  rosterHeaders: ['userId', 'teamId', 'group', 'teamType', 'userType', 'name', 'displayName', 'grade', 'term', 'role', 'updatedAt'],
+  rosterHeaders: ['userId', 'teamId', 'group', 'teamType', 'userType', 'name', 'lastName', 'firstName', 'lastNameKana', 'firstNameKana', 'displayName', 'grade', 'term', 'role', 'updatedAt'],
   logHeaders: ['userId', 'teamId', 'group', 'teamType', 'userType', 'name', 'displayName', 'date', 'cond', 'learning', 'next', 'goodNew', 'achievementStatus', 'whyMissed', 'retryPlan', 'grade', 'term', 'createdAt', 'updatedAt'],
   reviewHeaders: ['timestamp', 'sheetName', 'rowNumber', 'reason', 'name', 'group', 'candidateUserIds', 'candidateNames'],
   memberViewHeaders: ['所属', '学年', '名前', '期', '役職', 'userId', 'teamId'],
@@ -22,6 +22,10 @@ const CONFIG = {
 
 const FIELD_ALIASES = {
   name: ['name', '名前', '氏名'],
+  lastName: ['lastName', '姓'],
+  firstName: ['firstName', '名'],
+  lastNameKana: ['lastNameKana', '姓読み', 'セイ', 'せい'],
+  firstNameKana: ['firstNameKana', '名読み', 'メイ', 'めい'],
   pin: ['pin', 'PIN', '暗証番号', 'パスワード'],
   userId: ['userId', 'ユーザーID', 'user_id', 'id', 'ID'],
   teamId: ['teamId', 'チームID', 'team_id'],
@@ -96,6 +100,10 @@ function inferLegacyAction_(params, method) {
 
 function handleRegister_(context, params) {
   const name = cleanText_(params.name);
+  const lastName = cleanText_(params.lastName);
+  const firstName = cleanText_(params.firstName);
+  const lastNameKana = cleanText_(params.lastNameKana);
+  const firstNameKana = cleanText_(params.firstNameKana);
   const pin = cleanText_(params.pin);
   const teamMode = cleanText_(params.teamMode);
   const requestedTeamType = normalizeTeamType_(params.teamType);
@@ -152,6 +160,10 @@ function handleRegister_(context, params) {
 
   appendRecord_(usersTable, {
     name: name,
+    lastName: lastName,
+    firstName: firstName,
+    lastNameKana: lastNameKana,
+    firstNameKana: firstNameKana,
     pin: pin,
     userId: userId,
     teamId: teamId,
@@ -166,6 +178,10 @@ function handleRegister_(context, params) {
   upsertRosterForUser_(context, {
     userId: userId,
     name: name,
+    lastName: lastName,
+    firstName: firstName,
+    lastNameKana: lastNameKana,
+    firstNameKana: firstNameKana,
     displayName: name,
     teamId: teamId,
     group: group,
@@ -451,6 +467,10 @@ function authenticateUser_(context, params) {
 function userRecordFromRow_(table, row) {
   return {
     name: cleanText_(getField_(table, row, 'name')),
+    lastName: cleanText_(getField_(table, row, 'lastName')),
+    firstName: cleanText_(getField_(table, row, 'firstName')),
+    lastNameKana: cleanText_(getField_(table, row, 'lastNameKana')),
+    firstNameKana: cleanText_(getField_(table, row, 'firstNameKana')),
     pin: cleanText_(getField_(table, row, 'pin')),
     userId: cleanText_(getField_(table, row, 'userId')),
     teamId: cleanText_(getField_(table, row, 'teamId')),
@@ -483,6 +503,10 @@ function upsertRosterForUser_(context, user) {
     teamType: user.teamType || '',
     userType: user.userType || '',
     name: user.name,
+    lastName: user.lastName || '',
+    firstName: user.firstName || '',
+    lastNameKana: user.lastNameKana || '',
+    firstNameKana: user.firstNameKana || '',
     displayName: user.displayName || user.name,
     role: publicRole_(user.role || 'member'),
     updatedAt: isoNow_(),

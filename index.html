@@ -20,6 +20,8 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;backgroun
 .header{background:var(--red);color:#fff;padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .header-title{font-size:16px;font-weight:700;letter-spacing:0.05em}
 .header-sub{font-size:11px;opacity:0.8;margin-top:2px}
+.header-sub a,.auth-sub a{color:inherit;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.45)}
+.header-sub a:hover,.auth-sub a:hover{border-bottom-color:rgba(255,255,255,0.9)}
 .header-right{display:flex;align-items:center;gap:8px}
 .logout-btn{background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:11px;padding:4px 10px;border-radius:20px;cursor:pointer;font-family:inherit}
 .bottom-nav{background:#fff;border-top:1px solid var(--border);display:flex;padding:8px 0 12px;position:sticky;bottom:0;z-index:100}
@@ -32,9 +34,11 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;backgroun
 .card-title::before{content:'';display:inline-block;width:3px;height:13px;background:var(--red);border-radius:2px}
 .hero{background:linear-gradient(135deg,var(--red) 0%,#6B1111 100%);color:#fff;border-radius:var(--radius);padding:20px;margin-bottom:16px;position:relative;overflow:hidden}
 .hero::after{content:'太鼓';position:absolute;right:-10px;bottom:-20px;font-size:100px;opacity:0.08;font-weight:900;line-height:1}
-.hero-name{font-size:22px;font-weight:700;letter-spacing:0.05em}
 .hero-date{font-size:12px;opacity:0.8;margin-bottom:4px}
 .hero-count{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.2);border-radius:20px;padding:4px 10px;font-size:12px;margin-top:8px}
+.hero-focus-label{font-size:11px;font-weight:800;letter-spacing:0.1em;color:rgba(255,255,255,0.8);margin-top:16px;margin-bottom:6px}
+.hero-focus-text{font-size:20px;font-weight:700;line-height:1.6;color:#fff}
+.hero-focus-empty{font-size:14px;color:rgba(255,255,255,0.82);font-style:italic;line-height:1.6}
 .goodnews-card{background:linear-gradient(135deg,#fffdf6 0%,#fff 100%);border:1px solid #F0DFC0;border-radius:var(--radius);padding:10px 12px;margin-bottom:12px;box-shadow:0 8px 20px rgba(139,26,26,0.05);position:relative;overflow:hidden}
 .goodnews-card::after{content:'';position:absolute;inset:auto -32px -48px auto;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.14) 0%,rgba(201,168,76,0) 68%)}
 .goodnews-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;position:relative;z-index:1}
@@ -167,6 +171,7 @@ textarea:focus,input:focus{border-color:var(--red)}
 .auth-panel{display:none}
 .auth-panel.active{display:block}
 .auth-label{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px;margin-top:12px;display:block}
+.auth-name-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .auth-input{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:16px;font-family:inherit;outline:none;letter-spacing:0.1em;text-align:center}
 .auth-input:focus{border-color:var(--red)}
 .auth-select{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:15px;font-family:inherit;outline:none;background:#fff;color:var(--ink)}
@@ -175,6 +180,13 @@ textarea:focus,input:focus{border-color:var(--red)}
 .auth-inline-toggle input{accent-color:var(--red)}
 .auth-extra-box{display:none;margin-top:12px;padding:12px;border-radius:var(--radius-sm);background:#faf6ee;border:1px solid #ead7b7}
 .auth-extra-box.show{display:block}
+.auth-suggestion{display:none;margin-top:10px;padding:10px 12px;border-radius:var(--radius-sm);background:#fff;border:1px solid #e6d8b8}
+.auth-suggestion.show{display:block}
+.auth-suggestion-copy{font-size:12px;color:var(--ink2);line-height:1.6}
+.auth-suggestion-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.auth-suggestion-actions{display:flex;gap:8px;margin-top:8px}
+.auth-suggestion-btn{flex:1;border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 10px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--ink2)}
+.auth-suggestion-btn.primary{background:var(--red);border-color:var(--red);color:#fff}
 .auth-team-meta{font-size:11px;color:var(--ink3);line-height:1.6;margin-top:6px}
 .auth-team-loading{font-size:11px;color:var(--ink3);margin-top:8px}
 .auth-btn{width:100%;padding:14px;margin-top:16px;background:var(--red);color:#fff;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:0.05em}
@@ -248,8 +260,8 @@ textarea:focus,input:focus{border-color:var(--red)}
 
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-logo">🥁</div>
-  <div class="auth-title">稽古ノート</div>
-  <div class="auth-sub">府中東 和太鼓部</div>
+  <div class="auth-title">KEIKO™︎</div>
+  <div class="auth-sub">supported by <a href="https://sites.google.com/view/kokongakumeiza/" target="_blank" rel="noopener noreferrer">古今樂明座</a></div>
   <div class="auth-card">
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchAuthTab('login')">ログイン</button>
@@ -274,8 +286,16 @@ textarea:focus,input:focus{border-color:var(--red)}
 
 <!-- 登録パネル -->
 <div class="auth-panel" id="auth-register">
-  <label class="auth-label">名前（フルネーム）</label>
-  <input class="auth-input" id="regName" type="text" placeholder="田中 太郎" maxlength="20" style="letter-spacing:normal;text-align:left">
+  <label class="auth-label">名前</label>
+  <div class="auth-name-grid">
+    <input class="auth-input" id="regLastName" type="text" placeholder="姓" maxlength="20" style="letter-spacing:normal;text-align:left">
+    <input class="auth-input" id="regFirstName" type="text" placeholder="名" maxlength="20" style="letter-spacing:normal;text-align:left">
+  </div>
+  <label class="auth-label">読み方（カタカナ）</label>
+  <div class="auth-name-grid">
+    <input class="auth-input" id="regLastNameKana" type="text" placeholder="セイ" maxlength="20" style="letter-spacing:normal;text-align:left">
+    <input class="auth-input" id="regFirstNameKana" type="text" placeholder="メイ" maxlength="20" style="letter-spacing:normal;text-align:left">
+  </div>
   <label class="auth-label">所属チーム</label>
   <select class="auth-select" id="regTeamSelect">
     <option value="">所属チームを選択してください</option>
@@ -283,19 +303,26 @@ textarea:focus,input:focus{border-color:var(--red)}
   <div class="auth-team-loading" id="teamLoadingText">所属チームを読み込み中...</div>
   <label class="auth-inline-toggle">
     <input id="launchTeamToggle" type="checkbox" onchange="toggleTeamLaunchMode()">
-    <span>自分のチームがないのでローンチする</span>
+    <span>自分のチームを新しく登録する</span>
   </label>
   <div class="auth-extra-box" id="launchTeamBox">
-    <label class="auth-label" style="margin-top:0">新しいチーム名</label>
+    <label class="auth-label" style="margin-top:0">チーム名(正式名称)</label>
     <input class="auth-input" id="launchTeamName" type="text" placeholder="例：府中東 和太鼓部" maxlength="40" style="letter-spacing:normal;text-align:left">
+    <div class="auth-suggestion" id="launchTeamSuggestionBox">
+      <div class="auth-suggestion-copy" id="launchTeamSuggestionText"></div>
+      <div class="auth-suggestion-list" id="launchTeamSuggestionList"></div>
+      <div class="auth-suggestion-actions">
+        <button class="auth-suggestion-btn" type="button" onclick="dismissSuggestedTeam()">このまま新規登録する</button>
+      </div>
+    </div>
     <label class="auth-label">チーム区分</label>
     <select class="auth-select" id="launchTeamType">
-      <option value="student">学校の部活・ジュニアチーム</option>
+      <option value="student">学校の部活</option>
       <option value="general">一般団体・大学サークル</option>
     </select>
     <div class="auth-team-meta">登録した本人が最初の管理者になりますが、その情報はユーザー画面には表示されません。</div>
   </div>
-  <label class="auth-label">4桁PINを決める（好きな数字4つ）</label>
+  <label class="auth-label">4桁のパスワードを設定（好きな数字4つ）</label>
   <div class="pin-row">
     <input class="pin-digit" id="rp0" type="password" inputmode="numeric" maxlength="1" oninput="pinMove(this,'rp1')">
     <input class="pin-digit" id="rp1" type="password" inputmode="numeric" maxlength="1" oninput="pinMove(this,'rp2')">
@@ -344,7 +371,7 @@ textarea:focus,input:focus{border-color:var(--red)}
 
 <div class="screen" id="screen-home">
   <div class="header">
-    <div><div class="header-title">🥁 稽古ノート</div><div class="header-sub">府中東 和太鼓部</div></div>
+      <div><div class="header-title">KEIKO™︎</div><div class="header-sub">supported by <a href="https://sites.google.com/view/kokongakumeiza/" target="_blank" rel="noopener noreferrer">古今樂明座</a></div></div>
     <div class="header-right">
       <span id="headerUserName" style="font-size:12px;opacity:0.9"></span>
       <button class="logout-btn" onclick="doLogout()">ログアウト</button>
@@ -361,16 +388,9 @@ textarea:focus,input:focus{border-color:var(--red)}
     </div>
     <div class="hero">
       <div class="hero-date" id="heroDate"></div>
-      <div class="hero-name" id="heroName"></div>
       <div class="hero-count">📝 <span id="totalCount">0</span> 回記録達成！</div>
-    </div>
-    <div class="mission-card primary-focus">
-      <div class="mission-status-row">
-        <div class="mission-status-copy">TODAY'S FOCUS</div>
-        <div class="mission-status-badge unknown" id="missionStatusBadge">前回の結果は未記録</div>
-      </div>
-      <div class="mission-label">▶ 前回決めた「今日のやること」</div>
-      <div id="missionText" class="mission-empty">読み込み中...</div>
+      <div class="hero-focus-label">今回の稽古で意識すること</div>
+      <div id="missionText" class="hero-focus-empty">読み込み中...</div>
     </div>
     <button class="quick-btn btn-primary" onclick="goTo('form')">📝 稽古ログを記録する</button>
     <button class="quick-btn btn-secondary" onclick="goTo('log')">📖 過去のログを見る</button>
@@ -558,7 +578,9 @@ let cachedLogs = [];
 const teamState = {
   items: [],
   loaded: false,
-  loading: false
+  loading: false,
+  suggestedTeamIds: [],
+  ignoredSuggestionKey: ''
 };
 const goodNewsState = {
   items: [],
@@ -650,6 +672,10 @@ function initializeAuthUi() {
   hydrateCachedTeamOptions();
   renderTeamOptions();
   toggleTeamLaunchMode(false);
+  const launchInput = document.getElementById('launchTeamName');
+  if (launchInput) {
+    launchInput.addEventListener('input', handleLaunchTeamNameInput);
+  }
   loadTeamOptions();
 }
 // ============================================
@@ -789,6 +815,7 @@ function renderTeamOptions() {
   if (teamState.items.some((team) => team.teamId === currentValue)) {
     select.value = currentValue;
   }
+  updateLaunchTeamSuggestion();
 }
 
 function formatTeamOptionLabel(team) {
@@ -820,7 +847,102 @@ function toggleTeamLaunchMode(forceValue) {
   } else {
     document.getElementById('launchTeamName').value = '';
     document.getElementById('launchTeamType').value = 'student';
+    teamState.suggestedTeamIds = [];
+    teamState.ignoredSuggestionKey = '';
   }
+  updateLaunchTeamSuggestion();
+}
+
+function normalizeTeamName(value) {
+  return String(value || '').trim().normalize('NFKC').replace(/\s+/g, '').toLowerCase();
+}
+
+function findSuggestedTeamsByName(teamName) {
+  const normalized = normalizeTeamName(teamName);
+  if (!normalized || normalized.length < 2) return [];
+  return teamState.items
+    .map((team) => {
+      const candidate = normalizeTeamName(team.teamName);
+      if (!candidate) return null;
+      let score = 0;
+      if (candidate === normalized) score = 100;
+      else if (candidate.includes(normalized) || normalized.includes(candidate)) score = 80 + Math.min(normalized.length, candidate.length);
+      else {
+        const overlap = longestCommonSubstringLength(normalized, candidate);
+        if (overlap >= 2) score = 50 + overlap;
+      }
+      if (!score) return null;
+      return { ...team, score };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score || a.teamName.localeCompare(b.teamName, 'ja'))
+    .slice(0, 3);
+}
+
+function longestCommonSubstringLength(a, b) {
+  let max = 0;
+  for (let i = 0; i < a.length; i += 1) {
+    for (let j = 0; j < b.length; j += 1) {
+      let len = 0;
+      while (a[i + len] && a[i + len] === b[j + len]) len += 1;
+      if (len > max) max = len;
+    }
+  }
+  return max;
+}
+
+function handleLaunchTeamNameInput() {
+  const launchInput = document.getElementById('launchTeamName');
+  if (!launchInput) return;
+  const normalized = normalizeTeamName(launchInput.value);
+  if (normalized !== teamState.ignoredSuggestionKey) {
+    teamState.ignoredSuggestionKey = '';
+  }
+  updateLaunchTeamSuggestion();
+}
+
+function updateLaunchTeamSuggestion() {
+  const suggestionBox = document.getElementById('launchTeamSuggestionBox');
+  const suggestionText = document.getElementById('launchTeamSuggestionText');
+  const suggestionList = document.getElementById('launchTeamSuggestionList');
+  const isLaunchMode = !!document.getElementById('launchTeamToggle')?.checked;
+  const launchInput = document.getElementById('launchTeamName');
+  if (!suggestionBox || !suggestionText || !suggestionList || !launchInput || !isLaunchMode) {
+    if (suggestionBox) suggestionBox.classList.remove('show');
+    if (suggestionList) suggestionList.innerHTML = '';
+    teamState.suggestedTeamIds = [];
+    return;
+  }
+
+  const candidates = findSuggestedTeamsByName(launchInput.value);
+  const normalized = normalizeTeamName(launchInput.value);
+  if (!candidates.length || !normalized || teamState.ignoredSuggestionKey === normalized) {
+    suggestionBox.classList.remove('show');
+    suggestionList.innerHTML = '';
+    teamState.suggestedTeamIds = [];
+    return;
+  }
+
+  teamState.suggestedTeamIds = candidates.map((team) => team.teamId);
+  suggestionText.textContent = 'このチームではないですか？';
+  suggestionList.innerHTML = candidates.map((team) => `
+    <button class="auth-suggestion-btn primary" type="button" onclick="selectSuggestedTeam('${esc(team.teamId)}')">${esc(formatTeamOptionLabel(team))}</button>
+  `).join('');
+  suggestionBox.classList.add('show');
+}
+
+function selectSuggestedTeam(teamId) {
+  if (!teamId) return;
+  const select = document.getElementById('regTeamSelect');
+  if (select) select.value = teamId;
+  toggleTeamLaunchMode(false);
+}
+
+function dismissSuggestedTeam() {
+  const launchInput = document.getElementById('launchTeamName');
+  teamState.ignoredSuggestionKey = normalizeTeamName(launchInput?.value || '');
+  teamState.suggestedTeamIds = [];
+  updateLaunchTeamSuggestion();
 }
 
 function getRegistrationTeamPayload() {
@@ -842,15 +964,39 @@ function getRegistrationTeamPayload() {
   return { ok: true, teamMode: 'existing', teamId };
 }
 
+function collectRegisteredName() {
+  const lastName = document.getElementById('regLastName')?.value.trim() || '';
+  const firstName = document.getElementById('regFirstName')?.value.trim() || '';
+  const lastNameKana = document.getElementById('regLastNameKana')?.value.trim() || '';
+  const firstNameKana = document.getElementById('regFirstNameKana')?.value.trim() || '';
+  const name = `${lastName}${firstName}`.trim();
+
+  if (!lastName || !firstName) {
+    return { ok: false, message: '姓と名を入力してください' };
+  }
+  if (!lastNameKana || !firstNameKana) {
+    return { ok: false, message: 'セイとメイを入力してください' };
+  }
+
+  return {
+    ok: true,
+    name,
+    lastName,
+    firstName,
+    lastNameKana,
+    firstNameKana,
+  };
+}
+
 // ============================================
 // 登録
 // ============================================
 async function doRegister() {
-  const name = document.getElementById('regName').value.trim();
+  const nameFields = collectRegisteredName();
   const pin  = getPin('rp');
   const err  = document.getElementById('regErr');
   err.textContent = '';
-  if (!name)       { err.textContent = '名前を入力してください'; return; }
+  if (!nameFields.ok) { err.textContent = nameFields.message; return; }
   if (pin.length < 4) { err.textContent = '4桁すべて入力してください'; return; }
   const teamPayload = getRegistrationTeamPayload();
   if (!teamPayload.ok) { err.textContent = teamPayload.message; return; }
@@ -860,14 +1006,14 @@ async function doRegister() {
     const res  = await fetch(GAS_URL, {
       method: 'POST',
       headers: {'Content-Type':'text/plain'},
-      body: JSON.stringify({ action:'register', name, pin, ...teamPayload }),
+      body: JSON.stringify({ action:'register', name: nameFields.name, pin, ...nameFields, ...teamPayload }),
     });
     const json = await res.json();
     if (json.status === 'exists') { err.textContent = 'この名前はすでに登録されています。ログインしてください'; return; }
     if (json.status === 'team_exists') { err.textContent = 'そのチーム名は既に存在します。所属チームから選択してください'; loadTeamOptions(true); return; }
     if (json.status !== 'ok')    { err.textContent = 'エラーが発生しました'; return; }
     saveSession({
-      name,
+      name: nameFields.name,
       pin,
       userId: json.userId || '',
       teamId: json.teamId || teamPayload.teamId || '',
@@ -1024,32 +1170,16 @@ function getTeamTypeFromState(teamId) {
 // ============================================
 function updateHome() {
   document.getElementById('heroDate').textContent = getDateStr();
-  document.getElementById('heroName').textContent = getName() + ' さん';
   document.getElementById('headerUserName').textContent = getGroup() ? `${getName()} | ${getGroup()}` : getName();
   const total = cachedLogs.length;
   document.getElementById('totalCount').textContent = total;
   document.getElementById('statTotal').textContent  = total;
 
   const m = document.getElementById('missionText');
-  const statusBadge = document.getElementById('missionStatusBadge');
   if (cachedLogs.length && cachedLogs[0].next) {
-    m.textContent = cachedLogs[0].next; m.className = 'mission-text';
+    m.textContent = cachedLogs[0].next; m.className = 'hero-focus-text';
   } else {
-    m.textContent = 'まだ記録がありません'; m.className = 'mission-empty';
-  }
-  if (statusBadge) {
-    const latest = cachedLogs[0];
-    statusBadge.className = 'mission-status-badge show';
-    if (!latest || !latest.achievementStatus) {
-      statusBadge.classList.add('unknown');
-      statusBadge.textContent = '前回の結果は未記録';
-    } else if (latest.achievementStatus === 'done') {
-      statusBadge.classList.add('done');
-      statusBadge.textContent = '前回の結果: 達成';
-    } else {
-      statusBadge.classList.add('pending');
-      statusBadge.textContent = '前回の結果: 未達';
-    }
+    m.textContent = 'まだ記録がありません'; m.className = 'hero-focus-empty';
   }
   if (cachedLogs.length) {
     const avg = cachedLogs.reduce((s,l) => s + (parseInt(l.cond)||0), 0) / cachedLogs.length;
