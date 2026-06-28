@@ -321,8 +321,7 @@ function getLogsForUser_(context, user) {
   const rosterMap = buildRosterMap_(context);
   const fallbackName = normalizeText_(user.name);
   const fallbackGroup = normalizeText_(user.group);
-
-  return logTable.rows
+  const strictMatches = logTable.rows
     .map(function (row) {
       const rowUserId = cleanText_(getField_(logTable, row, 'userId'));
       const rowName = cleanText_(getField_(logTable, row, 'name'));
@@ -355,6 +354,40 @@ function getLogsForUser_(context, user) {
     .sort(function (a, b) {
       return sortByDateDesc_(a.createdAt || a.date, b.createdAt || b.date);
     });
+
+  if (strictMatches.length) {
+    return strictMatches;
+  }
+
+  return logTable.rows
+    .map(function (row) {
+      const rowUserId = cleanText_(getField_(logTable, row, 'userId'));
+      const rowName = cleanText_(getField_(logTable, row, 'name'));
+      if (rowUserId && rowUserId !== user.userId) return null;
+      if (normalizeText_(rowName) !== fallbackName) return null;
+      const roster = rowUserId ? (rosterMap[rowUserId] || {}) : {};
+      return {
+        userId: rowUserId || user.userId,
+        teamId: cleanText_(getField_(logTable, row, 'teamId')) || roster.teamId || user.teamId,
+        group: cleanText_(getField_(logTable, row, 'group')) || roster.group || user.group,
+        displayName: cleanText_(getField_(logTable, row, 'displayName')) || roster.displayName || user.name,
+        grade: cleanText_(getField_(logTable, row, 'grade')) || roster.grade || '',
+        term: cleanText_(getField_(logTable, row, 'term')) || roster.term || '',
+        date: cleanText_(getField_(logTable, row, 'date')),
+        cond: cleanText_(getField_(logTable, row, 'cond')),
+        learning: cleanText_(getField_(logTable, row, 'learning')),
+        next: cleanText_(getField_(logTable, row, 'next')),
+        goodNew: cleanText_(getField_(logTable, row, 'goodNew')),
+        achievementStatus: cleanText_(getField_(logTable, row, 'achievementStatus')),
+        whyMissed: cleanText_(getField_(logTable, row, 'whyMissed')),
+        retryPlan: cleanText_(getField_(logTable, row, 'retryPlan')),
+        createdAt: cleanText_(getField_(logTable, row, 'createdAt')),
+      };
+    })
+    .filter(Boolean)
+    .sort(function (a, b) {
+      return sortByDateDesc_(a.createdAt || a.date, b.createdAt || b.date);
+    });
 }
 
 function authenticateUser_(context, params) {
@@ -367,7 +400,7 @@ function authenticateUser_(context, params) {
       return cleanText_(getField_(usersTable, row, 'userId')) === userId;
     });
     if (byId.length === 1 && cleanText_(getField_(usersTable, byId[0], 'pin')) === pin) {
-      return { ok: true, user: userRecordFromRow_(usersTable, byId[0]) };
+      return { ok: true, user: enrichUserRecord_(context, usersTable, byId[0]) };
     }
   }
 
@@ -383,7 +416,7 @@ function authenticateUser_(context, params) {
     return { ok: false, message: 'User not found.' };
   }
 
-  return { ok: true, user: userRecordFromRow_(usersTable, matches[0]) };
+  return { ok: true, user: enrichUserRecord_(context, usersTable, matches[0]) };
 }
 
 function userRecordFromRow_(table, row) {
@@ -488,6 +521,8 @@ function ensureSystemReady_() {
     props.setProperty(CONFIG.setupAtProperty, isoNow_());
   }
 
+  syncTeamsFromUserGroupDropdown_(sheets.users, sheets.teams);
+
   return {
     spreadsheet: spreadsheet,
     sheets: sheets,
@@ -503,7 +538,7 @@ function runMigration_(spreadsheet, sheets) {
   const teamsTable = readTable_(sheets.teams);
   const reviewTable = readTable_(sheets.review);
 
-  const groupSeedMap = collectExistingGroups_(usersTable, rosterTable, logsTable);
+  const groupSeedMap = collectDeclaredGroupsFromUsersDropdown_(sheets.users, usersTable);
   ensureTeamsFromGroups_(teamsTable, groupSeedMap);
   flushChangedRows_(teamsTable);
 
@@ -523,13 +558,10 @@ function runMigration_(spreadsheet, sheets) {
   });
 }
 
-function collectExistingGroups_(usersTable, rosterTable, logsTable) {
+function collectDeclaredGroupsFromUsersDropdown_(usersSheet, usersTable) {
   const groups = {};
-  [usersTable, rosterTable, logsTable].forEach(function (table) {
-    table.rows.forEach(function (row) {
-      const group = cleanText_(getField_(table, row, 'group'));
-      if (group) groups[normalizeText_(group)] = group;
-    });
+  getDeclaredTeamOptions_(usersSheet, usersTable).forEach(function (group) {
+    groups[normalizeText_(group)] = group;
   });
   return groups;
 }
@@ -893,6 +925,198 @@ function openSpreadsheet_() {
     return SpreadsheetApp.openById(spreadsheetId);
   }
   return SpreadsheetApp.getActiveSpreadsheet();
+}
+
+function enrichUserRecord_(context, usersTable, row) {
+  const user = userRecordFromRow_(usersTable, row);
+  const rosterTable = readTable_(context.sheets.roster);
+  const logsTable = readTable_(context.sheets.logs);
+  const teamsTable = readTable_(context.sheets.teams);
+  let changed = false;
+
+  let rosterRow = null;
+  if (user.userId) {
+    rosterRow = rosterTable.rows.find(function (record) {
+      return cleanText_(getField_(rosterTable, record, 'userId')) === user.userId;
+    }) || null;
+  }
+  if (!rosterRow) {
+    const rosterMatches = rosterTable.rows.filter(function (record) {
+      return normalizeText_(getField_(rosterTable, record, 'name')) === normalizeText_(user.name);
+    });
+    if (rosterMatches.length === 1) rosterRow = rosterMatches[0];
+  }
+
+  if (!user.group && rosterRow) {
+    user.group = cleanText_(getField_(rosterTable, rosterRow, 'group'));
+    if (user.group) {
+      setField_(usersTable, row, 'group', user.group);
+      changed = true;
+    }
+  }
+
+  if (!user.teamId && rosterRow) {
+    user.teamId = cleanText_(getField_(rosterTable, rosterRow, 'teamId'));
+    if (user.teamId) {
+      setField_(usersTable, row, 'teamId', user.teamId);
+      changed = true;
+    }
+  }
+
+  if (!user.group) {
+    const logGroups = uniqueNonEmpty_(
+      logsTable.rows
+        .filter(function (record) {
+          return normalizeText_(getField_(logsTable, record, 'name')) === normalizeText_(user.name);
+        })
+        .map(function (record) {
+          return cleanText_(getField_(logsTable, record, 'group'));
+        })
+    );
+    if (logGroups.length === 1) {
+      user.group = logGroups[0];
+      setField_(usersTable, row, 'group', user.group);
+      changed = true;
+    }
+  }
+
+  if (!user.teamId && user.group) {
+    const team = findTeamByName_(teamsTable, user.group);
+    if (team) {
+      user.teamId = cleanText_(getField_(teamsTable, team.row, 'teamId'));
+      if (user.teamId) {
+        setField_(usersTable, row, 'teamId', user.teamId);
+        changed = true;
+      }
+    }
+  }
+
+  if (!user.group && user.teamId) {
+    const teamById = findTeamById_(teamsTable, user.teamId);
+    if (teamById) {
+      user.group = cleanText_(getField_(teamsTable, teamById.row, 'teamName'));
+      if (user.group) {
+        setField_(usersTable, row, 'group', user.group);
+        changed = true;
+      }
+    }
+  }
+
+  if (changed) {
+    setField_(usersTable, row, 'updatedAt', isoNow_());
+    flushChangedRows_(usersTable);
+  }
+
+  return user;
+}
+
+function syncTeamsFromUserGroupDropdown_(usersSheet, teamsSheet) {
+  const usersTable = readTable_(usersSheet);
+  const teamsTable = readTable_(teamsSheet);
+  const declaredOptions = getDeclaredTeamOptions_(usersSheet, usersTable);
+  if (!declaredOptions.length) return;
+
+  const declaredMap = {};
+  declaredOptions.forEach(function (teamName) {
+    declaredMap[normalizeText_(teamName)] = teamName;
+    const existing = findTeamByName_(teamsTable, teamName);
+    if (!existing) {
+      appendRecord_(teamsTable, {
+        teamId: generateId_('team'),
+        teamName: teamName,
+        createdByUserId: '',
+        adminUserIds: '',
+        createdAt: isoNow_(),
+        status: 'active',
+      });
+      return;
+    }
+    if (cleanText_(getField_(teamsTable, existing.row, 'status')) !== 'active') {
+      setField_(teamsTable, existing.row, 'status', 'active');
+    }
+  });
+
+  teamsTable.rows.forEach(function (row) {
+    const teamName = cleanText_(getField_(teamsTable, row, 'teamName'));
+    const createdByUserId = cleanText_(getField_(teamsTable, row, 'createdByUserId'));
+    if (!teamName || createdByUserId) return;
+    if (!declaredMap[normalizeText_(teamName)]) {
+      setField_(teamsTable, row, 'status', 'inactive');
+    }
+  });
+
+  flushChangedRows_(teamsTable);
+}
+
+function getDeclaredTeamOptions_(usersSheet, usersTable) {
+  const groupColumnIndex = resolveExistingColumnIndex_(usersTable, 'group');
+  if (groupColumnIndex < 0) return [];
+  const rowCount = Math.max(usersSheet.getLastRow() - 1, 1);
+  const validationRules = usersSheet.getRange(2, groupColumnIndex + 1, rowCount, 1).getDataValidations();
+  const optionsMap = {};
+  const assignedGroupMap = {};
+
+  usersTable.rows.forEach(function (row) {
+    const group = cleanText_(getField_(usersTable, row, 'group'));
+    if (group) assignedGroupMap[normalizeText_(group)] = group;
+  });
+
+  validationRules.forEach(function (ruleRow) {
+    ruleRow.forEach(function (rule) {
+      extractTeamOptionsFromValidationRule_(rule).forEach(function (value) {
+        optionsMap[normalizeText_(value)] = value;
+      });
+    });
+  });
+
+  const filteredKeys = Object.keys(optionsMap).filter(function (key) {
+    if (!Object.keys(assignedGroupMap).length) return true;
+    return !!assignedGroupMap[key];
+  });
+
+  return filteredKeys
+    .map(function (key) { return optionsMap[key]; })
+    .filter(Boolean)
+    .sort(function (a, b) {
+      return a.localeCompare(b, 'ja');
+    });
+}
+
+function extractTeamOptionsFromValidationRule_(rule) {
+  if (!rule) return [];
+  const criteriaType = rule.getCriteriaType();
+  const criteriaValues = rule.getCriteriaValues();
+  if (criteriaType === SpreadsheetApp.DataValidationCriteria.VALUE_IN_LIST) {
+    return uniqueNonEmpty_(criteriaValues[0] || []);
+  }
+  if (criteriaType === SpreadsheetApp.DataValidationCriteria.VALUE_IN_RANGE) {
+    const sourceRange = criteriaValues[0];
+    if (!sourceRange) return [];
+    return uniqueNonEmpty_(sourceRange.getDisplayValues().reduce(function (acc, row) {
+      return acc.concat(row);
+    }, []));
+  }
+  return [];
+}
+
+function resolveExistingColumnIndex_(table, fieldName) {
+  const columnName = table.indexMap[fieldName] !== undefined
+    ? fieldName
+    : resolveExistingAlias_(table, fieldName);
+  if (!columnName) return -1;
+  return typeof table.indexMap[columnName] === 'number' ? table.indexMap[columnName] : -1;
+}
+
+function uniqueNonEmpty_(values) {
+  const map = {};
+  (values || []).forEach(function (value) {
+    const text = cleanText_(value);
+    if (!text) return;
+    map[normalizeText_(text)] = text;
+  });
+  return Object.keys(map).map(function (key) {
+    return map[key];
+  });
 }
 
 function ensureSheets_(spreadsheet) {
