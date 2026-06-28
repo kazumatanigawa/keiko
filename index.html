@@ -117,8 +117,16 @@ textarea:focus,input:focus{border-color:var(--red)}
 .note-comments{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
 .note-comments-title{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--red);margin-bottom:8px}
 .note-comment{background:#faf7f1;border:1px solid #efe2cb;border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.note-comment-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px}
 .note-comment-meta{font-size:10px;color:var(--ink3);margin-bottom:4px}
 .note-comment-body{font-size:12px;color:var(--ink2);line-height:1.7;white-space:pre-wrap}
+.note-comment-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.note-comment-action{border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--ink2)}
+.note-comment-action.danger{color:var(--red);border-color:#efc8c8}
+.note-comment-action.primary{background:var(--red);border-color:var(--red);color:#fff}
+.note-comment-edit-box{margin-top:8px}
+.note-comment-edit-box textarea{min-height:88px}
+.note-comment-edited{display:inline-block;margin-left:4px;color:var(--ink3)}
 .note-empty{font-size:13px;color:var(--ink3);text-align:center;padding:32px 0}
 .note-compose{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px}
 .note-compose-title{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:12px}
@@ -217,59 +225,12 @@ textarea:focus,input:focus{border-color:var(--red)}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 
 /* ===== Drive Library ===== */
-.library-hero{background:linear-gradient(135deg,#fff 0%,#F8FAFF 100%);border:1px solid #E4E9F5;border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 12px 30px rgba(15,23,42,.06)}
-.library-eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;color:#2563eb;text-transform:uppercase;margin-bottom:8px}
-.library-title{font-size:24px;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.15}
-.library-description{font-size:13px;color:var(--ink2);line-height:1.7;margin-top:10px}
-.library-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
-.library-chip{background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.12);border-radius:14px;padding:12px}
-.library-chip-label{display:block;font-size:10px;color:#5b6475;margin-bottom:4px}
-.library-chip-value{display:block;font-size:13px;font-weight:700;color:var(--ink);word-break:break-word}
-.library-toolbar{background:rgba(255,255,255,.9);border:1px solid #E4E9F5;border-radius:18px;padding:14px;margin-bottom:14px;box-shadow:0 12px 30px rgba(15,23,42,.05)}
-.library-search{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #E4E9F5;border-radius:999px;padding:0 14px;min-height:48px}
-.library-search:focus-within{border-color:#7aa2ff;box-shadow:0 0 0 4px rgba(37,99,235,.08)}
-.library-search-icon{font-size:16px;color:var(--ink3)}
-.library-search input{width:100%;border:none;background:transparent;outline:none;font-size:14px;color:var(--ink)}
-.library-categories{display:flex;gap:8px;overflow-x:auto;padding-top:12px}
-.library-categories::-webkit-scrollbar{display:none}
-.library-category{border:1px solid #E4E9F5;background:#fff;color:var(--ink2);border-radius:999px;padding:9px 14px;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer}
-.library-category.active{background:#2563eb;color:#fff;border-color:#2563eb;box-shadow:0 10px 24px rgba(37,99,235,.18)}
-.library-status{display:none;background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:14px;border:1px solid #E4E9F5;line-height:1.6}
-.library-status.show{display:block}
-.library-status.info{border-color:#D6E4FF}
-.library-status.success{border-color:#C6F6D5}
-.library-status.error{border-color:#F6C7C7}
-.library-summary{font-size:12px;color:var(--ink3);margin-bottom:12px}
-.library-grid,.library-skeleton-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-.library-card{background:#fff;border:1px solid #E4E9F5;border-radius:16px;overflow:hidden;box-shadow:0 12px 24px rgba(15,23,42,.05);transition:transform .18s,box-shadow .18s}
-.library-card:hover{transform:translateY(-2px);box-shadow:0 18px 30px rgba(15,23,42,.09)}
-.library-card-media{aspect-ratio:16/10;background:linear-gradient(135deg,#EEF4FF 0%,#FFFFFF 100%);border-bottom:1px solid #E4E9F5;overflow:hidden}
-.library-card-media img{width:100%;height:100%;object-fit:cover}
-.library-fallback{display:grid;place-items:center;width:100%;height:100%;padding:14px}
-.library-card-body{padding:14px}
-.library-card-type{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;background:#EEF4FF;color:#2563eb;font-size:11px;font-weight:700}
-.library-card-title{font-size:14px;font-weight:700;line-height:1.55;margin:10px 0 8px;color:var(--ink);word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.library-card-meta{font-size:11px;color:var(--ink3);line-height:1.6}
-.library-card-link{display:flex;align-items:center;justify-content:center;margin-top:12px;padding:12px;background:var(--red);color:#fff;text-decoration:none;border-radius:12px;font-size:13px;font-weight:700}
-.library-empty{display:none;background:#fff;border:1px dashed #D5DBE8;border-radius:18px;padding:30px 20px;text-align:center;color:var(--ink2)}
-.library-empty.show{display:block}
-.library-empty-visual{width:58px;height:58px;background:var(--red);color:#fff;border-radius:18px;display:grid;place-items:center;font-size:20px;font-weight:800;margin:0 auto 12px}
-.library-skeleton-card{background:#fff;border:1px solid #E4E9F5;border-radius:16px;overflow:hidden}
-.library-skeleton-media,.library-skeleton-pill,.library-skeleton-line{background:linear-gradient(90deg,rgba(226,232,240,.85) 25%,rgba(241,245,249,.98) 50%,rgba(226,232,240,.85) 75%);background-size:200% 100%;animation:libraryShimmer 1.2s linear infinite}
-.library-skeleton-media{aspect-ratio:16/10}
-.library-skeleton-body{padding:14px}
-.library-skeleton-pill{width:82px;height:28px;border-radius:999px}
-.library-skeleton-line{height:12px;border-radius:999px;margin-top:10px}
-.library-skeleton-line.long{width:100%}
-.library-skeleton-line.mid{width:74%}
-.library-skeleton-line.short{width:48%}
-.library-actions{margin-top:14px}
+.library-panel{background:#fff;border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:0 12px 24px rgba(15,23,42,.05)}
+.library-panel-title{font-size:20px;font-weight:800;color:var(--ink);line-height:1.4}
+.library-panel-text{font-size:13px;color:var(--ink2);line-height:1.8;margin-top:10px}
+.library-actions{margin-top:18px}
+.library-actions-stack{display:flex;flex-direction:column;gap:10px}
 .library-folder-link{display:flex;align-items:center;justify-content:center;width:100%;padding:12px;border-radius:14px;border:2px solid var(--red);background:#fff;color:var(--red);text-decoration:none;font-size:13px;font-weight:700}
-@keyframes libraryShimmer{from{background-position:200% 0}to{background-position:-200% 0}}
-@media (max-width:430px){
-  .library-meta{grid-template-columns:1fr}
-  .library-grid,.library-skeleton-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
-}
 </style>
 
 </head>
@@ -518,17 +479,17 @@ textarea:focus,input:focus{border-color:var(--red)}
 <!-- NOTES -->
 
 <div class="screen" id="screen-notes">
-  <div class="header"><div><div class="header-title">🗒️ チームノート</div><div class="header-sub" id="notesGroupName">同じチーム内だけで共有されます</div></div></div>
+  <div class="header"><div><div class="header-title">🗒️ チームノート</div><div class="header-sub" id="notesGroupName">同じチーム内で稽古内容を積み上げます</div></div></div>
   <div class="content">
     <div class="note-compose">
-      <div class="note-compose-title">指導内容メモを共有する</div>
+      <div class="note-compose-title">指導内容・練習内容をまとめる</div>
       <div class="form-section" style="margin-bottom:12px">
         <label class="form-label">タイトル</label>
-        <input type="text" id="noteTitleInput" placeholder="例：本日の基礎打ちで意識すること">
+        <input type="text" id="noteTitleInput" placeholder="例：Aパート基礎打ちで意識すること">
       </div>
       <div class="form-section" style="margin-bottom:0">
-        <label class="form-label">コメント</label>
-        <textarea id="noteBodyInput" rows="6" placeholder="指導内容を聞いて、自分がどう学んだかを自由に言語化してください。"></textarea>
+        <label class="form-label">内容</label>
+        <textarea id="noteBodyInput" rows="6" placeholder="例：今日はAパートの入りとリズムを重点確認。次回は入りのタイミングをそろえてから通しに入る。"></textarea>
       </div>
       <div class="note-compose-actions">
         <button class="note-submit-btn" id="noteSubmitBtn" type="button" onclick="submitNote()">記録</button>
@@ -548,50 +509,17 @@ textarea:focus,input:focus{border-color:var(--red)}
 <!-- LIBRARY -->
 
 <div class="screen" id="screen-library">
-  <div class="header"><div><div class="header-title">🎁 ライブラリ</div><div class="header-sub">Google Drive 教材CMS</div></div></div>
+  <div class="header"><div><div class="header-title">🎁 ライブラリ</div><div class="header-sub">Google Drive</div></div></div>
   <div class="content">
-    <div class="library-hero">
-      <div class="library-eyebrow">Google Drive Library</div>
-      <div class="library-title">教材ライブラリ</div>
-      <div class="library-description">Google Drive の指定フォルダを教材CMSとして使い、PDF・動画・画像・Google Docs・Google Slides を自動反映します。</div>
-      <div class="library-meta">
-        <div class="library-chip">
-          <span class="library-chip-label">表示件数</span>
-          <strong class="library-chip-value" id="libraryFileCount">0</strong>
-        </div>
-        <div class="library-chip">
-          <span class="library-chip-label">最終更新</span>
-          <strong class="library-chip-value" id="libraryLastUpdated">-</strong>
-        </div>
+    <div class="library-panel">
+      <div class="library-panel-title">Google Drive から教材を開く</div>
+      <div class="library-panel-text">
+        教材ライブラリ機能は一度シンプル化し、ここから Google Drive フォルダへ直接移動する形にしています。
       </div>
-    </div>
-
-    <div class="library-toolbar">
-      <label class="library-search" for="librarySearchInput">
-        <span class="library-search-icon">🔎</span>
-        <input id="librarySearchInput" type="search" placeholder="ファイル名で検索" autocomplete="off" spellcheck="false">
-      </label>
-      <div class="library-categories" id="libraryCategoryTabs">
-        <button class="library-category active" type="button" data-category="all">すべて</button>
+      <div class="library-actions library-actions-stack">
+        <a class="library-folder-link" href="https://drive.google.com/drive/folders/1a9iaxd2OKBywSuRZvPib1gyGciL22HpM?usp=drive_link" target="_blank" rel="noopener noreferrer">📁 Google Drive フォルダを開く →</a>
+        <a class="library-folder-link" href="https://sites.google.com/view/kokongakumeiza/%E8%AD%9C%E9%9D%A2%E3%81%A8%E9%9F%B3%E6%BA%90?authuser=0" target="_blank" rel="noopener noreferrer">🎼 古今樂明座 提供音源・楽譜</a>
       </div>
-    </div>
-
-    <div class="library-status show info" id="libraryStatus">
-      <strong>設定が必要です。</strong> <span><code>API_KEY</code> を入力すると Google Drive から教材一覧を取得できます。</span>
-    </div>
-
-    <div class="library-summary" id="libraryResultSummary">読み込み待機中</div>
-
-    <div class="library-skeleton-grid" id="libraryLoadingGrid"></div>
-    <div class="library-grid" id="libraryGrid" style="display:none"></div>
-    <div class="library-empty" id="libraryEmptyState">
-      <div class="library-empty-visual">0</div>
-      <div style="font-size:16px;font-weight:700;margin-bottom:6px">該当する教材がありません</div>
-      <div style="font-size:13px;line-height:1.7">検索条件またはカテゴリを変更してください。</div>
-    </div>
-
-    <div class="library-actions">
-      <a class="library-folder-link" id="libraryFolderLink" href="https://drive.google.com/drive/folders/1a9iaxd2OKBywSuRZvPib1gyGciL22HpM?usp=drive_link" target="_blank" rel="noopener noreferrer">📁 Google Drive フォルダを開く →</a>
     </div>
   </div>
   <div class="bottom-nav">
@@ -609,17 +537,11 @@ textarea:focus,input:focus{border-color:var(--red)}
 // ============================================
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwm21rQITFGNgi-2TmnadTdd-rQaf425NKSUz0WJcPUYB6KrTQ7WtY6Rokn_aP-axabUg/exec";
 
-// ============================================
-// 【設定】Google Drive ライブラリ
-// ============================================
-const DRIVE_FOLDER_ID = "1a9iaxd2OKBywSuRZvPib1gyGciL22HpM";
 const DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1a9iaxd2OKBywSuRZvPib1gyGciL22HpM?usp=drive_link";
-const API_KEY = "AIzaSyBvD4bw5zAdaDcsI3cyBRb4q5mbKJTG2J8";
-const DRIVE_API_URL = "https://www.googleapis.com/drive/v3/files";
-const DRIVE_PAGE_SIZE = 100;
 const GOOD_NEWS_ROTATE_MS = 3000;
 const GOOD_NEWS_REFRESH_MS = 60000;
 const GOOD_NEWS_RECENT_LIMIT = 4;
+const NOTES_REFRESH_MS = 45000;
 const APP_VERSION = '2026-06-28-01';
 const APP_VERSION_KEY = 'taiko_app_version';
 const TEAM_CACHE_KEY = 'taiko_team_options';
@@ -651,28 +573,9 @@ const notesState = {
   items: [],
   loading: false,
   loaded: false,
+  lastFetchedAt: 0,
   submitting: false,
-};
-
-const libraryState = {
-  files: [],
-  filteredFiles: [],
-  activeCategory: "all",
-  searchQuery: "",
-  loaded: false
-};
-
-const libraryElements = {
-  fileCount: () => document.getElementById('libraryFileCount'),
-  lastUpdated: () => document.getElementById('libraryLastUpdated'),
-  status: () => document.getElementById('libraryStatus'),
-  summary: () => document.getElementById('libraryResultSummary'),
-  searchInput: () => document.getElementById('librarySearchInput'),
-  categoryTabs: () => document.getElementById('libraryCategoryTabs'),
-  loadingGrid: () => document.getElementById('libraryLoadingGrid'),
-  grid: () => document.getElementById('libraryGrid'),
-  emptyState: () => document.getElementById('libraryEmptyState'),
-  folderLink: () => document.getElementById('libraryFolderLink')
+  editingCommentId: '',
 };
 
 const goodNewsElements = {
@@ -681,47 +584,8 @@ const goodNewsElements = {
   meta: () => document.getElementById('goodNewsMeta')
 };
 
-document.addEventListener('DOMContentLoaded', initializeDriveLibrary);
 document.addEventListener('DOMContentLoaded', initializeGoodNewsFeed);
 document.addEventListener('DOMContentLoaded', initializeAuthUi);
-
-function initializeDriveLibrary() {
-  renderLibraryLoadingSkeleton();
-  bindLibraryEvents();
-  const folderLink = libraryElements.folderLink();
-  if (folderLink) folderLink.href = DRIVE_FOLDER_URL;
-}
-function bindLibraryEvents() {
-  const searchInput = libraryElements.searchInput();
-  if (searchInput) {
-    searchInput.addEventListener('input', (event) => {
-      libraryState.searchQuery = event.target.value.trim().toLowerCase();
-      filterLibraryFiles();
-    });
-  }
-
-  const categoryTabs = libraryElements.categoryTabs();
-  if (categoryTabs) {
-    categoryTabs.addEventListener('click', (event) => {
-      const button = event.target.closest('[data-category]');
-      if (!button) return;
-      libraryState.activeCategory = button.dataset.category;
-      updateLibraryActiveTab();
-      filterLibraryFiles();
-    });
-  }
-
-  const grid = libraryElements.grid();
-  if (grid) {
-    grid.addEventListener('click', (event) => {
-      const trigger = event.target.closest('[data-open-url]');
-      if (!trigger) return;
-      event.preventDefault();
-      const url = trigger.dataset.openUrl;
-      if (url) window.open(url, '_blank', 'noopener');
-    });
-  }
-}
 
 function initializeGoodNewsFeed() {
   renderGoodNewsPlaceholder('loading', '読み込み中...', 'みんなの前向きな変化が3秒ごとに流れます');
@@ -1741,10 +1605,10 @@ function updateNotes() {
   const groupName = getGroup();
   const sub = document.getElementById('notesGroupName');
   if (sub) {
-    sub.textContent = groupName ? `${groupName} のメンバーだけで共有されます` : '同じチーム内だけで共有されます';
+    sub.textContent = groupName ? `${groupName} のメンバー内だけで稽古内容を蓄積できます` : '同じチーム内だけで稽古内容を蓄積できます';
   }
   renderNotes();
-  ensureNotesLoaded(true);
+  ensureNotesLoaded({ background: true });
 }
 
 function renderNotes() {
@@ -1757,21 +1621,21 @@ function renderNotes() {
   }
 
   if (!notesState.items.length) {
-    content.innerHTML = '<div class="note-empty">まだチームノートがありません。最初の1件を記録してください。</div>';
+    content.innerHTML = '<div class="note-empty">まだ稽古内容の記録がありません。最初の指導内容や練習内容を残してください。</div>';
     return;
   }
 
   content.innerHTML = notesState.items.map((note) => `
     <article class="note-card">
       <div class="note-title">${esc(note.title)}</div>
-      <div class="note-meta">投稿者: ${esc(note.authorName || '未設定')} / ${esc(fmtDateTime(note.createdAt))}</div>
+      <div class="note-meta">まとめた人: ${esc(note.authorName || '未設定')} / ${esc(fmtDateTime(note.createdAt))}</div>
       <div class="note-body">${esc(note.body)}</div>
       <div class="note-comments">
         <div class="note-comments-title">コメント ${Array.isArray(note.comments) ? `(${note.comments.length})` : '(0)'}</div>
         ${renderNoteComments(note.comments)}
         <div class="note-comment-box">
-          <textarea id="noteCommentInput_${escapeAttr(note.noteId)}" rows="3" placeholder="この指導内容から自分が得た学びや気づきをコメントできます。"></textarea>
-          <button class="note-inline-btn" type="button" onclick="submitNoteComment('${escapeAttr(note.noteId)}')">コメントする</button>
+          <textarea id="noteCommentInput_${escapeAttr(note.noteId)}" rows="3" placeholder="例：入りの合図は右手を上げた瞬間。自分は次回ここを重点的に確認する。"></textarea>
+          <button class="note-inline-btn" type="button" onclick="submitNoteComment('${escapeAttr(note.noteId)}')">アイデアをシェア</button>
         </div>
       </div>
     </article>
@@ -1780,24 +1644,53 @@ function renderNotes() {
 
 function renderNoteComments(comments) {
   if (!Array.isArray(comments) || !comments.length) {
-    return '<div class="note-empty" style="padding:12px 0 0">まだコメントはありません。</div>';
+    return '<div class="note-empty" style="padding:12px 0 0">まだ補足メモはありません。</div>';
   }
 
   return comments.map((comment) => `
     <div class="note-comment">
-      <div class="note-comment-meta">${esc(comment.authorName || '未設定')} / ${esc(fmtDateTime(comment.createdAt))}</div>
-      <div class="note-comment-body">${esc(comment.body)}</div>
+      <div class="note-comment-head">
+        <div class="note-comment-meta">${esc(comment.authorName || '未設定')} / ${esc(fmtDateTime(comment.createdAt))}${comment.isEdited ? '<span class="note-comment-edited">編集済み</span>' : ''}</div>
+        ${renderNoteCommentActions(comment)}
+      </div>
+      ${notesState.editingCommentId === comment.commentId ? renderNoteCommentEditor(comment) : `<div class="note-comment-body">${esc(comment.body)}</div>`}
     </div>
   `).join('');
 }
 
-async function ensureNotesLoaded(force = false) {
+function renderNoteCommentActions(comment) {
+  if (!comment || (!comment.canEdit && !comment.canDelete)) return '';
+  const buttons = [];
+  if (comment.canEdit) {
+    buttons.push(`<button class="note-comment-action" type="button" onclick="beginEditNoteComment('${escapeAttr(comment.commentId)}')">編集</button>`);
+  }
+  if (comment.canDelete) {
+    buttons.push(`<button class="note-comment-action danger" type="button" onclick="deleteNoteComment('${escapeAttr(comment.commentId)}')">削除</button>`);
+  }
+  return `<div class="note-comment-actions">${buttons.join('')}</div>`;
+}
+
+function renderNoteCommentEditor(comment) {
+  return `
+    <div class="note-comment-edit-box">
+      <textarea id="editNoteCommentInput_${escapeAttr(comment.commentId)}" rows="3">${esc(comment.body)}</textarea>
+      <div class="note-comment-actions" style="margin-top:8px">
+        <button class="note-comment-action" type="button" onclick="cancelEditNoteComment()">キャンセル</button>
+        <button class="note-comment-action primary" type="button" onclick="saveEditedNoteComment('${escapeAttr(comment.commentId)}')">保存</button>
+      </div>
+    </div>
+  `;
+}
+
+async function ensureNotesLoaded(options = {}) {
+  const { force = false, background = false } = options;
   if (!getName() || !getPin2()) return;
   if (notesState.loading) return;
-  if (!force && notesState.loaded) return;
+  const isFresh = notesState.loaded && (Date.now() - notesState.lastFetchedAt < NOTES_REFRESH_MS);
+  if (!force && isFresh) return;
 
   notesState.loading = true;
-  if (!notesState.items.length) renderNotes();
+  if (!background || !notesState.items.length) renderNotes();
 
   try {
     const requestUrl = new URL(GAS_URL);
@@ -1815,6 +1708,7 @@ async function ensureNotesLoaded(force = false) {
 
     notesState.items = Array.isArray(json.notes) ? json.notes : [];
     notesState.loaded = true;
+    notesState.lastFetchedAt = Date.now();
   } catch (error) {
     console.error(error);
     showToast('ノートの取得に失敗しました');
@@ -1832,7 +1726,7 @@ async function submitNote() {
   const body = bodyInput?.value.trim() || '';
 
   if (!title) { showToast('タイトルを入力してください'); return; }
-  if (!body) { showToast('コメントを入力してください'); return; }
+  if (!body) { showToast('内容を入力してください'); return; }
   if (notesState.submitting) return;
 
   notesState.submitting = true;
@@ -1862,10 +1756,11 @@ async function submitNote() {
 
     notesState.items = Array.isArray(json.notes) ? json.notes : [];
     notesState.loaded = true;
+    notesState.lastFetchedAt = Date.now();
     titleInput.value = '';
     bodyInput.value = '';
     renderNotes();
-    showToast('チームノートを記録しました');
+    showToast('稽古内容を記録しました');
   } catch (error) {
     console.error(error);
     showToast('ノートの記録に失敗しました');
@@ -1881,7 +1776,7 @@ async function submitNote() {
 async function submitNoteComment(noteId) {
   const input = document.getElementById(`noteCommentInput_${noteId}`);
   const body = input?.value.trim() || '';
-  if (!body) { showToast('コメントを入力してください'); return; }
+  if (!body) { showToast('補足内容を入力してください'); return; }
 
   try {
     const response = await fetch(GAS_URL, {
@@ -1904,12 +1799,93 @@ async function submitNoteComment(noteId) {
 
     notesState.items = Array.isArray(json.notes) ? json.notes : [];
     notesState.loaded = true;
+    notesState.lastFetchedAt = Date.now();
     if (input) input.value = '';
+    notesState.editingCommentId = '';
     renderNotes();
-    showToast('コメントを記録しました');
+    showToast('補足メモを記録しました');
   } catch (error) {
     console.error(error);
-    showToast('コメントの記録に失敗しました');
+    showToast('補足メモの記録に失敗しました');
+  }
+}
+
+function beginEditNoteComment(commentId) {
+  notesState.editingCommentId = commentId;
+  renderNotes();
+}
+
+function cancelEditNoteComment() {
+  notesState.editingCommentId = '';
+  renderNotes();
+}
+
+async function saveEditedNoteComment(commentId) {
+  const input = document.getElementById(`editNoteCommentInput_${commentId}`);
+  const body = input?.value.trim() || '';
+  if (!body) { showToast('補足内容を入力してください'); return; }
+
+  try {
+    const response = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action: 'updateNoteComment',
+        userId: getUserId(),
+        teamId: getTeamId(),
+        name: getName(),
+        pin: getPin2(),
+        commentId,
+        body,
+      }),
+    });
+    const json = await response.json();
+    if (!response.ok || json.status !== 'ok') {
+      throw new Error(json.message || 'update comment failed');
+    }
+
+    notesState.items = Array.isArray(json.notes) ? json.notes : [];
+    notesState.loaded = true;
+    notesState.lastFetchedAt = Date.now();
+    notesState.editingCommentId = '';
+    renderNotes();
+    showToast('補足メモを更新しました');
+  } catch (error) {
+    console.error(error);
+    showToast(error?.message || '補足メモの更新に失敗しました');
+  }
+}
+
+async function deleteNoteComment(commentId) {
+  if (!confirm('この補足メモを削除しますか？')) return;
+
+  try {
+    const response = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action: 'deleteNoteComment',
+        userId: getUserId(),
+        teamId: getTeamId(),
+        name: getName(),
+        pin: getPin2(),
+        commentId,
+      }),
+    });
+    const json = await response.json();
+    if (!response.ok || json.status !== 'ok') {
+      throw new Error(json.message || 'delete comment failed');
+    }
+
+    notesState.items = Array.isArray(json.notes) ? json.notes : [];
+    notesState.loaded = true;
+    notesState.lastFetchedAt = Date.now();
+    if (notesState.editingCommentId === commentId) notesState.editingCommentId = '';
+    renderNotes();
+    showToast('補足メモを削除しました');
+  } catch (error) {
+    console.error(error);
+    showToast(error?.message || '補足メモの削除に失敗しました');
   }
 }
 
@@ -1923,282 +1899,7 @@ function fmtDateTime(val) {
 // ============================================
 // ライブラリ
 // ============================================
-function updateLibrary() {
-  if (libraryState.loaded) {
-    return;
-  }
-
-  loadDriveFiles();
-}
-
-async function loadDriveFiles() {
-  if (!isDriveConfigured()) {
-    showLibraryStatus('info', 'API_KEY を入力すると Google Drive から教材一覧を取得できます。');
-    updateLibrarySummary('設定待ち');
-    toggleLibraryLoading(false);
-    libraryState.loaded = true;
-    return;
-  }
-
-  showLibraryStatus('info', 'Google Drive から教材一覧を読み込んでいます。');
-  toggleLibraryLoading(true);
-
-  try {
-    const files = await fetchDriveFiles();
-    libraryState.files = files.sort((a, b) => new Date(b.modifiedTime) - new Date(a.modifiedTime));
-    renderLibraryCategories();
-    filterLibraryFiles();
-    updateLibraryHero();
-    showLibraryStatus('success', `${libraryState.files.length} 件の教材を読み込みました。`);
-  } catch (error) {
-    console.error(error);
-    libraryState.files = [];
-    libraryState.filteredFiles = [];
-    renderLibraryCategories();
-    renderLibraryFiles();
-    updateLibraryHero();
-    handleLibraryError(error);
-  } finally {
-    toggleLibraryLoading(false);
-    libraryState.loaded = true;
-  }
-}
-
-async function fetchDriveFiles() {
-  const allFiles = [];
-  let pageToken = '';
-
-  do {
-    const requestUrl = new URL(DRIVE_API_URL);
-    requestUrl.searchParams.set('key', API_KEY);
-    requestUrl.searchParams.set('q', `'${DRIVE_FOLDER_ID}' in parents and trashed=false`);
-    requestUrl.searchParams.set('fields', 'nextPageToken,files(id,name,mimeType,thumbnailLink,webViewLink,modifiedTime)');
-    requestUrl.searchParams.set('orderBy', 'modifiedTime desc');
-    requestUrl.searchParams.set('pageSize', String(DRIVE_PAGE_SIZE));
-    requestUrl.searchParams.set('includeItemsFromAllDrives', 'true');
-    requestUrl.searchParams.set('supportsAllDrives', 'true');
-    if (pageToken) requestUrl.searchParams.set('pageToken', pageToken);
-
-    const response = await fetch(requestUrl.toString());
-    if (!response.ok) {
-      const errorPayload = await response.json().catch(() => ({}));
-      throw new Error(`${response.status}: ${errorPayload.error?.message || 'Drive API request failed.'}`);
-    }
-
-    const data = await response.json();
-    allFiles.push(...(data.files || []));
-    pageToken = data.nextPageToken || '';
-  } while (pageToken);
-
-  return allFiles;
-}
-
-function filterLibraryFiles() {
-  libraryState.filteredFiles = libraryState.files.filter((file) => {
-    const category = getDriveFileType(file.mimeType).category;
-    const matchesCategory = libraryState.activeCategory === 'all' || libraryState.activeCategory === category;
-    const matchesSearch = !libraryState.searchQuery || file.name.toLowerCase().includes(libraryState.searchQuery);
-    return matchesCategory && matchesSearch;
-  });
-
-  renderLibraryFiles();
-}
-
-function renderLibraryFiles() {
-  const grid = libraryElements.grid();
-  const emptyState = libraryElements.emptyState();
-  grid.innerHTML = libraryState.filteredFiles.map((file) => createLibraryCard(file)).join('');
-  const hasFiles = libraryState.filteredFiles.length > 0;
-  grid.style.display = hasFiles ? 'grid' : 'none';
-  emptyState.classList.toggle('show', !hasFiles);
-  updateLibrarySummary(hasFiles ? `${libraryState.filteredFiles.length} 件を表示中` : '0 件');
-}
-
-function createLibraryCard(file) {
-  const fileType = getDriveFileType(file.mimeType);
-  const thumbnail = file.thumbnailLink
-    ? `<img src="${escapeAttr(file.thumbnailLink)}" alt="${escapeAttr(file.name)} のサムネイル" loading="lazy" referrerpolicy="no-referrer">`
-    : `<div class="library-fallback"><img src="${getLibraryFallbackIcon(fileType.iconKey)}" alt="${escapeAttr(fileType.label)} アイコン" loading="lazy"></div>`;
-
-  return `
-    <article class="library-card">
-      <div class="library-card-media">${thumbnail}</div>
-      <div class="library-card-body">
-        <span class="library-card-type">${escapeHtmlText(fileType.label)}</span>
-        <div class="library-card-title">${escapeHtmlText(file.name)}</div>
-        <div class="library-card-meta">
-          <div>種別: ${escapeHtmlText(fileType.description)}</div>
-          <div>更新日: ${formatLibraryDate(file.modifiedTime)}</div>
-        </div>
-        <a class="library-card-link" href="${escapeAttr(file.webViewLink || '#')}" data-open-url="${escapeAttr(file.webViewLink || '')}" target="_blank" rel="noopener noreferrer">開く</a>
-      </div>
-    </article>
-  `;
-}
-
-function renderLibraryCategories() {
-  const labels = {
-    all: 'すべて',
-    pdf: 'PDF',
-    video: '動画',
-    image: '画像',
-    docs: 'Docs',
-    slides: 'Slides',
-    folder: 'Folder',
-    other: 'その他'
-  };
-
-  const counts = libraryState.files.reduce((acc, file) => {
-    const category = getDriveFileType(file.mimeType).category;
-    acc[category] = (acc[category] || 0) + 1;
-    return acc;
-  }, {});
-
-  const categories = ['all', ...Object.keys(labels).filter((key) => counts[key])];
-  libraryElements.categoryTabs().innerHTML = categories.map((category) => `
-    <button class="library-category${libraryState.activeCategory === category ? ' active' : ''}" type="button" data-category="${category}">
-      ${labels[category]} (${category === 'all' ? libraryState.files.length : counts[category]})
-    </button>
-  `).join('');
-}
-
-function updateLibraryActiveTab() {
-  document.querySelectorAll('.library-category').forEach((button) => {
-    button.classList.toggle('active', button.dataset.category === libraryState.activeCategory);
-  });
-}
-
-function renderLibraryLoadingSkeleton() {
-  const html = Array.from({ length: 6 }, () => `
-    <div class="library-skeleton-card">
-      <div class="library-skeleton-media"></div>
-      <div class="library-skeleton-body">
-        <div class="library-skeleton-pill"></div>
-        <div class="library-skeleton-line long"></div>
-        <div class="library-skeleton-line mid"></div>
-        <div class="library-skeleton-line short"></div>
-      </div>
-    </div>
-  `).join('');
-
-  libraryElements.loadingGrid().innerHTML = html;
-}
-
-function updateLibraryHero() {
-  const files = libraryState.files;
-  libraryElements.fileCount().textContent = String(files.length);
-  libraryElements.lastUpdated().textContent = files.length ? formatLibraryDate(files[0].modifiedTime) : '-';
-}
-
-function updateLibrarySummary(text) {
-  libraryElements.summary().textContent = text;
-}
-
-function toggleLibraryLoading(isLoading) {
-  libraryElements.loadingGrid().style.display = isLoading ? 'grid' : 'none';
-  if (isLoading) {
-    libraryElements.grid().style.display = 'none';
-    libraryElements.emptyState().classList.remove('show');
-  }
-}
-
-function showLibraryStatus(type, message) {
-  const status = libraryElements.status();
-  status.className = `library-status show ${type}`;
-  status.innerHTML = `<strong>${getLibraryStatusTitle(type)}</strong> <span>${escapeHtmlText(message)}</span>`;
-}
-
-function getLibraryStatusTitle(type) {
-  if (type === 'error') return '読み込みに失敗しました。';
-  if (type === 'success') return '読み込み完了。';
-  return 'お知らせ';
-}
-
-function handleLibraryError(error) {
-  const message = error.message || '';
-  const isLocalFile = window.location.protocol === 'file:';
-  if (message.includes('403')) {
-    if (isLocalFile) {
-      showLibraryStatus('error', 'このページを file:// で開いているため、GitHub Pages 用に制限した API Key では拒否されています。GitHub Pages URL で確認するか、localhost で配信して動作確認してください。');
-      updateLibrarySummary('ローカル表示では API 制限により取得不可');
-      return;
-    }
-    showLibraryStatus('error', 'API Key の設定、または対象フォルダの公開権限を確認してください。');
-    updateLibrarySummary('アクセスエラー');
-    return;
-  }
-  if (message.includes('400')) {
-    showLibraryStatus('error', 'フォルダID、API Key、または Drive API の設定を確認してください。');
-    updateLibrarySummary('設定エラー');
-    return;
-  }
-  showLibraryStatus('error', '通信に失敗しました。ネットワーク接続と Google Drive API の状態を確認してください。');
-  updateLibrarySummary('通信エラー');
-}
-
-function getDriveFileType(mimeType) {
-  const types = [
-    { match: ['application/pdf'], category: 'pdf', label: 'PDF', description: 'PDFファイル', iconKey: 'pdf' },
-    { match: ['video/'], category: 'video', label: '動画', description: '動画ファイル', iconKey: 'video' },
-    { match: ['image/'], category: 'image', label: '画像', description: '画像ファイル', iconKey: 'image' },
-    { match: ['application/vnd.google-apps.document'], category: 'docs', label: 'Docs', description: 'Google Docs', iconKey: 'docs' },
-    { match: ['application/vnd.google-apps.presentation'], category: 'slides', label: 'Slides', description: 'Google Slides', iconKey: 'slides' },
-    { match: ['application/vnd.google-apps.folder'], category: 'folder', label: 'Folder', description: 'Google Drive フォルダ', iconKey: 'folder' }
-  ];
-
-  const matched = types.find((type) => type.match.some((pattern) => mimeType?.startsWith(pattern) || mimeType === pattern));
-  return matched || { category: 'other', label: 'その他', description: 'その他のファイル', iconKey: 'other' };
-}
-
-function formatLibraryDate(dateString) {
-  if (!dateString) return '-';
-  return new Intl.DateTimeFormat('ja-JP', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(new Date(dateString));
-}
-
-function isDriveConfigured() {
-  return API_KEY && API_KEY !== 'ここにAPIキー';
-}
-
-function getLibraryFallbackIcon(iconKey) {
-  const colors = {
-    pdf: '#ef4444',
-    video: '#f59e0b',
-    image: '#10b981',
-    docs: '#2563eb',
-    slides: '#ea580c',
-    folder: '#7c3aed',
-    other: '#475569'
-  };
-  const labels = {
-    pdf: 'PDF',
-    video: 'MOV',
-    image: 'IMG',
-    docs: 'DOC',
-    slides: 'SLD',
-    folder: 'DIR',
-    other: 'FILE'
-  };
-  const color = colors[iconKey] || colors.other;
-  const label = labels[iconKey] || labels.other;
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400">
-      <rect width="640" height="400" rx="36" fill="#f8fafc"/>
-      <rect x="48" y="48" width="544" height="304" rx="28" fill="${color}" opacity="0.14"/>
-      <rect x="72" y="86" width="132" height="160" rx="20" fill="${color}" opacity="0.92"/>
-      <rect x="230" y="108" width="230" height="26" rx="13" fill="#cbd5e1"/>
-      <rect x="230" y="156" width="168" height="22" rx="11" fill="#e2e8f0"/>
-      <rect x="230" y="196" width="210" height="22" rx="11" fill="#e2e8f0"/>
-      <text x="138" y="184" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="700" fill="#ffffff">${label}</text>
-    </svg>
-  `;
-  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
-}
+function updateLibrary() {}
 
 // ============================================
 // ユーティリティ

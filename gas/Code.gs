@@ -24,6 +24,8 @@ const CONFIG = {
   sourceBackupSheets: [],
 };
 
+const COMMENT_EDIT_WINDOW_HOURS = 12;
+
 const FIELD_ALIASES = {
   name: ['name', '名前', '氏名'],
   lastName: ['lastName', '姓'],
@@ -89,6 +91,10 @@ function routeRequest_(params, method) {
         return jsonOutput_(handleSaveNote_(context, params));
       case 'addNoteComment':
         return jsonOutput_(handleAddNoteComment_(context, params));
+      case 'updateNoteComment':
+        return jsonOutput_(handleUpdateNoteComment_(context, params));
+      case 'deleteNoteComment':
+        return jsonOutput_(handleDeleteNoteComment_(context, params));
       default:
         return jsonOutput_({ status: 'error', message: 'Unsupported action.' });
     }
@@ -423,6 +429,56 @@ function handleAddNoteComment_(context, params) {
   };
 }
 
+function handleUpdateNoteComment_(context, params) {
+  const auth = authenticateUser_(context, params);
+  if (!auth.ok) return { status: 'error', message: auth.message };
+
+  const commentId = cleanText_(params.commentId);
+  const body = cleanText_(params.body);
+  if (!commentId) return { status: 'error', message: 'commentId is required.' };
+  if (!body) return { status: 'error', message: 'body is required.' };
+
+  const commentsTable = readTable_(context.sheets.noteComments);
+  const commentRow = findVisibleCommentById_(commentsTable, auth.user, commentId);
+  if (!commentRow) return { status: 'error', message: 'Comment not found.' };
+  if (!canEditComment_(commentsTable, commentRow, auth.user)) {
+    return { status: 'error', message: 'Comment can only be edited within 12 hours by its author.' };
+  }
+
+  setField_(commentsTable, commentRow, 'body', body);
+  setField_(commentsTable, commentRow, 'updatedAt', isoNow_());
+  flushChangedRows_(commentsTable);
+
+  return {
+    status: 'ok',
+    notes: getNotesForTeam_(context, auth.user),
+  };
+}
+
+function handleDeleteNoteComment_(context, params) {
+  const auth = authenticateUser_(context, params);
+  if (!auth.ok) return { status: 'error', message: auth.message };
+
+  const commentId = cleanText_(params.commentId);
+  if (!commentId) return { status: 'error', message: 'commentId is required.' };
+
+  const commentsTable = readTable_(context.sheets.noteComments);
+  const commentRow = findVisibleCommentById_(commentsTable, auth.user, commentId);
+  if (!commentRow) return { status: 'error', message: 'Comment not found.' };
+  if (!canDeleteComment_(commentsTable, commentRow, auth.user)) {
+    return { status: 'error', message: 'Only the author can delete this comment.' };
+  }
+
+  setField_(commentsTable, commentRow, 'status', 'deleted');
+  setField_(commentsTable, commentRow, 'updatedAt', isoNow_());
+  flushChangedRows_(commentsTable);
+
+  return {
+    status: 'ok',
+    notes: getNotesForTeam_(context, auth.user),
+  };
+}
+
 function listTeams_(context) {
   const teamsTable = readTable_(context.sheets.teams);
   return teamsTable.rows
@@ -474,12 +530,13 @@ function getNotesForTeam_(context, user) {
       return sortByDateDesc_(a.createdAt, b.createdAt);
     });
 
-  const noteIds = teamNotes.map(function (note) {
-    return note.noteId;
-  });
+  const noteIdMap = teamNotes.reduce(function (acc, note) {
+    acc[note.noteId] = true;
+    return acc;
+  }, {});
   const commentsByNoteId = commentsTable.rows.reduce(function (acc, row) {
     const noteId = cleanText_(getField_(commentsTable, row, 'noteId'));
-    if (!noteId || noteIds.indexOf(noteId) === -1) return acc;
+    if (!noteId || !noteIdMap[noteId]) return acc;
     if ((cleanText_(getField_(commentsTable, row, 'status')) || 'active') !== 'active') return acc;
     if (!commentRowBelongsToUserTeam_(commentsTable, row, user)) return acc;
     if (!acc[noteId]) acc[noteId] = [];
@@ -493,6 +550,9 @@ function getNotesForTeam_(context, user) {
       body: cleanText_(getField_(commentsTable, row, 'body')),
       createdAt: cleanText_(getField_(commentsTable, row, 'createdAt')),
       updatedAt: cleanText_(getField_(commentsTable, row, 'updatedAt')),
+      canEdit: canEditComment_(commentsTable, row, user),
+      canDelete: canDeleteComment_(commentsTable, row, user),
+      isEdited: isCommentEdited_(commentsTable, row),
     });
     return acc;
   }, {});
@@ -529,6 +589,42 @@ function commentRowBelongsToUserTeam_(commentsTable, row, user) {
   const rowGroup = cleanText_(getField_(commentsTable, row, 'group'));
   if (user.teamId && rowTeamId) return rowTeamId === user.teamId;
   return !!user.group && normalizeText_(rowGroup) === normalizeText_(user.group);
+}
+
+function findVisibleCommentById_(commentsTable, user, commentId) {
+  return commentsTable.rows.find(function (record) {
+    return cleanText_(getField_(commentsTable, record, 'commentId')) === cleanText_(commentId) &&
+      commentRowBelongsToUserTeam_(commentsTable, record, user) &&
+      (cleanText_(getField_(commentsTable, record, 'status')) || 'active') === 'active';
+  }) || null;
+}
+
+function canEditComment_(commentsTable, row, user) {
+  if (!isCommentOwnedByUser_(commentsTable, row, user)) return false;
+  const createdAt = parseDateMs_(getField_(commentsTable, row, 'createdAt'));
+  if (!createdAt) return false;
+  return (Date.now() - createdAt) <= COMMENT_EDIT_WINDOW_HOURS * 60 * 60 * 1000;
+}
+
+function canDeleteComment_(commentsTable, row, user) {
+  return isCommentOwnedByUser_(commentsTable, row, user);
+}
+
+function isCommentEdited_(commentsTable, row) {
+  const createdAt = cleanText_(getField_(commentsTable, row, 'createdAt'));
+  const updatedAt = cleanText_(getField_(commentsTable, row, 'updatedAt'));
+  return !!createdAt && !!updatedAt && createdAt !== updatedAt;
+}
+
+function isCommentOwnedByUser_(commentsTable, row, user) {
+  const authorUserId = cleanText_(getField_(commentsTable, row, 'authorUserId'));
+  if (authorUserId && cleanText_(user.userId)) {
+    return authorUserId === cleanText_(user.userId);
+  }
+
+  const authorName = normalizeText_(getField_(commentsTable, row, 'authorName'));
+  const userName = normalizeText_(user.name);
+  return !!authorName && !!userName && authorName === userName;
 }
 
 function getLogsForUser_(context, user) {
@@ -1585,6 +1681,13 @@ function normalizeLogDate_(value) {
     return formatDateKey_(parsed);
   }
   return text;
+}
+
+function parseDateMs_(value) {
+  const text = cleanText_(value);
+  if (!text) return 0;
+  const parsed = Date.parse(text);
+  return Number.isNaN(parsed) ? 0 : parsed;
 }
 
 function sortByDateDesc_(a, b) {
