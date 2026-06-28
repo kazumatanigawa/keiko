@@ -288,6 +288,11 @@ textarea:focus,input:focus{border-color:var(--red)}
   <div class="auth-extra-box" id="launchTeamBox">
     <label class="auth-label" style="margin-top:0">新しいチーム名</label>
     <input class="auth-input" id="launchTeamName" type="text" placeholder="例：府中東 和太鼓部" maxlength="40" style="letter-spacing:normal;text-align:left">
+    <label class="auth-label">チーム区分</label>
+    <select class="auth-select" id="launchTeamType">
+      <option value="student">学校の部活・ジュニアチーム</option>
+      <option value="general">一般団体・大学サークル</option>
+    </select>
     <div class="auth-team-meta">登録した本人が最初の管理者になりますが、その情報はユーザー画面には表示されません。</div>
   </div>
   <label class="auth-label">4桁PINを決める（好きな数字4つ）</label>
@@ -757,7 +762,8 @@ async function loadTeamOptions(force = false) {
       .filter((team) => team && team.teamId && team.teamName)
       .map((team) => ({
         teamId: String(team.teamId),
-        teamName: String(team.teamName)
+        teamName: String(team.teamName),
+        teamType: String(team.teamType || 'general')
       }))
       .sort((a, b) => a.teamName.localeCompare(b.teamName, 'ja'));
     teamState.loaded = true;
@@ -778,11 +784,15 @@ function renderTeamOptions() {
   if (!select) return;
   const currentValue = select.value;
   const options = ['<option value="">所属チームを選択してください</option>']
-    .concat(teamState.items.map((team) => `<option value="${esc(team.teamId)}">${esc(team.teamName)}</option>`));
+    .concat(teamState.items.map((team) => `<option value="${esc(team.teamId)}">${esc(formatTeamOptionLabel(team))}</option>`));
   select.innerHTML = options.join('');
   if (teamState.items.some((team) => team.teamId === currentValue)) {
     select.value = currentValue;
   }
+}
+
+function formatTeamOptionLabel(team) {
+  return `${team.teamName}（${team.teamType === 'student' ? '学校' : '一般'}）`;
 }
 
 function updateTeamLoadingMessage(message) {
@@ -809,6 +819,7 @@ function toggleTeamLaunchMode(forceValue) {
     select.value = '';
   } else {
     document.getElementById('launchTeamName').value = '';
+    document.getElementById('launchTeamType').value = 'student';
   }
 }
 
@@ -816,12 +827,13 @@ function getRegistrationTeamPayload() {
   const isLaunchMode = !!document.getElementById('launchTeamToggle')?.checked;
   const teamId = document.getElementById('regTeamSelect')?.value || '';
   const teamName = document.getElementById('launchTeamName')?.value.trim() || '';
+  const teamType = document.getElementById('launchTeamType')?.value || 'student';
 
   if (isLaunchMode) {
     if (!teamName) {
       return { ok: false, message: 'ローンチするチーム名を入力してください' };
     }
-    return { ok: true, teamMode: 'launch', teamName };
+    return { ok: true, teamMode: 'launch', teamName, teamType };
   }
 
   if (!teamId) {
@@ -859,7 +871,9 @@ async function doRegister() {
       pin,
       userId: json.userId || '',
       teamId: json.teamId || teamPayload.teamId || '',
-      group: json.group || teamPayload.teamName || getTeamNameFromState(teamPayload.teamId)
+      group: json.group || teamPayload.teamName || getTeamNameFromState(teamPayload.teamId),
+      teamType: json.teamType || teamPayload.teamType || getTeamTypeFromState(teamPayload.teamId),
+      userType: json.userType || ''
     });
     hideAuth();
     goTo('home');
@@ -894,7 +908,9 @@ async function doLogin() {
       pin,
       userId: json.userId || '',
       teamId: json.teamId || '',
-      group: json.group || ''
+      group: json.group || '',
+      teamType: json.teamType || '',
+      userType: json.userType || ''
     });
     hideAuth();
     goTo('home');
@@ -918,7 +934,9 @@ async function refreshSessionFromLogin(name, pin) {
       pin,
       userId: json.userId || '',
       teamId: json.teamId || '',
-      group: json.group || ''
+      group: json.group || '',
+      teamType: json.teamType || '',
+      userType: json.userType || ''
     });
     return true;
   } catch (error) {
@@ -936,6 +954,10 @@ function saveSession(session) {
   else localStorage.removeItem('taiko_team_id');
   if (session.group) localStorage.setItem('taiko_group', session.group);
   else localStorage.removeItem('taiko_group');
+  if (session.teamType) localStorage.setItem('taiko_team_type', session.teamType);
+  else localStorage.removeItem('taiko_team_type');
+  if (session.userType) localStorage.setItem('taiko_user_type', session.userType);
+  else localStorage.removeItem('taiko_user_type');
   localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
 }
 
@@ -955,6 +977,8 @@ function doLogout() {
   localStorage.removeItem('taiko_user_id');
   localStorage.removeItem('taiko_team_id');
   localStorage.removeItem('taiko_group');
+  localStorage.removeItem('taiko_team_type');
+  localStorage.removeItem('taiko_user_type');
   localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
   cachedLogs = [];
   location.reload();
@@ -978,6 +1002,8 @@ function getPin2()  { return localStorage.getItem('taiko_pin')  || ''; }
 function getUserId() { return localStorage.getItem('taiko_user_id') || ''; }
 function getTeamId() { return localStorage.getItem('taiko_team_id') || ''; }
 function getGroup()  { return localStorage.getItem('taiko_group') || ''; }
+function getTeamType() { return localStorage.getItem('taiko_team_type') || ''; }
+function getUserType() { return localStorage.getItem('taiko_user_type') || ''; }
 function getDateStr() {
   const d = new Date();
   return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${'日月火水木金土'[d.getDay()]}）`;
@@ -986,6 +1012,11 @@ function getDateStr() {
 function getTeamNameFromState(teamId) {
   const team = teamState.items.find((item) => item.teamId === teamId);
   return team ? team.teamName : '';
+}
+
+function getTeamTypeFromState(teamId) {
+  const team = teamState.items.find((item) => item.teamId === teamId);
+  return team ? team.teamType : '';
 }
 
 // ============================================
@@ -1434,7 +1465,9 @@ async function loadLogs() {
           pin: getPin2(),
           userId: json.userId || getUserId(),
           teamId: json.teamId || getTeamId(),
-          group: json.group || getGroup()
+          group: json.group || getGroup(),
+          teamType: json.teamType || getTeamType(),
+          userType: json.userType || getUserType()
         });
       }
       if (document.getElementById('screen-home').classList.contains('active')) updateHome();

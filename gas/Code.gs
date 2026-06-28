@@ -1,5 +1,5 @@
 const CONFIG = {
-  schemaVersion: '2026-06-28-01',
+  schemaVersion: '2026-06-28-02',
   spreadsheetIdProperty: 'SPREADSHEET_ID',
   setupVersionProperty: 'KEIKO_SETUP_VERSION',
   setupAtProperty: 'KEIKO_SETUP_COMPLETED_AT',
@@ -11,10 +11,10 @@ const CONFIG = {
     teams: 'チーム一覧',
     review: '移行要確認',
   },
-  userHeaders: ['name', 'pin', 'userId', 'teamId', 'group', 'role', 'createdAt', 'updatedAt'],
-  teamHeaders: ['teamId', 'teamName', 'createdByUserId', 'adminUserIds', 'createdAt', 'status'],
-  rosterHeaders: ['userId', 'teamId', 'group', 'name', 'displayName', 'grade', 'term', 'role', 'updatedAt'],
-  logHeaders: ['userId', 'teamId', 'group', 'name', 'displayName', 'date', 'cond', 'learning', 'next', 'goodNew', 'achievementStatus', 'whyMissed', 'retryPlan', 'grade', 'term', 'createdAt', 'updatedAt'],
+  userHeaders: ['name', 'pin', 'userId', 'teamId', 'group', 'teamType', 'userType', 'role', 'createdAt', 'updatedAt'],
+  teamHeaders: ['teamId', 'teamName', 'teamType', 'createdByUserId', 'adminUserIds', 'createdAt', 'status'],
+  rosterHeaders: ['userId', 'teamId', 'group', 'teamType', 'userType', 'name', 'displayName', 'grade', 'term', 'role', 'updatedAt'],
+  logHeaders: ['userId', 'teamId', 'group', 'teamType', 'userType', 'name', 'displayName', 'date', 'cond', 'learning', 'next', 'goodNew', 'achievementStatus', 'whyMissed', 'retryPlan', 'grade', 'term', 'createdAt', 'updatedAt'],
   reviewHeaders: ['timestamp', 'sheetName', 'rowNumber', 'reason', 'name', 'group', 'candidateUserIds', 'candidateNames'],
   memberViewHeaders: ['所属', '学年', '名前', '期', '役職', 'userId', 'teamId'],
   sourceBackupSheets: ['ユーザー', '生徒一覧', '稽古ログ', '部員一覧'],
@@ -26,6 +26,8 @@ const FIELD_ALIASES = {
   userId: ['userId', 'ユーザーID', 'user_id', 'id', 'ID'],
   teamId: ['teamId', 'チームID', 'team_id'],
   group: ['group', '所属', '所属チーム', '学校', 'チーム'],
+  teamType: ['teamType', 'チーム区分', 'team_type'],
+  userType: ['userType', 'ユーザー区分', 'user_type'],
   role: ['role', '役割', '権限', 'teamRole'],
   createdAt: ['createdAt', 'created_at', '作成日時'],
   updatedAt: ['updatedAt', 'updated_at', '更新日時'],
@@ -96,6 +98,7 @@ function handleRegister_(context, params) {
   const name = cleanText_(params.name);
   const pin = cleanText_(params.pin);
   const teamMode = cleanText_(params.teamMode);
+  const requestedTeamType = normalizeTeamType_(params.teamType);
 
   if (!name) return { status: 'error', message: 'name is required.' };
   if (!/^\d{4}$/.test(pin)) return { status: 'error', message: 'pin must be 4 digits.' };
@@ -111,6 +114,8 @@ function handleRegister_(context, params) {
 
   let teamId = '';
   let group = '';
+  let teamType = 'general';
+  let userType = 'general';
   let role = 'member';
   const now = isoNow_();
   const userId = generateId_('usr');
@@ -122,6 +127,7 @@ function handleRegister_(context, params) {
       return { status: 'error', message: 'Selected team was not found.' };
     }
     group = cleanText_(getField_(teamsTable, teamRecord.row, 'teamName'));
+    teamType = normalizeTeamType_(getField_(teamsTable, teamRecord.row, 'teamType')) || inferTeamTypeFromName_(group);
   } else {
     group = cleanText_(params.teamName);
     if (!group) return { status: 'error', message: 'teamName is required.' };
@@ -129,17 +135,20 @@ function handleRegister_(context, params) {
     if (existingTeam) {
       return { status: 'team_exists' };
     }
+    teamType = requestedTeamType || 'student';
     teamId = generateId_('team');
     role = 'owner_admin';
     appendRecord_(teamsTable, {
       teamId: teamId,
       teamName: group,
+      teamType: teamType,
       createdByUserId: userId,
       adminUserIds: userId,
       createdAt: now,
       status: 'active',
     });
   }
+  userType = teamTypeToUserType_(teamType);
 
   appendRecord_(usersTable, {
     name: name,
@@ -147,6 +156,8 @@ function handleRegister_(context, params) {
     userId: userId,
     teamId: teamId,
     group: group,
+    teamType: teamType,
+    userType: userType,
     role: role,
     createdAt: now,
     updatedAt: now,
@@ -158,6 +169,8 @@ function handleRegister_(context, params) {
     displayName: name,
     teamId: teamId,
     group: group,
+    teamType: teamType,
+    userType: userType,
     role: publicRole_(role),
   });
 
@@ -168,6 +181,8 @@ function handleRegister_(context, params) {
     userId: userId,
     teamId: teamId,
     group: group,
+    teamType: teamType,
+    userType: userType,
   };
 }
 
@@ -182,6 +197,8 @@ function handleLogin_(context, params) {
     userId: auth.user.userId,
     teamId: auth.user.teamId,
     group: auth.user.group,
+    teamType: auth.user.teamType,
+    userType: auth.user.userType,
   };
 }
 
@@ -205,6 +222,8 @@ function handleSaveLog_(context, params) {
     userId: auth.user.userId,
     teamId: auth.user.teamId,
     group: auth.user.group,
+    teamType: auth.user.teamType,
+    userType: auth.user.userType,
     name: auth.user.name,
     displayName: displayName,
     date: cleanText_(params.date) || formatDateKey_(new Date()),
@@ -226,6 +245,8 @@ function handleSaveLog_(context, params) {
     userId: auth.user.userId,
     teamId: auth.user.teamId,
     group: auth.user.group,
+    teamType: auth.user.teamType,
+    userType: auth.user.userType,
   };
 }
 
@@ -239,6 +260,8 @@ function handleGetLogs_(context, params) {
     userId: auth.user.userId,
     teamId: auth.user.teamId,
     group: auth.user.group,
+    teamType: auth.user.teamType,
+    userType: auth.user.userType,
     logs: logs,
   };
 }
@@ -299,6 +322,7 @@ function listTeams_(context) {
       return {
         teamId: cleanText_(getField_(teamsTable, row, 'teamId')),
         teamName: cleanText_(getField_(teamsTable, row, 'teamName')),
+        teamType: normalizeTeamType_(getField_(teamsTable, row, 'teamType')) || inferTeamTypeFromName_(cleanText_(getField_(teamsTable, row, 'teamName'))),
         status: cleanText_(getField_(teamsTable, row, 'status')) || 'active',
       };
     })
@@ -312,6 +336,7 @@ function listTeams_(context) {
       return {
         teamId: team.teamId,
         teamName: team.teamName,
+        teamType: team.teamType,
       };
     });
 }
@@ -336,6 +361,8 @@ function getLogsForUser_(context, user) {
         userId: rowUserId || user.userId,
         teamId: cleanText_(getField_(logTable, row, 'teamId')) || user.teamId,
         group: cleanText_(getField_(logTable, row, 'group')) || roster.group || user.group,
+        teamType: cleanText_(getField_(logTable, row, 'teamType')) || roster.teamType || user.teamType,
+        userType: cleanText_(getField_(logTable, row, 'userType')) || roster.userType || user.userType,
         displayName: cleanText_(getField_(logTable, row, 'displayName')) || roster.displayName || user.name,
         grade: cleanText_(getField_(logTable, row, 'grade')) || roster.grade || '',
         term: cleanText_(getField_(logTable, row, 'term')) || roster.term || '',
@@ -370,6 +397,8 @@ function getLogsForUser_(context, user) {
         userId: rowUserId || user.userId,
         teamId: cleanText_(getField_(logTable, row, 'teamId')) || roster.teamId || user.teamId,
         group: cleanText_(getField_(logTable, row, 'group')) || roster.group || user.group,
+        teamType: cleanText_(getField_(logTable, row, 'teamType')) || roster.teamType || user.teamType,
+        userType: cleanText_(getField_(logTable, row, 'userType')) || roster.userType || user.userType,
         displayName: cleanText_(getField_(logTable, row, 'displayName')) || roster.displayName || user.name,
         grade: cleanText_(getField_(logTable, row, 'grade')) || roster.grade || '',
         term: cleanText_(getField_(logTable, row, 'term')) || roster.term || '',
@@ -426,6 +455,8 @@ function userRecordFromRow_(table, row) {
     userId: cleanText_(getField_(table, row, 'userId')),
     teamId: cleanText_(getField_(table, row, 'teamId')),
     group: cleanText_(getField_(table, row, 'group')),
+    teamType: normalizeTeamType_(getField_(table, row, 'teamType')),
+    userType: normalizeUserType_(getField_(table, row, 'userType')),
     role: cleanText_(getField_(table, row, 'role')),
   };
 }
@@ -449,6 +480,8 @@ function upsertRosterForUser_(context, user) {
     userId: user.userId,
     teamId: user.teamId,
     group: user.group,
+    teamType: user.teamType || '',
+    userType: user.userType || '',
     name: user.name,
     displayName: user.displayName || user.name,
     role: publicRole_(user.role || 'member'),
@@ -470,12 +503,14 @@ function findRosterByUserId_(context, userId) {
     return cleanText_(getField_(rosterTable, record, 'userId')) === cleanText_(userId);
   });
   if (!row) {
-    return { userId: userId, grade: '', term: '', displayName: '', group: '', role: '' };
+    return { userId: userId, grade: '', term: '', displayName: '', group: '', teamType: '', userType: '', role: '' };
   }
   return {
     userId: cleanText_(getField_(rosterTable, row, 'userId')),
     teamId: cleanText_(getField_(rosterTable, row, 'teamId')),
     group: cleanText_(getField_(rosterTable, row, 'group')),
+    teamType: normalizeTeamType_(getField_(rosterTable, row, 'teamType')),
+    userType: normalizeUserType_(getField_(rosterTable, row, 'userType')),
     name: cleanText_(getField_(rosterTable, row, 'name')),
     displayName: cleanText_(getField_(rosterTable, row, 'displayName')),
     grade: cleanText_(getField_(rosterTable, row, 'grade')),
@@ -493,6 +528,8 @@ function buildRosterMap_(context) {
       userId: userId,
       teamId: cleanText_(getField_(rosterTable, row, 'teamId')),
       group: cleanText_(getField_(rosterTable, row, 'group')),
+      teamType: normalizeTeamType_(getField_(rosterTable, row, 'teamType')),
+      userType: normalizeUserType_(getField_(rosterTable, row, 'userType')),
       name: cleanText_(getField_(rosterTable, row, 'name')),
       displayName: cleanText_(getField_(rosterTable, row, 'displayName')) || cleanText_(getField_(rosterTable, row, 'name')),
       grade: cleanText_(getField_(rosterTable, row, 'grade')),
@@ -573,6 +610,7 @@ function ensureTeamsFromGroups_(teamsTable, groupSeedMap) {
       appendRecord_(teamsTable, {
         teamId: generateId_('team'),
         teamName: group,
+        teamType: inferTeamTypeFromName_(group),
         createdByUserId: '',
         adminUserIds: '',
         createdAt: isoNow_(),
@@ -604,7 +642,15 @@ function migrateUsers_(usersTable, rosterTable, teamsTable) {
       const team = findTeamByName_(teamsTable, group);
       if (team) {
         setField_(usersTable, row, 'teamId', cleanText_(getField_(teamsTable, team.row, 'teamId')));
+        setField_(usersTable, row, 'teamType', normalizeTeamType_(getField_(teamsTable, team.row, 'teamType')) || inferTeamTypeFromName_(group));
+        setField_(usersTable, row, 'userType', teamTypeToUserType_(cleanText_(getField_(usersTable, row, 'teamType'))));
       }
+    }
+    if (!cleanText_(getField_(usersTable, row, 'teamType'))) {
+      setField_(usersTable, row, 'teamType', inferTeamTypeFromName_(group));
+    }
+    if (!cleanText_(getField_(usersTable, row, 'userType'))) {
+      setField_(usersTable, row, 'userType', teamTypeToUserType_(cleanText_(getField_(usersTable, row, 'teamType'))));
     }
     if (!cleanText_(getField_(usersTable, row, 'role'))) {
       setField_(usersTable, row, 'role', 'member');
@@ -649,6 +695,8 @@ function migrateRoster_(rosterTable, usersTable, teamsTable, reviewTable) {
     setField_(rosterTable, row, 'userId', userId);
     setField_(rosterTable, row, 'teamId', cleanText_(getField_(usersTable, matched.userRow, 'teamId')));
     setField_(rosterTable, row, 'group', cleanText_(getField_(usersTable, matched.userRow, 'group')) || group);
+    setField_(rosterTable, row, 'teamType', cleanText_(getField_(usersTable, matched.userRow, 'teamType')) || inferTeamTypeFromName_(cleanText_(getField_(usersTable, matched.userRow, 'group')) || group));
+    setField_(rosterTable, row, 'userType', cleanText_(getField_(usersTable, matched.userRow, 'userType')) || teamTypeToUserType_(cleanText_(getField_(rosterTable, row, 'teamType'))));
     setField_(rosterTable, row, 'name', cleanText_(getField_(usersTable, matched.userRow, 'name')) || name);
     if (!cleanText_(getField_(rosterTable, row, 'displayName'))) {
       setField_(rosterTable, row, 'displayName', cleanText_(getField_(rosterTable, row, 'name')));
@@ -695,6 +743,8 @@ function migrateLogs_(logsTable, usersTable, rosterTable, teamsTable, reviewTabl
     setField_(logsTable, row, 'userId', userId);
     setField_(logsTable, row, 'teamId', cleanText_(getField_(usersTable, matched.userRow, 'teamId')));
     setField_(logsTable, row, 'group', cleanText_(getField_(usersTable, matched.userRow, 'group')) || group);
+    setField_(logsTable, row, 'teamType', cleanText_(getField_(usersTable, matched.userRow, 'teamType')) || inferTeamTypeFromName_(cleanText_(getField_(usersTable, matched.userRow, 'group')) || group));
+    setField_(logsTable, row, 'userType', cleanText_(getField_(usersTable, matched.userRow, 'userType')) || teamTypeToUserType_(cleanText_(getField_(logsTable, row, 'teamType'))));
     setField_(logsTable, row, 'displayName', cleanText_(getField_(usersTable, matched.userRow, 'name')) || name);
     hydrateLogProfileFields_(logsTable, row, rosterMap[userId], teamsTable);
     if (!cleanText_(getField_(logsTable, row, 'createdAt'))) {
@@ -723,6 +773,12 @@ function hydrateLogProfileFields_(logsTable, row, roster, teamsTable) {
     if (!cleanText_(getField_(logsTable, row, 'group')) && roster.group) {
       setField_(logsTable, row, 'group', roster.group);
     }
+    if (!cleanText_(getField_(logsTable, row, 'teamType')) && roster.teamType) {
+      setField_(logsTable, row, 'teamType', roster.teamType);
+    }
+    if (!cleanText_(getField_(logsTable, row, 'userType')) && roster.userType) {
+      setField_(logsTable, row, 'userType', roster.userType);
+    }
   }
 
   if (!cleanText_(getField_(logsTable, row, 'group'))) {
@@ -730,6 +786,8 @@ function hydrateLogProfileFields_(logsTable, row, roster, teamsTable) {
     const team = teamId ? findTeamById_(teamsTable, teamId) : null;
     if (team) {
       setField_(logsTable, row, 'group', cleanText_(getField_(teamsTable, team.row, 'teamName')));
+      setField_(logsTable, row, 'teamType', normalizeTeamType_(getField_(teamsTable, team.row, 'teamType')) || inferTeamTypeFromName_(cleanText_(getField_(teamsTable, team.row, 'teamName'))));
+      setField_(logsTable, row, 'userType', teamTypeToUserType_(cleanText_(getField_(logsTable, row, 'teamType'))));
     }
   }
 }
@@ -746,6 +804,8 @@ function syncRosterTeamFields_(rosterTable, row, teamsTable) {
     const team = findTeamByName_(teamsTable, group);
     if (team) {
       setField_(rosterTable, row, 'teamId', cleanText_(getField_(teamsTable, team.row, 'teamId')));
+      setField_(rosterTable, row, 'teamType', normalizeTeamType_(getField_(teamsTable, team.row, 'teamType')) || inferTeamTypeFromName_(group));
+      setField_(rosterTable, row, 'userType', teamTypeToUserType_(cleanText_(getField_(rosterTable, row, 'teamType'))));
     }
   }
 }
@@ -909,6 +969,8 @@ function buildRosterMapFromTable_(rosterTable) {
       userId: userId,
       teamId: cleanText_(getField_(rosterTable, row, 'teamId')),
       group: cleanText_(getField_(rosterTable, row, 'group')),
+      teamType: normalizeTeamType_(getField_(rosterTable, row, 'teamType')),
+      userType: normalizeUserType_(getField_(rosterTable, row, 'userType')),
       name: cleanText_(getField_(rosterTable, row, 'name')),
       displayName: cleanText_(getField_(rosterTable, row, 'displayName')) || cleanText_(getField_(rosterTable, row, 'name')),
       grade: cleanText_(getField_(rosterTable, row, 'grade')),
@@ -988,6 +1050,11 @@ function enrichUserRecord_(context, usersTable, row) {
         setField_(usersTable, row, 'teamId', user.teamId);
         changed = true;
       }
+      user.teamType = normalizeTeamType_(getField_(teamsTable, team.row, 'teamType')) || inferTeamTypeFromName_(user.group);
+      user.userType = teamTypeToUserType_(user.teamType);
+      setField_(usersTable, row, 'teamType', user.teamType);
+      setField_(usersTable, row, 'userType', user.userType);
+      changed = true;
     }
   }
 
@@ -999,7 +1066,20 @@ function enrichUserRecord_(context, usersTable, row) {
         setField_(usersTable, row, 'group', user.group);
         changed = true;
       }
+      user.teamType = normalizeTeamType_(getField_(teamsTable, teamById.row, 'teamType')) || inferTeamTypeFromName_(user.group);
+      user.userType = teamTypeToUserType_(user.teamType);
+      setField_(usersTable, row, 'teamType', user.teamType);
+      setField_(usersTable, row, 'userType', user.userType);
+      changed = true;
     }
+  }
+
+  if (!user.teamType && user.group) {
+    user.teamType = inferTeamTypeFromName_(user.group);
+    user.userType = teamTypeToUserType_(user.teamType);
+    setField_(usersTable, row, 'teamType', user.teamType);
+    setField_(usersTable, row, 'userType', user.userType);
+    changed = true;
   }
 
   if (changed) {
@@ -1024,6 +1104,7 @@ function syncTeamsFromUserGroupDropdown_(usersSheet, teamsSheet) {
       appendRecord_(teamsTable, {
         teamId: generateId_('team'),
         teamName: teamName,
+        teamType: inferTeamTypeFromName_(teamName),
         createdByUserId: '',
         adminUserIds: '',
         createdAt: isoNow_(),
@@ -1033,6 +1114,9 @@ function syncTeamsFromUserGroupDropdown_(usersSheet, teamsSheet) {
     }
     if (cleanText_(getField_(teamsTable, existing.row, 'status')) !== 'active') {
       setField_(teamsTable, existing.row, 'status', 'active');
+    }
+    if (!cleanText_(getField_(teamsTable, existing.row, 'teamType'))) {
+      setField_(teamsTable, existing.row, 'teamType', inferTeamTypeFromName_(teamName));
     }
   });
 
@@ -1117,6 +1201,31 @@ function uniqueNonEmpty_(values) {
   return Object.keys(map).map(function (key) {
     return map[key];
   });
+}
+
+function normalizeTeamType_(value) {
+  const text = cleanText_(value).toLowerCase();
+  if (text === 'student' || text === 'general') return text;
+  return '';
+}
+
+function normalizeUserType_(value) {
+  const text = cleanText_(value).toLowerCase();
+  if (text === 'student' || text === 'general' || text === 'admin') return text;
+  return '';
+}
+
+function teamTypeToUserType_(teamType) {
+  return normalizeTeamType_(teamType) === 'student' ? 'student' : 'general';
+}
+
+function inferTeamTypeFromName_(teamName) {
+  const text = cleanText_(teamName);
+  if (!text) return 'general';
+  if (/(高校|高等学校|中学|中学校|小学校|ジュニア|少年団|児童|学園|学院)/.test(text)) {
+    return 'student';
+  }
+  return 'general';
 }
 
 function ensureSheets_(spreadsheet) {
