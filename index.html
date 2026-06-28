@@ -169,6 +169,14 @@ textarea:focus,input:focus{border-color:var(--red)}
 .auth-label{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px;margin-top:12px;display:block}
 .auth-input{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:16px;font-family:inherit;outline:none;letter-spacing:0.1em;text-align:center}
 .auth-input:focus{border-color:var(--red)}
+.auth-select{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:15px;font-family:inherit;outline:none;background:#fff;color:var(--ink)}
+.auth-select:focus{border-color:var(--red)}
+.auth-inline-toggle{display:flex;align-items:center;gap:8px;margin-top:12px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:#fff;font-size:12px;color:var(--ink2)}
+.auth-inline-toggle input{accent-color:var(--red)}
+.auth-extra-box{display:none;margin-top:12px;padding:12px;border-radius:var(--radius-sm);background:#faf6ee;border:1px solid #ead7b7}
+.auth-extra-box.show{display:block}
+.auth-team-meta{font-size:11px;color:var(--ink3);line-height:1.6;margin-top:6px}
+.auth-team-loading{font-size:11px;color:var(--ink3);margin-top:8px}
 .auth-btn{width:100%;padding:14px;margin-top:16px;background:var(--red);color:#fff;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:0.05em}
 .auth-hint{font-size:11px;color:var(--ink3);text-align:center;margin-top:8px;line-height:1.6}
 .auth-err{font-size:12px;color:var(--red);text-align:center;margin-top:8px;min-height:18px}
@@ -268,6 +276,20 @@ textarea:focus,input:focus{border-color:var(--red)}
 <div class="auth-panel" id="auth-register">
   <label class="auth-label">名前（フルネーム）</label>
   <input class="auth-input" id="regName" type="text" placeholder="田中 太郎" maxlength="20" style="letter-spacing:normal;text-align:left">
+  <label class="auth-label">所属チーム</label>
+  <select class="auth-select" id="regTeamSelect">
+    <option value="">所属チームを選択してください</option>
+  </select>
+  <div class="auth-team-loading" id="teamLoadingText">所属チームを読み込み中...</div>
+  <label class="auth-inline-toggle">
+    <input id="launchTeamToggle" type="checkbox" onchange="toggleTeamLaunchMode()">
+    <span>自分のチームがないのでローンチする</span>
+  </label>
+  <div class="auth-extra-box" id="launchTeamBox">
+    <label class="auth-label" style="margin-top:0">新しいチーム名</label>
+    <input class="auth-input" id="launchTeamName" type="text" placeholder="例：府中東 和太鼓部" maxlength="40" style="letter-spacing:normal;text-align:left">
+    <div class="auth-team-meta">登録した本人が最初の管理者になりますが、その情報はユーザー画面には表示されません。</div>
+  </div>
   <label class="auth-label">4桁PINを決める（好きな数字4つ）</label>
   <div class="pin-row">
     <input class="pin-digit" id="rp0" type="password" inputmode="numeric" maxlength="1" oninput="pinMove(this,'rp1')">
@@ -507,7 +529,7 @@ textarea:focus,input:focus{border-color:var(--red)}
 // ============================================
 // 【設定】GASのウェブアプリURLをここに貼る
 // ============================================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbz55G2GOryMBvDWabjsDHwS2rDe6_cXPfWsXOhH84siHtQseSgk0i91TGYfepZIolHL/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwm21rQITFGNgi-2TmnadTdd-rQaf425NKSUz0WJcPUYB6KrTQ7WtY6Rokn_aP-axabUg/exec";
 
 // ============================================
 // 【設定】Google Drive ライブラリ
@@ -520,13 +542,19 @@ const DRIVE_PAGE_SIZE = 100;
 const GOOD_NEWS_ROTATE_MS = 3000;
 const GOOD_NEWS_REFRESH_MS = 60000;
 const GOOD_NEWS_RECENT_LIMIT = 4;
-const APP_VERSION = '2026-05-13-01';
+const APP_VERSION = '2026-06-28-01';
 const APP_VERSION_KEY = 'taiko_app_version';
+const TEAM_CACHE_KEY = 'taiko_team_options';
 
 const COND_EMOJI = ['','☠️','💦','😃','💪','🔥'];
 let selCond = 0;
 let selAchievement = '';
 let cachedLogs = [];
+const teamState = {
+  items: [],
+  loaded: false,
+  loading: false
+};
 const goodNewsState = {
   items: [],
   timerId: null,
@@ -569,6 +597,7 @@ const goodNewsElements = {
 
 document.addEventListener('DOMContentLoaded', initializeDriveLibrary);
 document.addEventListener('DOMContentLoaded', initializeGoodNewsFeed);
+document.addEventListener('DOMContentLoaded', initializeAuthUi);
 
 function initializeDriveLibrary() {
   renderLibraryLoadingSkeleton();
@@ -612,10 +641,16 @@ function initializeGoodNewsFeed() {
   renderGoodNewsPlaceholder('loading', '読み込み中...', 'みんなの前向きな変化が3秒ごとに流れます');
   document.addEventListener('visibilitychange', syncGoodNewsTickerWithView);
 }
+function initializeAuthUi() {
+  hydrateCachedTeamOptions();
+  renderTeamOptions();
+  toggleTeamLaunchMode(false);
+  loadTeamOptions();
+}
 // ============================================
 // 起動処理
 // ============================================
-window.onload = function() {
+window.onload = async function() {
   const versionStatus = enforceAppVersion();
   const name = localStorage.getItem('taiko_name');
   const pin  = localStorage.getItem('taiko_pin');
@@ -629,7 +664,11 @@ window.onload = function() {
   }
 
   if (name && pin) {
-    // 自動ログイン
+    const userId = getUserId();
+    if (!userId) {
+      const ok = await refreshSessionFromLogin(name, pin);
+      if (!ok) return;
+    }
     document.getElementById('authOverlay').classList.add('hidden');
     goTo('home');
     loadLogs();
@@ -678,6 +717,119 @@ function getPin(prefix) {
   return ['0','1','2','3'].map(i => document.getElementById(prefix + i).value).join('');
 }
 
+function hydrateCachedTeamOptions() {
+  try {
+    const raw = localStorage.getItem(TEAM_CACHE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return;
+    teamState.items = parsed.filter(Boolean);
+    teamState.loaded = teamState.items.length > 0;
+  } catch (error) {
+    console.warn('team cache hydrate failed', error);
+  }
+}
+
+function cacheTeamOptions() {
+  try {
+    localStorage.setItem(TEAM_CACHE_KEY, JSON.stringify(teamState.items));
+  } catch (error) {
+    console.warn('team cache save failed', error);
+  }
+}
+
+async function loadTeamOptions(force = false) {
+  if (teamState.loading) return;
+  if (!force && teamState.loaded && teamState.items.length) return;
+
+  teamState.loading = true;
+  updateTeamLoadingMessage('所属チームを読み込み中...');
+
+  try {
+    const requestUrl = new URL(GAS_URL);
+    requestUrl.searchParams.set('action', 'getTeams');
+    const response = await fetch(requestUrl.toString());
+    const json = await response.json();
+    if (!response.ok || json.status !== 'ok' || !Array.isArray(json.teams)) {
+      throw new Error(json.message || 'team fetch failed');
+    }
+    teamState.items = json.teams
+      .filter((team) => team && team.teamId && team.teamName)
+      .map((team) => ({
+        teamId: String(team.teamId),
+        teamName: String(team.teamName)
+      }))
+      .sort((a, b) => a.teamName.localeCompare(b.teamName, 'ja'));
+    teamState.loaded = true;
+    cacheTeamOptions();
+    renderTeamOptions();
+    updateTeamLoadingMessage(teamState.items.length ? '' : '所属チームがまだ登録されていません。');
+  } catch (error) {
+    console.warn(error);
+    renderTeamOptions();
+    updateTeamLoadingMessage(teamState.items.length ? '最新の所属チーム取得に失敗したため、前回の一覧を表示しています。' : '所属チーム一覧を取得できませんでした。ローンチ登録は可能です。');
+  } finally {
+    teamState.loading = false;
+  }
+}
+
+function renderTeamOptions() {
+  const select = document.getElementById('regTeamSelect');
+  if (!select) return;
+  const currentValue = select.value;
+  const options = ['<option value="">所属チームを選択してください</option>']
+    .concat(teamState.items.map((team) => `<option value="${esc(team.teamId)}">${esc(team.teamName)}</option>`));
+  select.innerHTML = options.join('');
+  if (teamState.items.some((team) => team.teamId === currentValue)) {
+    select.value = currentValue;
+  }
+}
+
+function updateTeamLoadingMessage(message) {
+  const el = document.getElementById('teamLoadingText');
+  if (!el) return;
+  el.textContent = message || '';
+  el.style.display = message ? 'block' : 'none';
+}
+
+function toggleTeamLaunchMode(forceValue) {
+  const toggle = document.getElementById('launchTeamToggle');
+  const box = document.getElementById('launchTeamBox');
+  const select = document.getElementById('regTeamSelect');
+  if (!toggle || !box || !select) return;
+
+  if (typeof forceValue === 'boolean') {
+    toggle.checked = forceValue;
+  }
+
+  const isLaunchMode = !!toggle.checked;
+  box.classList.toggle('show', isLaunchMode);
+  select.disabled = isLaunchMode;
+  if (isLaunchMode) {
+    select.value = '';
+  } else {
+    document.getElementById('launchTeamName').value = '';
+  }
+}
+
+function getRegistrationTeamPayload() {
+  const isLaunchMode = !!document.getElementById('launchTeamToggle')?.checked;
+  const teamId = document.getElementById('regTeamSelect')?.value || '';
+  const teamName = document.getElementById('launchTeamName')?.value.trim() || '';
+
+  if (isLaunchMode) {
+    if (!teamName) {
+      return { ok: false, message: 'ローンチするチーム名を入力してください' };
+    }
+    return { ok: true, teamMode: 'launch', teamName };
+  }
+
+  if (!teamId) {
+    return { ok: false, message: '所属チームを選択してください' };
+  }
+  return { ok: true, teamMode: 'existing', teamId };
+}
+
 // ============================================
 // 登録
 // ============================================
@@ -688,19 +840,27 @@ async function doRegister() {
   err.textContent = '';
   if (!name)       { err.textContent = '名前を入力してください'; return; }
   if (pin.length < 4) { err.textContent = '4桁すべて入力してください'; return; }
+  const teamPayload = getRegistrationTeamPayload();
+  if (!teamPayload.ok) { err.textContent = teamPayload.message; return; }
 
   err.textContent = '登録中...';
   try {
     const res  = await fetch(GAS_URL, {
       method: 'POST',
       headers: {'Content-Type':'text/plain'},
-      body: JSON.stringify({ action:'register', name, pin }),
+      body: JSON.stringify({ action:'register', name, pin, ...teamPayload }),
     });
     const json = await res.json();
     if (json.status === 'exists') { err.textContent = 'この名前はすでに登録されています。ログインしてください'; return; }
+    if (json.status === 'team_exists') { err.textContent = 'そのチーム名は既に存在します。所属チームから選択してください'; loadTeamOptions(true); return; }
     if (json.status !== 'ok')    { err.textContent = 'エラーが発生しました'; return; }
-    // 登録成功 → そのままログイン
-    saveSession(name, pin);
+    saveSession({
+      name,
+      pin,
+      userId: json.userId || '',
+      teamId: json.teamId || teamPayload.teamId || '',
+      group: json.group || teamPayload.teamName || getTeamNameFromState(teamPayload.teamId)
+    });
     hideAuth();
     goTo('home');
     loadLogs();
@@ -729,7 +889,13 @@ async function doLogin() {
     });
     const json = await res.json();
     if (json.status !== 'ok') { err.textContent = '名前またはPINが違います'; return; }
-    saveSession(name, pin);
+    saveSession({
+      name,
+      pin,
+      userId: json.userId || '',
+      teamId: json.teamId || '',
+      group: json.group || ''
+    });
     hideAuth();
     goTo('home');
     loadLogs();
@@ -738,9 +904,38 @@ async function doLogin() {
   }
 }
 
-function saveSession(name, pin) {
-  localStorage.setItem('taiko_name', name);
-  localStorage.setItem('taiko_pin',  pin);
+async function refreshSessionFromLogin(name, pin) {
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({ action:'login', name, pin }),
+    });
+    const json = await res.json();
+    if (json.status !== 'ok') return false;
+    saveSession({
+      name,
+      pin,
+      userId: json.userId || '',
+      teamId: json.teamId || '',
+      group: json.group || ''
+    });
+    return true;
+  } catch (error) {
+    console.warn('silent login failed', error);
+    return false;
+  }
+}
+
+function saveSession(session) {
+  localStorage.setItem('taiko_name', session.name || '');
+  localStorage.setItem('taiko_pin',  session.pin || '');
+  if (session.userId) localStorage.setItem('taiko_user_id', session.userId);
+  else localStorage.removeItem('taiko_user_id');
+  if (session.teamId) localStorage.setItem('taiko_team_id', session.teamId);
+  else localStorage.removeItem('taiko_team_id');
+  if (session.group) localStorage.setItem('taiko_group', session.group);
+  else localStorage.removeItem('taiko_group');
   localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
 }
 
@@ -757,6 +952,9 @@ function doLogout() {
   stopGoodNewsRefresh();
   localStorage.removeItem('taiko_name');
   localStorage.removeItem('taiko_pin');
+  localStorage.removeItem('taiko_user_id');
+  localStorage.removeItem('taiko_team_id');
+  localStorage.removeItem('taiko_group');
   localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
   cachedLogs = [];
   location.reload();
@@ -777,9 +975,17 @@ function goTo(s) {
 
 function getName()  { return localStorage.getItem('taiko_name') || ''; }
 function getPin2()  { return localStorage.getItem('taiko_pin')  || ''; }
+function getUserId() { return localStorage.getItem('taiko_user_id') || ''; }
+function getTeamId() { return localStorage.getItem('taiko_team_id') || ''; }
+function getGroup()  { return localStorage.getItem('taiko_group') || ''; }
 function getDateStr() {
   const d = new Date();
   return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${'日月火水木金土'[d.getDay()]}）`;
+}
+
+function getTeamNameFromState(teamId) {
+  const team = teamState.items.find((item) => item.teamId === teamId);
+  return team ? team.teamName : '';
 }
 
 // ============================================
@@ -788,7 +994,7 @@ function getDateStr() {
 function updateHome() {
   document.getElementById('heroDate').textContent = getDateStr();
   document.getElementById('heroName').textContent = getName() + ' さん';
-  document.getElementById('headerUserName').textContent = getName();
+  document.getElementById('headerUserName').textContent = getGroup() ? `${getName()} | ${getGroup()}` : getName();
   const total = cachedLogs.length;
   document.getElementById('totalCount').textContent = total;
   document.getElementById('statTotal').textContent  = total;
@@ -860,6 +1066,7 @@ async function loadGoodNewsFeed({ force = false, background = false } = {}) {
     requestUrl.searchParams.set('action', 'getGoodNews');
     requestUrl.searchParams.set('name', getName());
     requestUrl.searchParams.set('pin', getPin2());
+    if (getUserId()) requestUrl.searchParams.set('userId', getUserId());
 
     const response = await fetch(requestUrl.toString());
     const json = await response.json();
@@ -1122,6 +1329,9 @@ async function submitLog() {
 
   const payload = {
     action: 'saveLog',
+    userId:   getUserId(),
+    teamId:   getTeamId(),
+    group:    getGroup(),
     name:     getName(),
     pin:      getPin2(),
     date:     getDateStr(),
@@ -1142,6 +1352,8 @@ async function submitLog() {
     if (json.status === 'ok') {
       // ローカルにも追記してすぐ反映
       cachedLogs.unshift({
+        userId: getUserId(),
+        group: getGroup(),
         cond: selCond,
         learning,
         next,
@@ -1207,12 +1419,24 @@ async function loadLogs() {
   const _start = Date.now();
   try {
     const url = GAS_URL
-      + '?name=' + encodeURIComponent(getName())
-      + '&pin='  + encodeURIComponent(getPin2());
+      + '?action=getLogs'
+      + '&userId=' + encodeURIComponent(getUserId())
+      + '&name=' + encodeURIComponent(getName())
+      + '&pin='  + encodeURIComponent(getPin2())
+      + '&teamId=' + encodeURIComponent(getTeamId());
     const res  = await fetch(url);
     const json = await res.json();
     if (json.status === 'ok') {
       cachedLogs = json.logs;
+      if (json.userId || json.teamId || json.group) {
+        saveSession({
+          name: getName(),
+          pin: getPin2(),
+          userId: json.userId || getUserId(),
+          teamId: json.teamId || getTeamId(),
+          group: json.group || getGroup()
+        });
+      }
       if (document.getElementById('screen-home').classList.contains('active')) updateHome();
       else ensureGoodNewsFeed();
     }
@@ -1236,7 +1460,7 @@ function fmtDate(val) {
   return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${'日月火水木金土'[d.getDay()]}）`;
 }
 function updateLog() {
-  document.getElementById('logName').textContent = getName() + ' さんの記録';
+  document.getElementById('logName').textContent = getGroup() ? `${getName()} さんの記録｜${getGroup()}` : getName() + ' さんの記録';
   const el = document.getElementById('logContent');
   if (!cachedLogs.length) {
     el.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--ink3)">まだ記録がありません</div>';
@@ -1245,11 +1469,21 @@ function updateLog() {
   el.innerHTML = cachedLogs.map(l => `
     <div class="log-entry">
       <div class="log-date"><span>${esc(fmtDate(l.date))}</span><span class="log-cond">${COND_EMOJI[l.cond]||''}</span></div>
+      ${renderProfileMeta(l)}
       <div class="log-section"><div class="log-section-label">今日の学び</div><div class="log-section-text">${esc(l.learning)}</div></div>
       <div class="log-next"><div class="log-next-label">▶ 次の稽古でやること</div><div class="log-next-text">${esc(l.next)}</div></div>
       ${renderAchievementLog(l)}
       <div class="log-section" style="margin-top:8px"><div class="log-section-label">Good & New</div><div class="log-section-text">${esc(l.goodNew)}</div></div>
     </div>`).join('');
+}
+
+function renderProfileMeta(log) {
+  const pieces = [];
+  if (log.grade) pieces.push(`学年: ${esc(log.grade)}`);
+  if (log.term) pieces.push(`期: ${esc(log.term)}`);
+  if (log.group) pieces.push(`所属: ${esc(log.group)}`);
+  if (!pieces.length) return '';
+  return `<div class="log-section" style="margin-top:8px"><div class="log-section-label">プロフィール</div><div class="log-section-text">${pieces.join(' / ')}</div></div>`;
 }
 
 function renderAchievementLog(log) {
