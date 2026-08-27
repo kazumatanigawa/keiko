@@ -1,19 +1,31 @@
 # GAS Backend
 
-`gas/Code.gs` は、`index.html` から呼ばれる Web App 用の Apps Script 実装です。
+`gas/Code.gs` is the thin API layer between `index.html` and Supabase. It does
+not read or write Google Sheets.
 
-## 想定
+## Script Properties
 
-- スプレッドシートは既存運用を継続する
-- 既存データは削除しない
-- 初回実行時にバックアップ、ID採番、`teamId`/`userId` 補完、`部員一覧` 再構築を行う
+Set these values in Apps Script under **Project Settings > Script Properties**.
 
-## デプロイ手順
+| Property | Purpose |
+| --- | --- |
+| `SUPABASE_URL` | Project URL such as `https://PROJECT_REF.supabase.co` |
+| `SUPABASE_SECRET_KEY` | Server-only Supabase secret key |
+| `SUPABASE_PUBLISHABLE_KEY` | Browser-safe key used for Auth and RLS requests |
+| `KEIKO_AUTH_PEPPER` | Same secret value used by the migration scripts |
+| `KEIKO_REGISTRATION_CODE` | Code required for all new registrations |
 
-1. Apps Script プロジェクトを開く
-2. `Code.gs` をこの内容で置き換える
-3. `appsscript.json` を反映する
-4. 必要ならスクリプトプロパティ `SPREADSHEET_ID` を設定する
-5. Web App を再デプロイする
+Never place the secret key, auth pepper, or registration code in `index.html`.
 
-`SPREADSHEET_ID` を設定しない場合は、コンテナバインドされたスプレッドシートを使います。
+## Deploy
+
+1. Replace the Apps Script project's `Code.gs` with `gas/Code.gs`.
+2. Apply `gas/appsscript.json` if the manifest is managed manually.
+3. Add all five Script Properties above.
+4. Deploy a new Web App version.
+5. Execute the app as the deploying account and allow access to anyone using the app.
+6. Keep the `/exec` URL in `index.html` unchanged when updating an existing deployment.
+7. Open the app in a private window and verify login, log save, log reload, notes, and logout.
+
+After switching production to this version, Google Sheets are migration archives
+only. New application data is stored in Supabase.

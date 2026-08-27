@@ -309,6 +309,8 @@ textarea:focus,input:focus{border-color:var(--red)}
     <input class="pin-digit" id="rp2" type="password" inputmode="numeric" maxlength="1" oninput="pinMove(this,'rp3')">
     <input class="pin-digit" id="rp3" type="password" inputmode="numeric" maxlength="1" oninput="pinMove(this,null)">
   </div>
+  <label class="auth-label">登録コード</label>
+  <input class="auth-input" id="registrationCode" type="password" placeholder="指導員から共有されたコード" maxlength="64" style="letter-spacing:normal;text-align:left">
   <div class="auth-err" id="regErr"></div>
   <button class="auth-btn" onclick="doRegister()">登録してはじめる</button>
   <div class="auth-hint">※ 4桁PINは自分だけの番号です。忘れないようにしよう！</div>
@@ -542,9 +544,12 @@ const GOOD_NEWS_ROTATE_MS = 3000;
 const GOOD_NEWS_REFRESH_MS = 60000;
 const GOOD_NEWS_RECENT_LIMIT = 4;
 const NOTES_REFRESH_MS = 45000;
-const APP_VERSION = '2026-06-28-01';
+const APP_VERSION = '2026-08-27-01';
 const APP_VERSION_KEY = 'taiko_app_version';
 const TEAM_CACHE_KEY = 'taiko_team_options';
+const ACCESS_TOKEN_KEY = 'taiko_access_token';
+const REFRESH_TOKEN_KEY = 'taiko_refresh_token';
+const TOKEN_EXPIRES_AT_KEY = 'taiko_token_expires_at';
 
 const COND_EMOJI = ['','☠️','💦','😃','💪','🔥'];
 let selCond = 0;
@@ -607,7 +612,6 @@ function initializeAuthUi() {
 window.onload = async function() {
   const versionStatus = enforceAppVersion();
   const name = localStorage.getItem('taiko_name');
-  const pin  = localStorage.getItem('taiko_pin');
   if (name) document.getElementById('loginName').value = name;
 
   if (versionStatus.requiresRelogin) {
@@ -617,21 +621,23 @@ window.onload = async function() {
     return;
   }
 
-  if (name && pin) {
-    const userId = getUserId();
-    if (!userId) {
-      const ok = await refreshSessionFromLogin(name, pin);
-      if (!ok) return;
+  if (hasSession()) {
+    try {
+      await ensureAccessToken();
+      document.getElementById('authOverlay').classList.add('hidden');
+      goTo('home');
+      loadLogs();
+    } catch (error) {
+      clearSession();
+      const err = document.getElementById('loginErr');
+      if (err) err.textContent = 'ログインの有効期限が切れました。もう一度ログインしてください。';
     }
-    document.getElementById('authOverlay').classList.add('hidden');
-    goTo('home');
-    loadLogs();
   }
 };
 
 function enforceAppVersion() {
   const storedVersion = localStorage.getItem(APP_VERSION_KEY);
-  const hasSession = !!localStorage.getItem('taiko_name') || !!localStorage.getItem('taiko_pin');
+  const hadSession = hasSession();
 
   if (!storedVersion) {
     localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
@@ -640,9 +646,8 @@ function enforceAppVersion() {
 
   if (storedVersion !== APP_VERSION) {
     localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
-    if (hasSession) {
-      localStorage.removeItem('taiko_name');
-      localStorage.removeItem('taiko_pin');
+    if (hadSession) {
+      clearSession();
       return { requiresRelogin: true };
     }
   }
@@ -669,6 +674,67 @@ function pinMove(el, nextId) {
 
 function getPin(prefix) {
   return ['0','1','2','3'].map(i => document.getElementById(prefix + i).value).join('');
+}
+
+function clearPin(prefix) {
+  ['0','1','2','3'].forEach(i => {
+    const input = document.getElementById(prefix + i);
+    if (input) input.value = '';
+  });
+}
+
+function hasSession() {
+  return !!localStorage.getItem(REFRESH_TOKEN_KEY);
+}
+
+async function apiRequest(action, payload = {}, options = {}) {
+  const { auth = true, retry = true } = options;
+  const body = { action, ...payload };
+  if (auth) body.accessToken = await ensureAccessToken();
+
+  const response = await fetch(GAS_URL, {
+    method: 'POST',
+    headers: {'Content-Type':'text/plain'},
+    body: JSON.stringify(body),
+  });
+  const json = await response.json();
+  if (json.status === 'ok' || json.status === 'exists' || json.status === 'team_exists') return json;
+
+  if (auth && retry && ['auth_required', 'session_expired'].includes(json.code)) {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(TOKEN_EXPIRES_AT_KEY);
+    await refreshAccessToken();
+    return apiRequest(action, payload, { auth: true, retry: false });
+  }
+  const error = new Error(json.message || '処理に失敗しました');
+  error.code = json.code || 'request_failed';
+  throw error;
+}
+
+async function ensureAccessToken() {
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY) || '';
+  const expiresAt = Number(localStorage.getItem(TOKEN_EXPIRES_AT_KEY) || 0);
+  if (token && expiresAt > Date.now() + 60000) return token;
+  return refreshAccessToken();
+}
+
+let refreshPromise = null;
+async function refreshAccessToken() {
+  if (refreshPromise) return refreshPromise;
+  const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY) || '';
+  if (!refreshToken) throw new Error('ログインが必要です');
+
+  refreshPromise = apiRequest('refreshSession', { refreshToken }, { auth: false, retry: false })
+    .then(json => {
+      saveSession(json);
+      return json.accessToken;
+    })
+    .catch(error => {
+      clearSession();
+      throw error;
+    })
+    .finally(() => { refreshPromise = null; });
+  return refreshPromise;
 }
 
 function hydrateCachedTeamOptions() {
@@ -700,13 +766,8 @@ async function loadTeamOptions(force = false) {
   updateTeamLoadingMessage('所属チームを読み込み中...');
 
   try {
-    const requestUrl = new URL(GAS_URL);
-    requestUrl.searchParams.set('action', 'getTeams');
-    const response = await fetch(requestUrl.toString());
-    const json = await response.json();
-    if (!response.ok || json.status !== 'ok' || !Array.isArray(json.teams)) {
-      throw new Error(json.message || 'team fetch failed');
-    }
+    const json = await apiRequest('getTeams', {}, { auth: false });
+    if (!Array.isArray(json.teams)) throw new Error('team fetch failed');
     teamState.items = json.teams
       .filter((team) => team && team.teamId && team.teamName)
       .map((team) => ({
@@ -917,38 +978,28 @@ function collectRegisteredName() {
 async function doRegister() {
   const nameFields = collectRegisteredName();
   const pin  = getPin('rp');
+  const registrationCode = document.getElementById('registrationCode')?.value.trim() || '';
   const err  = document.getElementById('regErr');
   err.textContent = '';
   if (!nameFields.ok) { err.textContent = nameFields.message; return; }
   if (pin.length < 4) { err.textContent = '4桁すべて入力してください'; return; }
+  if (!registrationCode) { err.textContent = '登録コードを入力してください'; return; }
   const teamPayload = getRegistrationTeamPayload();
   if (!teamPayload.ok) { err.textContent = teamPayload.message; return; }
 
   err.textContent = '登録中...';
   try {
-    const res  = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: {'Content-Type':'text/plain'},
-      body: JSON.stringify({ action:'register', name: nameFields.name, pin, ...nameFields, ...teamPayload }),
-    });
-    const json = await res.json();
+    const json = await apiRequest('register', { name: nameFields.name, pin, registrationCode, ...nameFields, ...teamPayload }, { auth: false });
     if (json.status === 'exists') { err.textContent = 'この名前はすでに登録されています。ログインしてください'; return; }
     if (json.status === 'team_exists') { err.textContent = 'そのチーム名は既に存在します。所属チームから選択してください'; loadTeamOptions(true); return; }
-    if (json.status !== 'ok')    { err.textContent = 'エラーが発生しました'; return; }
-    saveSession({
-      name: nameFields.name,
-      pin,
-      userId: json.userId || '',
-      teamId: json.teamId || teamPayload.teamId || '',
-      group: json.group || teamPayload.teamName || getTeamNameFromState(teamPayload.teamId),
-      teamType: json.teamType || teamPayload.teamType || getTeamTypeFromState(teamPayload.teamId),
-      userType: json.userType || ''
-    });
+    saveSession(json);
+    clearPin('rp');
+    document.getElementById('registrationCode').value = '';
     hideAuth();
     goTo('home');
     loadLogs();
   } catch(e) {
-    err.textContent = '通信エラー。Wi-Fiを確認してください';
+    err.textContent = e.message || '通信エラー。Wi-Fiを確認してください';
   }
 }
 
@@ -965,58 +1016,23 @@ async function doLogin() {
 
   err.textContent = '確認中...';
   try {
-    const res  = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: {'Content-Type':'text/plain'},
-      body: JSON.stringify({ action:'login', name, pin }),
-    });
-    const json = await res.json();
-    if (json.status !== 'ok') { err.textContent = '名前またはPINが違います'; return; }
-    saveSession({
-      name,
-      pin,
-      userId: json.userId || '',
-      teamId: json.teamId || '',
-      group: json.group || '',
-      teamType: json.teamType || '',
-      userType: json.userType || ''
-    });
+    const json = await apiRequest('login', { name, pin }, { auth: false });
+    saveSession(json);
+    clearPin('lp');
     hideAuth();
     goTo('home');
     loadLogs();
   } catch(e) {
-    err.textContent = '通信エラー。Wi-Fiを確認してください';
-  }
-}
-
-async function refreshSessionFromLogin(name, pin) {
-  try {
-    const res = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: {'Content-Type':'text/plain'},
-      body: JSON.stringify({ action:'login', name, pin }),
-    });
-    const json = await res.json();
-    if (json.status !== 'ok') return false;
-    saveSession({
-      name,
-      pin,
-      userId: json.userId || '',
-      teamId: json.teamId || '',
-      group: json.group || '',
-      teamType: json.teamType || '',
-      userType: json.userType || ''
-    });
-    return true;
-  } catch (error) {
-    console.warn('silent login failed', error);
-    return false;
+    err.textContent = e.message || '名前またはPINが違います';
   }
 }
 
 function saveSession(session) {
   localStorage.setItem('taiko_name', session.name || '');
-  localStorage.setItem('taiko_pin',  session.pin || '');
+  if (session.accessToken) localStorage.setItem(ACCESS_TOKEN_KEY, session.accessToken);
+  if (session.refreshToken) localStorage.setItem(REFRESH_TOKEN_KEY, session.refreshToken);
+  if (session.expiresAt) localStorage.setItem(TOKEN_EXPIRES_AT_KEY, String(Number(session.expiresAt) * 1000));
+  else if (session.expiresIn) localStorage.setItem(TOKEN_EXPIRES_AT_KEY, String(Date.now() + Number(session.expiresIn) * 1000));
   if (session.userId) localStorage.setItem('taiko_user_id', session.userId);
   else localStorage.removeItem('taiko_user_id');
   if (session.teamId) localStorage.setItem('taiko_team_id', session.teamId);
@@ -1030,6 +1046,11 @@ function saveSession(session) {
   localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
 }
 
+function clearSession() {
+  ['taiko_name', 'taiko_user_id', 'taiko_team_id', 'taiko_group', 'taiko_team_type', 'taiko_user_type', ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, TOKEN_EXPIRES_AT_KEY, 'taiko_pin']
+    .forEach(key => localStorage.removeItem(key));
+}
+
 function hideAuth() {
   document.getElementById('authOverlay').classList.add('hidden');
 }
@@ -1041,13 +1062,7 @@ function doLogout() {
   if (!confirm('ログアウトしますか？')) return;
   stopGoodNewsTicker();
   stopGoodNewsRefresh();
-  localStorage.removeItem('taiko_name');
-  localStorage.removeItem('taiko_pin');
-  localStorage.removeItem('taiko_user_id');
-  localStorage.removeItem('taiko_team_id');
-  localStorage.removeItem('taiko_group');
-  localStorage.removeItem('taiko_team_type');
-  localStorage.removeItem('taiko_user_type');
+  clearSession();
   localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
   cachedLogs = [];
   location.reload();
@@ -1068,7 +1083,6 @@ function goTo(s) {
 }
 
 function getName()  { return localStorage.getItem('taiko_name') || ''; }
-function getPin2()  { return localStorage.getItem('taiko_pin')  || ''; }
 function getUserId() { return localStorage.getItem('taiko_user_id') || ''; }
 function getTeamId() { return localStorage.getItem('taiko_team_id') || ''; }
 function getGroup()  { return localStorage.getItem('taiko_group') || ''; }
@@ -1128,11 +1142,11 @@ function isHomeScreenActive() {
 }
 
 function canRunGoodNewsTicker() {
-  return isHomeScreenActive() && !document.hidden && !!getName() && !!getPin2();
+  return isHomeScreenActive() && !document.hidden && hasSession();
 }
 
 function ensureGoodNewsFeed(force = false) {
-  if (!getName() || !getPin2()) return;
+  if (!hasSession()) return;
   const isStale = Date.now() - goodNewsState.lastFetchedAt > GOOD_NEWS_REFRESH_MS;
   if ((force || !goodNewsState.loaded || isStale) && !goodNewsState.loading) {
     loadGoodNewsFeed({ force, background: goodNewsState.loaded && !force });
@@ -1142,7 +1156,7 @@ function ensureGoodNewsFeed(force = false) {
 }
 
 async function loadGoodNewsFeed({ force = false, background = false } = {}) {
-  if (!getName() || !getPin2()) return;
+  if (!hasSession()) return;
   if (goodNewsState.loading) return;
   if (!force && goodNewsState.loaded && Date.now() - goodNewsState.lastFetchedAt < GOOD_NEWS_REFRESH_MS) {
     syncGoodNewsTickerWithView();
@@ -1155,17 +1169,7 @@ async function loadGoodNewsFeed({ force = false, background = false } = {}) {
   }
 
   try {
-    const requestUrl = new URL(GAS_URL);
-    requestUrl.searchParams.set('action', 'getGoodNews');
-    requestUrl.searchParams.set('name', getName());
-    requestUrl.searchParams.set('pin', getPin2());
-    if (getUserId()) requestUrl.searchParams.set('userId', getUserId());
-
-    const response = await fetch(requestUrl.toString());
-    const json = await response.json();
-    if (!response.ok || json.status !== 'ok') {
-      throw new Error(json.message || 'Good&New feed request failed.');
-    }
+    const json = await apiRequest('getGoodNews', { teamId: getTeamId() });
 
     goodNewsState.items = normalizeGoodNewsItems(json.items);
     goodNewsState.loaded = true;
@@ -1421,12 +1425,8 @@ async function submitLog() {
   btn.disabled = true; btn.textContent = '送信中...';
 
   const payload = {
-    action: 'saveLog',
-    userId:   getUserId(),
     teamId:   getTeamId(),
-    group:    getGroup(),
-    name:     getName(),
-    pin:      getPin2(),
+    requestId: createRequestId(),
     date:     getDateKey(),
     cond:     selCond,
     learning, next, goodNew,
@@ -1436,12 +1436,7 @@ async function submitLog() {
   };
 
   try {
-    const res  = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: {'Content-Type':'text/plain'},
-      body: JSON.stringify(payload),
-    });
-    const json = await res.json();
+    const json = await apiRequest('saveLog', payload);
     if (json.status === 'ok') {
       // ローカルにも追記してすぐ反映
       cachedLogs.unshift({
@@ -1469,6 +1464,13 @@ async function submitLog() {
     showToast('通信エラー。Wi-Fiを確認してください');
     btn.disabled = false; btn.textContent = '記録を保存する ✓';
   }
+}
+
+function createRequestId() {
+  if (window.crypto?.randomUUID) return window.crypto.randomUUID().replace(/-/g, '');
+  const random = new Uint8Array(24);
+  window.crypto.getRandomValues(random);
+  return Array.from(random, byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
 function closeSuccess() {
@@ -1512,20 +1514,12 @@ async function loadLogs() {
   showLoading();
   const _start = Date.now();
   try {
-    const url = GAS_URL
-      + '?action=getLogs'
-      + '&userId=' + encodeURIComponent(getUserId())
-      + '&name=' + encodeURIComponent(getName())
-      + '&pin='  + encodeURIComponent(getPin2())
-      + '&teamId=' + encodeURIComponent(getTeamId());
-    const res  = await fetch(url);
-    const json = await res.json();
+    const json = await apiRequest('getLogs', { teamId: getTeamId() });
     if (json.status === 'ok') {
       cachedLogs = json.logs;
       if (json.userId || json.teamId || json.group) {
         saveSession({
           name: getName(),
-          pin: getPin2(),
           userId: json.userId || getUserId(),
           teamId: json.teamId || getTeamId(),
           group: json.group || getGroup(),
@@ -1684,7 +1678,7 @@ function renderNoteCommentEditor(comment) {
 
 async function ensureNotesLoaded(options = {}) {
   const { force = false, background = false } = options;
-  if (!getName() || !getPin2()) return;
+  if (!hasSession()) return;
   if (notesState.loading) return;
   const isFresh = notesState.loaded && (Date.now() - notesState.lastFetchedAt < NOTES_REFRESH_MS);
   if (!force && isFresh) return;
@@ -1693,18 +1687,7 @@ async function ensureNotesLoaded(options = {}) {
   if (!background || !notesState.items.length) renderNotes();
 
   try {
-    const requestUrl = new URL(GAS_URL);
-    requestUrl.searchParams.set('action', 'getNotes');
-    requestUrl.searchParams.set('name', getName());
-    requestUrl.searchParams.set('pin', getPin2());
-    if (getUserId()) requestUrl.searchParams.set('userId', getUserId());
-    if (getTeamId()) requestUrl.searchParams.set('teamId', getTeamId());
-
-    const response = await fetch(requestUrl.toString());
-    const json = await response.json();
-    if (!response.ok || json.status !== 'ok') {
-      throw new Error(json.message || 'note fetch failed');
-    }
+    const json = await apiRequest('getNotes', { teamId: getTeamId() });
 
     notesState.items = Array.isArray(json.notes) ? json.notes : [];
     notesState.loaded = true;
@@ -1736,23 +1719,7 @@ async function submitNote() {
   }
 
   try {
-    const response = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: {'Content-Type':'text/plain'},
-      body: JSON.stringify({
-        action: 'saveNote',
-        userId: getUserId(),
-        teamId: getTeamId(),
-        name: getName(),
-        pin: getPin2(),
-        title,
-        body,
-      }),
-    });
-    const json = await response.json();
-    if (!response.ok || json.status !== 'ok') {
-      throw new Error(json.message || 'save note failed');
-    }
+    const json = await apiRequest('saveNote', { teamId: getTeamId(), title, body });
 
     notesState.items = Array.isArray(json.notes) ? json.notes : [];
     notesState.loaded = true;
@@ -1779,23 +1746,7 @@ async function submitNoteComment(noteId) {
   if (!body) { showToast('補足内容を入力してください'); return; }
 
   try {
-    const response = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: {'Content-Type':'text/plain'},
-      body: JSON.stringify({
-        action: 'addNoteComment',
-        userId: getUserId(),
-        teamId: getTeamId(),
-        name: getName(),
-        pin: getPin2(),
-        noteId,
-        body,
-      }),
-    });
-    const json = await response.json();
-    if (!response.ok || json.status !== 'ok') {
-      throw new Error(json.message || 'add comment failed');
-    }
+    const json = await apiRequest('addNoteComment', { teamId: getTeamId(), noteId, body });
 
     notesState.items = Array.isArray(json.notes) ? json.notes : [];
     notesState.loaded = true;
@@ -1826,23 +1777,7 @@ async function saveEditedNoteComment(commentId) {
   if (!body) { showToast('補足内容を入力してください'); return; }
 
   try {
-    const response = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: {'Content-Type':'text/plain'},
-      body: JSON.stringify({
-        action: 'updateNoteComment',
-        userId: getUserId(),
-        teamId: getTeamId(),
-        name: getName(),
-        pin: getPin2(),
-        commentId,
-        body,
-      }),
-    });
-    const json = await response.json();
-    if (!response.ok || json.status !== 'ok') {
-      throw new Error(json.message || 'update comment failed');
-    }
+    const json = await apiRequest('updateNoteComment', { teamId: getTeamId(), commentId, body });
 
     notesState.items = Array.isArray(json.notes) ? json.notes : [];
     notesState.loaded = true;
@@ -1860,22 +1795,7 @@ async function deleteNoteComment(commentId) {
   if (!confirm('この補足メモを削除しますか？')) return;
 
   try {
-    const response = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: {'Content-Type':'text/plain'},
-      body: JSON.stringify({
-        action: 'deleteNoteComment',
-        userId: getUserId(),
-        teamId: getTeamId(),
-        name: getName(),
-        pin: getPin2(),
-        commentId,
-      }),
-    });
-    const json = await response.json();
-    if (!response.ok || json.status !== 'ok') {
-      throw new Error(json.message || 'delete comment failed');
-    }
+    const json = await apiRequest('deleteNoteComment', { teamId: getTeamId(), commentId });
 
     notesState.items = Array.isArray(json.notes) ? json.notes : [];
     notesState.loaded = true;
