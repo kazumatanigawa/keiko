@@ -24,8 +24,6 @@ const CONFIG = {
   sourceBackupSheets: [],
 };
 
-const COMMENT_EDIT_WINDOW_HOURS = 12;
-
 const FIELD_ALIASES = {
   name: ['name', '名前', '氏名'],
   lastName: ['lastName', '姓'],
@@ -442,7 +440,7 @@ function handleUpdateNoteComment_(context, params) {
   const commentRow = findVisibleCommentById_(commentsTable, auth.user, commentId);
   if (!commentRow) return { status: 'error', message: 'Comment not found.' };
   if (!canEditComment_(commentsTable, commentRow, auth.user)) {
-    return { status: 'error', message: 'Comment can only be edited within 12 hours by its author.' };
+    return { status: 'error', message: 'Only the author can edit this comment.' };
   }
 
   setField_(commentsTable, commentRow, 'body', body);
@@ -600,10 +598,7 @@ function findVisibleCommentById_(commentsTable, user, commentId) {
 }
 
 function canEditComment_(commentsTable, row, user) {
-  if (!isCommentOwnedByUser_(commentsTable, row, user)) return false;
-  const createdAt = parseDateMs_(getField_(commentsTable, row, 'createdAt'));
-  if (!createdAt) return false;
-  return (Date.now() - createdAt) <= COMMENT_EDIT_WINDOW_HOURS * 60 * 60 * 1000;
+  return isCommentOwnedByUser_(commentsTable, row, user);
 }
 
 function canDeleteComment_(commentsTable, row, user) {
