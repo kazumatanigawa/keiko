@@ -14,8 +14,6 @@ const CONFIG = Object.freeze({
   notesLimit: 100,
 });
 
-let settingsCache_ = null;
-
 function doGet(e) {
   const params = e && e.parameter ? e.parameter : {};
   if ((params.action || 'health') === 'health') {
@@ -615,7 +613,6 @@ function supabaseRequest_(path, options) {
 }
 
 function getSettings_() {
-  if (settingsCache_) return settingsCache_;
   const properties = PropertiesService.getScriptProperties();
   const settings = {
     supabaseUrl: cleanText_(properties.getProperty(CONFIG.propertyNames.supabaseUrl)).replace(/\/+$/, ''),
@@ -627,8 +624,7 @@ function getSettings_() {
   ['supabaseUrl', 'secretKey', 'publishableKey', 'authPepper'].forEach(function(key) {
     if (!settings[key]) throw new Error('Missing Script Property: ' + CONFIG.propertyNames[key]);
   });
-  settingsCache_ = Object.freeze(settings);
-  return settingsCache_;
+  return settings;
 }
 
 function buildUrl_(baseUrl, path, query) {
