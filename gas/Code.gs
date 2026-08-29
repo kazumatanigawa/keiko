@@ -479,11 +479,13 @@ function authenticateRequest_(params) {
   });
   if (!memberships.length) throw userError_('team_required', '所属チームが設定されていません。');
   const requestedTeamId = cleanText_(params.teamId);
-  const membership = memberships.find(function(item) { return item.team_id === requestedTeamId; }) || memberships[0];
+  const membershipTeamIds = memberships.map(function(item) { return item.team_id; }).join(',');
   const teams = userRequest_('/rest/v1/teams', accessToken, {
-    query: { select: 'id,team_name,team_type,status', id: 'eq.' + membership.team_id, status: 'eq.active', limit: '1' },
+    query: { select: 'id,team_name,team_type,status', id: 'in.(' + membershipTeamIds + ')', status: 'eq.active', order: 'team_name.asc' },
   });
   if (!teams.length) throw userError_('team_required', '所属チームを確認できません。');
+  const team = teams.find(function(item) { return item.id === requestedTeamId; }) || teams[0];
+  const membership = memberships.find(function(item) { return item.team_id === team.id; });
 
   let studentProfile = null;
   if (profiles[0].user_type === 'student') {
@@ -492,7 +494,7 @@ function authenticateRequest_(params) {
     });
     studentProfile = studentProfiles[0] || null;
   }
-  return { accessToken: accessToken, user: user, profile: profiles[0], membership: membership, team: teams[0], studentProfile: studentProfile };
+  return { accessToken: accessToken, user: user, profile: profiles[0], membership: membership, team: team, studentProfile: studentProfile };
 }
 
 function buildSessionResponse_(session, userId) {
@@ -512,21 +514,24 @@ function loadSessionContextAdmin_(userId) {
   });
   if (!profiles.length) throw userError_('auth_required', '利用可能なユーザー情報がありません。');
   const memberships = adminRequest_('/rest/v1/team_members', {
-    query: { select: 'team_id,team_role', user_id: 'eq.' + userId, limit: '1' },
+    query: { select: 'team_id,team_role', user_id: 'eq.' + userId },
   });
   if (!memberships.length) throw userError_('team_required', '所属チームが設定されていません。');
+  const membershipTeamIds = memberships.map(function(item) { return item.team_id; }).join(',');
   const teams = adminRequest_('/rest/v1/teams', {
-    query: { select: 'id,team_name,team_type', id: 'eq.' + memberships[0].team_id, limit: '1' },
+    query: { select: 'id,team_name,team_type', id: 'in.(' + membershipTeamIds + ')', status: 'eq.active', order: 'team_name.asc' },
   });
   if (!teams.length) throw userError_('team_required', '所属チームを確認できません。');
+  const team = teams[0];
+  const membership = memberships.find(function(item) { return item.team_id === team.id; });
   return {
     userId: userId,
     name: profiles[0].display_name,
-    teamId: teams[0].id,
-    group: teams[0].team_name,
-    teamType: teams[0].team_type,
+    teamId: team.id,
+    group: team.team_name,
+    teamType: team.team_type,
     userType: profiles[0].user_type,
-    role: memberships[0].team_role,
+    role: membership.team_role,
   };
 }
 
