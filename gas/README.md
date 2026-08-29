@@ -25,13 +25,14 @@ retires legacy keys.
 
 ## Deploy
 
-1. Replace the Apps Script project's `Code.gs` with `gas/Code.gs`.
-2. Apply `gas/appsscript.json` if the manifest is managed manually.
-3. Add all five Script Properties above.
-4. Deploy a new Web App version.
-5. Execute the app as the deploying account and allow access to anyone using the app.
-6. Keep the `/exec` URL in `index.html` unchanged when updating an existing deployment.
-7. Open the app in a private window and verify login, log save, log reload, notes, and logout.
+1. Apply pending SQL files under `supabase/migrations` in the Supabase SQL Editor.
+2. Replace the Apps Script project's `Code.gs` with `gas/Code.gs`.
+3. Apply `gas/appsscript.json` if the manifest is managed manually.
+4. Add all five Script Properties above.
+5. Deploy a new Web App version.
+6. Execute the app as the deploying account and allow access to anyone using the app.
+7. Keep the `/exec` URL in `index.html` unchanged when updating an existing deployment.
+8. Open the app in a private window and verify login, home, 20-item log pages, log save, notes, and logout.
 
 After switching production to this version, Google Sheets are migration archives
 only. New application data is stored in Supabase.

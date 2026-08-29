@@ -9,6 +9,9 @@ Japanese drum practice logging app.
 - Supabase Auth: PIN-based application login through derived passwords
 - Supabase Postgres: profiles, teams, practice logs, notes, and comments
 - Supabase RLS: per-user and per-team data access
+- Supabase RPC: one-call session context and lightweight home summaries
+- Browser cache: user/team-scoped home data and up to 100 recent logs
+- Log pagination: cursor-based pages of 20 records
 
 The browser never receives the Supabase secret key or stores a user's PIN.
 Google Sheets are used only as the source for one-time migration scripts.

@@ -110,6 +110,9 @@ textarea:focus,input:focus{border-color:var(--red)}
 .log-achievement-badge.done{background:#E8F7EE;color:#177245}
 .log-achievement-badge.pending{background:#FDF1F1;color:#8B1A1A}
 .log-achievement-text{font-size:12px;color:var(--ink2);line-height:1.6}
+.log-load-more{display:flex;justify-content:center;padding:10px 0 18px}
+.log-load-more-btn{border:1px solid var(--red);background:#fff;color:var(--red);border-radius:999px;padding:10px 22px;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer}
+.log-load-more-btn:disabled{opacity:.5;cursor:not-allowed}
 .note-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
 .note-title{font-size:16px;font-weight:700;color:var(--ink);line-height:1.5}
 .note-meta{font-size:11px;color:var(--ink3);margin-top:6px}
@@ -548,6 +551,9 @@ const NOTES_REFRESH_MS = 45000;
 const APP_VERSION = '2026-08-27-01';
 const APP_VERSION_KEY = 'taiko_app_version';
 const TEAM_CACHE_KEY = 'taiko_team_options';
+const PRACTICE_CACHE_PREFIX = 'taiko_practice_cache_v1:';
+const PRACTICE_CACHE_MAX_LOGS = 100;
+const PRACTICE_REFRESH_MS = 300000;
 const ACCESS_TOKEN_KEY = 'taiko_access_token';
 const REFRESH_TOKEN_KEY = 'taiko_refresh_token';
 const TOKEN_EXPIRES_AT_KEY = 'taiko_token_expires_at';
@@ -556,6 +562,23 @@ const COND_EMOJI = ['','☠️','💦','😃','💪','🔥'];
 let selCond = 0;
 let selAchievement = '';
 let cachedLogs = [];
+const homeState = {
+  totalCount: 0,
+  averageCondition: null,
+  latestLog: null,
+  loaded: false,
+  loading: false,
+  lastFetchedAt: 0,
+};
+const logState = {
+  loaded: false,
+  loading: false,
+  loadingMore: false,
+  hasMore: false,
+  nextCursor: null,
+  lastFetchedAt: 0,
+  error: '',
+};
 const teamState = {
   items: [],
   loaded: false,
@@ -629,8 +652,9 @@ window.onload = async function() {
     try {
       await ensureAccessToken();
       document.getElementById('authOverlay').classList.add('hidden');
+      hydratePracticeCache();
       goTo('home');
-      loadLogs();
+      loadHome({ background: homeState.loaded });
     } catch (error) {
       clearSession();
       const err = document.getElementById('loginErr');
@@ -1000,8 +1024,9 @@ async function doRegister() {
     clearPin('rp');
     document.getElementById('registrationCode').value = '';
     hideAuth();
+    hydratePracticeCache();
     goTo('home');
-    loadLogs();
+    loadHome({ background: homeState.loaded });
   } catch(e) {
     err.textContent = e.message || '通信エラー。Wi-Fiを確認してください';
   }
@@ -1024,8 +1049,9 @@ async function doLogin() {
     saveSession(json);
     clearPin('lp');
     hideAuth();
+    hydratePracticeCache();
     goTo('home');
-    loadLogs();
+    loadHome({ background: homeState.loaded });
   } catch(e) {
     err.textContent = e.message || '名前またはPINが違います';
   }
@@ -1051,6 +1077,7 @@ function saveSession(session) {
 }
 
 function clearSession() {
+  clearPracticeCache();
   ['taiko_name', 'taiko_user_id', 'taiko_team_id', 'taiko_group', 'taiko_team_type', 'taiko_user_type', ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, TOKEN_EXPIRES_AT_KEY, 'taiko_pin']
     .forEach(key => localStorage.removeItem(key));
 }
@@ -1080,7 +1107,7 @@ function goTo(s) {
   document.getElementById('screen-' + s).classList.add('active');
   if (s === 'home')    updateHome();
   if (s === 'form')    updateForm();
-  if (s === 'log')     updateLog();
+  if (s === 'log')     ensureLogsLoaded();
   if (s === 'notes')   updateNotes();
   if (s === 'library') updateLibrary();
   syncGoodNewsTickerWithView();
@@ -1092,6 +1119,86 @@ function getTeamId() { return localStorage.getItem('taiko_team_id') || ''; }
 function getGroup()  { return localStorage.getItem('taiko_group') || ''; }
 function getTeamType() { return localStorage.getItem('taiko_team_type') || ''; }
 function getUserType() { return localStorage.getItem('taiko_user_type') || ''; }
+
+function getPracticeCacheKey() {
+  const userId = getUserId();
+  const teamId = getTeamId();
+  return userId && teamId ? `${PRACTICE_CACHE_PREFIX}${userId}:${teamId}` : '';
+}
+
+function cursorFromLog(log) {
+  if (!log?.id || !log?.date || !log?.createdAt) return null;
+  return { id: log.id, date: log.date, createdAt: log.createdAt };
+}
+
+function hydratePracticeCache() {
+  const key = getPracticeCacheKey();
+  if (!key) return;
+  try {
+    const parsed = JSON.parse(localStorage.getItem(key) || 'null');
+    if (!parsed || parsed.version !== 1) return;
+
+    if (parsed.home && typeof parsed.home === 'object') {
+      homeState.totalCount = Number(parsed.home.totalCount || 0);
+      const cachedAverage = Number(parsed.home.averageCondition);
+      homeState.averageCondition = parsed.home.averageCondition === null || !Number.isFinite(cachedAverage)
+        ? null
+        : cachedAverage;
+      homeState.latestLog = parsed.home.latestLog || null;
+      homeState.loaded = true;
+      homeState.lastFetchedAt = Number(parsed.home.lastFetchedAt || 0);
+    }
+    if (Array.isArray(parsed.logs)) {
+      cachedLogs = parsed.logs.filter(Boolean);
+      logState.loaded = !!parsed.logsLoaded;
+      logState.hasMore = !!parsed.hasMore;
+      logState.nextCursor = parsed.nextCursor || null;
+      logState.lastFetchedAt = Number(parsed.logsLastFetchedAt || 0);
+    }
+  } catch (error) {
+    console.warn('practice cache hydrate failed', error);
+    localStorage.removeItem(key);
+  }
+}
+
+function cachePracticeData() {
+  const key = getPracticeCacheKey();
+  if (!key) return;
+  const logs = cachedLogs.slice(0, PRACTICE_CACHE_MAX_LOGS);
+  const wasTrimmed = logs.length < cachedLogs.length;
+  const nextCursor = wasTrimmed
+    ? cursorFromLog(logs[logs.length - 1])
+    : logState.nextCursor;
+  try {
+    localStorage.setItem(key, JSON.stringify({
+      version: 1,
+      savedAt: Date.now(),
+      home: {
+        totalCount: homeState.totalCount,
+        averageCondition: homeState.averageCondition,
+        latestLog: homeState.latestLog,
+        lastFetchedAt: homeState.lastFetchedAt,
+      },
+      logs,
+      logsLoaded: logState.loaded,
+      logsLastFetchedAt: logState.lastFetchedAt,
+      hasMore: wasTrimmed || logState.hasMore,
+      nextCursor,
+    }));
+  } catch (error) {
+    console.warn('practice cache save failed', error);
+  }
+}
+
+function clearPracticeCache() {
+  const key = getPracticeCacheKey();
+  if (key) localStorage.removeItem(key);
+}
+
+function getLatestLog() {
+  return homeState.latestLog || cachedLogs[0] || null;
+}
+
 function getDateStr() {
   const d = new Date();
   return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${'日月火水木金土'[d.getDay()]}）`;
@@ -1118,22 +1225,61 @@ function getTeamTypeFromState(teamId) {
 // ============================================
 // ホーム更新
 // ============================================
+async function loadHome(options = {}) {
+  const { background = false } = options;
+  if (homeState.loading) return;
+
+  homeState.loading = true;
+  const showOverlay = !background && !homeState.loaded;
+  const startedAt = Date.now();
+  if (showOverlay) showLoading();
+
+  try {
+    const json = await apiRequest('getHome', { teamId: getTeamId() });
+    homeState.totalCount = Number(json.totalCount || 0);
+    homeState.averageCondition = json.averageCondition === null || json.averageCondition === undefined
+      ? null
+      : Number(json.averageCondition);
+    homeState.latestLog = json.latestLog || null;
+    homeState.loaded = true;
+    homeState.lastFetchedAt = Date.now();
+
+    if (homeState.latestLog) {
+      cachedLogs = [homeState.latestLog, ...cachedLogs.filter(log => log.id !== homeState.latestLog.id)];
+    } else if (!homeState.totalCount) {
+      cachedLogs = [];
+    }
+    if (json.userId) saveSession(json);
+    cachePracticeData();
+    updateHome();
+  } catch (error) {
+    console.error(error);
+    if (!homeState.loaded) showToast(error?.message || 'ホーム情報の取得に失敗しました');
+  } finally {
+    homeState.loading = false;
+    if (showOverlay) {
+      const elapsed = Date.now() - startedAt;
+      setTimeout(hideLoading, Math.max(0, 500 - elapsed));
+    }
+  }
+}
+
 function updateHome() {
   document.getElementById('heroDate').textContent = getDateStr();
   document.getElementById('headerUserName').textContent = getGroup() ? `${getName()} | ${getGroup()}` : getName();
-  const total = cachedLogs.length;
+  const total = homeState.totalCount;
   document.getElementById('totalCount').textContent = total;
   document.getElementById('statTotal').textContent  = total;
 
   const m = document.getElementById('missionText');
-  if (cachedLogs.length && cachedLogs[0].next) {
-    m.textContent = cachedLogs[0].next; m.className = 'hero-focus-text';
+  const latestLog = getLatestLog();
+  if (latestLog?.next) {
+    m.textContent = latestLog.next; m.className = 'hero-focus-text';
   } else {
     m.textContent = 'まだ記録がありません'; m.className = 'hero-focus-empty';
   }
-  if (cachedLogs.length) {
-    const avg = cachedLogs.reduce((s,l) => s + (parseInt(l.cond)||0), 0) / cachedLogs.length;
-    document.getElementById('statAvgCond').textContent = COND_EMOJI[Math.round(avg)] || '-';
+  if (homeState.averageCondition !== null && Number.isFinite(homeState.averageCondition)) {
+    document.getElementById('statAvgCond').textContent = COND_EMOJI[Math.round(homeState.averageCondition)] || '-';
   } else {
     document.getElementById('statAvgCond').textContent = '-';
   }
@@ -1360,8 +1506,9 @@ function updateForm() {
   const m = document.getElementById('formMission');
   const note = document.getElementById('achievementNote');
   const hint = document.getElementById('formMissionHint');
-  if (cachedLogs.length && cachedLogs[0].next) {
-    m.textContent = cachedLogs[0].next; m.className = 'mission-text';
+  const latestLog = getLatestLog();
+  if (latestLog?.next) {
+    m.textContent = latestLog.next; m.className = 'mission-text';
     note.textContent = '達成できたかを選んでから、今日の記録を入力します。';
     hint.textContent = 'この1選を達成できたかどうかを最初に振り返ります。';
   } else {
@@ -1380,7 +1527,7 @@ function updateForm() {
   document.getElementById('charWhyMissed').textContent = '0/80';
   document.getElementById('charRetryPlan').textContent = '0/80';
   toggleFailureFields(false);
-  document.getElementById('achievementSection').style.display = cachedLogs.length && cachedLogs[0].next ? 'block' : 'none';
+  document.getElementById('achievementSection').style.display = latestLog?.next ? 'block' : 'none';
   document.getElementById('submitBtn').disabled = false;
 }
 
@@ -1417,7 +1564,7 @@ async function submitLog() {
   const goodNew  = document.getElementById('fieldGoodNew').value.trim();
   const whyMissed = document.getElementById('fieldWhyMissed').value.trim();
   const retryPlan = document.getElementById('fieldRetryPlan').value.trim();
-  const hasPreviousMission = cachedLogs.length && cachedLogs[0].next;
+  const hasPreviousMission = !!getLatestLog()?.next;
   if (hasPreviousMission && !selAchievement) { showToast('前回の達成チェックを選んでください'); return; }
   if (!learning) { showToast('今日の学びを入力してください'); return; }
   if (!next)     { showToast('次の稽古でやることを入力してください'); return; }
@@ -1442,8 +1589,8 @@ async function submitLog() {
   try {
     const json = await apiRequest('saveLog', payload);
     if (json.status === 'ok') {
-      // ローカルにも追記してすぐ反映
-      cachedLogs.unshift({
+      const savedLog = {
+        id: json.id || `local_${payload.requestId}`,
         userId: getUserId(),
         group: getGroup(),
         cond: selCond,
@@ -1455,7 +1602,19 @@ async function submitLog() {
         achievementStatus: hasPreviousMission ? selAchievement : '',
         whyMissed: selAchievement === 'pending' ? whyMissed : '',
         retryPlan: selAchievement === 'pending' ? retryPlan : ''
-      });
+      };
+      cachedLogs = [savedLog, ...cachedLogs.filter(log => log.id !== savedLog.id)];
+      if (!json.duplicate) {
+        const previousCount = homeState.totalCount;
+        const previousAverage = Number(homeState.averageCondition || 0);
+        homeState.totalCount = previousCount + 1;
+        homeState.averageCondition = ((previousAverage * previousCount) + selCond) / homeState.totalCount;
+      }
+      homeState.latestLog = savedLog;
+      homeState.loaded = true;
+      homeState.lastFetchedAt = Date.now();
+      cachePracticeData();
+      loadHome({ background: true });
       loadGoodNewsFeed({ force: true, background: true });
       document.getElementById('successText').textContent =
         `「${next.substring(0,20)}${next.length>20?'…':''}」を次の稽古の誓いに登録しました！`;
@@ -1517,34 +1676,60 @@ function showLoading() {
 function hideLoading() {
   if (_loadingEl) _loadingEl.style.display = 'none';
 }
-async function loadLogs() {
-  showLoading();
-  const _start = Date.now();
-  try {
-    const json = await apiRequest('getLogs', { teamId: getTeamId() });
-    if (json.status === 'ok') {
-      cachedLogs = json.logs;
-      if (json.userId || json.teamId || json.group) {
-        saveSession({
-          name: getName(),
-          userId: json.userId || getUserId(),
-          teamId: json.teamId || getTeamId(),
-          group: json.group || getGroup(),
-          teamType: json.teamType || getTeamType(),
-          userType: json.userType || getUserType()
-        });
-      }
-      if (document.getElementById('screen-home').classList.contains('active')) updateHome();
-      else ensureGoodNewsFeed();
-    }
-  } catch(e) {
-    const m = document.getElementById('missionText');
-    if (m) { m.textContent = '通信エラー。Wi-Fiを確認してください'; m.className = 'mission-empty'; }
-  } finally {
-    // 最低500ms表示を保証
-    const elapsed = Date.now() - _start;
-    setTimeout(hideLoading, Math.max(0, 500 - elapsed));
+function ensureLogsLoaded() {
+  updateLog();
+  const isStale = Date.now() - logState.lastFetchedAt > PRACTICE_REFRESH_MS;
+  if ((!logState.loaded || isStale) && !logState.loading) {
+    loadLogs({ reset: true, background: cachedLogs.length > 0 });
   }
+}
+
+async function loadLogs(options = {}) {
+  const { reset = false, background = false } = options;
+  if (logState.loading) return;
+  if (!reset && (!logState.hasMore || !logState.nextCursor)) return;
+
+  const cursor = reset ? null : logState.nextCursor;
+  const showOverlay = !background && reset && !cachedLogs.length;
+  const startedAt = Date.now();
+  logState.loading = true;
+  logState.loadingMore = !reset;
+  logState.error = '';
+  if (showOverlay) showLoading();
+  updateLog();
+
+  try {
+    const json = await apiRequest('getLogs', { teamId: getTeamId(), cursor });
+    const incoming = Array.isArray(json.logs) ? json.logs : [];
+    if (reset) {
+      cachedLogs = incoming;
+    } else {
+      const existingIds = new Set(cachedLogs.map(log => log.id));
+      cachedLogs = cachedLogs.concat(incoming.filter(log => !existingIds.has(log.id)));
+    }
+    logState.loaded = true;
+    logState.hasMore = !!json.hasMore;
+    logState.nextCursor = json.nextCursor || null;
+    logState.lastFetchedAt = Date.now();
+    if (json.userId) saveSession(json);
+    cachePracticeData();
+  } catch (error) {
+    console.error(error);
+    logState.error = error?.message || '稽古ログの取得に失敗しました';
+    if (cachedLogs.length) showToast(logState.error);
+  } finally {
+    logState.loading = false;
+    logState.loadingMore = false;
+    updateLog();
+    if (showOverlay) {
+      const elapsed = Date.now() - startedAt;
+      setTimeout(hideLoading, Math.max(0, 500 - elapsed));
+    }
+  }
+}
+
+function loadMoreLogs() {
+  loadLogs({ reset: false, background: true });
 }
 
 // ============================================
@@ -1559,11 +1744,19 @@ function fmtDate(val) {
 function updateLog() {
   document.getElementById('logName').textContent = getGroup() ? `${getName()} さんの記録｜${getGroup()}` : getName() + ' さんの記録';
   const el = document.getElementById('logContent');
+  if (logState.loading && !cachedLogs.length) {
+    el.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--ink3)">ログを読み込み中...</div>';
+    return;
+  }
+  if (logState.error && !cachedLogs.length) {
+    el.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--ink3)">${esc(logState.error)}</div>`;
+    return;
+  }
   if (!cachedLogs.length) {
     el.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--ink3)">まだ記録がありません</div>';
     return;
   }
-  el.innerHTML = cachedLogs.map(l => `
+  const entries = cachedLogs.map(l => `
     <div class="log-entry">
       <div class="log-date"><span>${esc(fmtDate(l.date))}</span><span class="log-cond">${COND_EMOJI[l.cond]||''}</span></div>
       ${renderProfileMeta(l)}
@@ -1572,6 +1765,10 @@ function updateLog() {
       ${renderAchievementLog(l)}
       <div class="log-section" style="margin-top:8px"><div class="log-section-label">Good & New</div><div class="log-section-text">${esc(l.goodNew)}</div></div>
     </div>`).join('');
+  const loadMore = logState.hasMore || logState.loadingMore
+    ? `<div class="log-load-more"><button class="log-load-more-btn" type="button" onclick="loadMoreLogs()" ${logState.loadingMore ? 'disabled aria-busy="true"' : ''}>${logState.loadingMore ? '読み込み中...' : 'さらに読み込む'}</button></div>`
+    : '';
+  el.innerHTML = entries + loadMore;
 }
 
 function renderProfileMeta(log) {

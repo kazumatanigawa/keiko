@@ -1,5 +1,5 @@
 const CONFIG = Object.freeze({
-  apiVersion: '2026-08-29-03',
+  apiVersion: '2026-08-29-04',
   propertyNames: Object.freeze({
     supabaseUrl: 'SUPABASE_URL',
     secretKey: 'SUPABASE_SECRET_KEY',
@@ -11,7 +11,7 @@ const CONFIG = Object.freeze({
   maxNoteTitleLength: 120,
   maxNoteBodyLength: 5000,
   goodNewsLimit: 50,
-  logsLimit: 500,
+  logsPageSize: 20,
   notesLimit: 100,
 });
 
@@ -51,6 +51,7 @@ function routeRequest_(params) {
       case 'login': return jsonOutput_(handleLogin_(params));
       case 'refreshSession': return jsonOutput_(handleRefreshSession_(params));
       case 'saveLog': return jsonOutput_(handleSaveLog_(params));
+      case 'getHome': return jsonOutput_(handleGetHome_(params));
       case 'getGoodNews': return jsonOutput_(handleGetGoodNews_(params));
       case 'getLogs': return jsonOutput_(handleGetLogs_(params));
       case 'getNotes': return jsonOutput_(handleGetNotes_(params));
@@ -96,7 +97,7 @@ function handleLogin_(params) {
   if (!authUser || !authUser.email) throw invalidCredentials_();
   const password = deriveAuthPassword_(profile.legacy_user_id || profile.id, pin);
   const session = authPasswordLogin_(authUser.email, password);
-  return buildSessionResponse_(session, profile.id);
+  return buildSessionResponse_(session);
 }
 
 function handleRefreshSession_(params) {
@@ -111,7 +112,7 @@ function handleRefreshSession_(params) {
   if (!session || !session.user || !session.user.id) {
     throw userError_('session_expired', 'ログインの有効期限が切れました。');
   }
-  return buildSessionResponse_(session, session.user.id);
+  return buildSessionResponse_(session);
 }
 
 function handleRegister_(params) {
@@ -216,7 +217,7 @@ function handleRegister_(params) {
     adminRequest_(profilePath, { method: 'post', body: profileBody });
 
     const session = authPasswordLogin_(email, password);
-    return buildSessionResponse_(session, authUserId);
+    return buildSessionResponse_(session);
   } catch (error) {
     if (authUserId) {
       try { adminRequest_('/auth/v1/admin/users/' + encodeURIComponent(authUserId), { method: 'delete' }); } catch (cleanupError) { console.error(cleanupError); }
@@ -285,19 +286,51 @@ function handleSaveLog_(params) {
   }
 }
 
-function handleGetLogs_(params) {
+function handleGetHome_(params) {
   const auth = authenticateRequest_(params);
-  const rows = userRequest_('/rest/v1/practice_logs', auth.accessToken, {
-    query: {
-      select: 'id,practice_date,condition,learning,next_action,good_new,achievement_status,why_missed,retry_plan,created_at,updated_at',
-      user_id: 'eq.' + auth.user.id,
-      order: 'practice_date.desc,created_at.desc',
-      limit: String(CONFIG.logsLimit),
-    },
-  });
+  const summary = unwrapRpcResult_(userRequest_('/rest/v1/rpc/get_keiko_home_summary', auth.accessToken, {
+    method: 'post',
+    body: {},
+  }));
   const response = sessionContext_(auth);
   response.status = 'ok';
-  response.logs = rows.map(mapLog_);
+  response.totalCount = Number(summary.total_count || 0);
+  response.averageCondition = summary.average_condition === null || summary.average_condition === undefined
+    ? null
+    : Number(summary.average_condition);
+  response.latestLog = summary.latest_log ? mapLog_(summary.latest_log) : null;
+  return response;
+}
+
+function handleGetLogs_(params) {
+  const auth = authenticateRequest_(params);
+  const cursor = parseLogCursor_(params.cursor);
+  const query = {
+    select: 'id,practice_date,condition,learning,next_action,good_new,achievement_status,why_missed,retry_plan,created_at,updated_at',
+    user_id: 'eq.' + auth.user.id,
+    order: 'practice_date.desc,created_at.desc,id.desc',
+    limit: String(CONFIG.logsPageSize + 1),
+  };
+  if (cursor) {
+    query.or = [
+      '(practice_date.lt.' + cursor.date,
+      'and(practice_date.eq.' + cursor.date + ',created_at.lt.' + cursor.createdAt + ')',
+      'and(practice_date.eq.' + cursor.date + ',created_at.eq.' + cursor.createdAt + ',id.lt.' + cursor.id + '))',
+    ].join(',');
+  }
+
+  const rows = userRequest_('/rest/v1/practice_logs', auth.accessToken, { query: query });
+  const pageRows = rows.slice(0, CONFIG.logsPageSize);
+  const lastRow = pageRows.length ? pageRows[pageRows.length - 1] : null;
+  const response = sessionContext_(auth);
+  response.status = 'ok';
+  response.logs = pageRows.map(mapLog_);
+  response.hasMore = rows.length > CONFIG.logsPageSize;
+  response.nextCursor = response.hasMore && lastRow ? {
+    date: lastRow.practice_date,
+    createdAt: lastRow.created_at,
+    id: lastRow.id,
+  } : null;
   return response;
 }
 
@@ -462,44 +495,12 @@ function assertOwnedComment_(auth, commentId) {
 
 function authenticateRequest_(params) {
   const accessToken = requireText_(params.accessToken, 'アクセストークン', 8192);
-  let user;
-  try {
-    user = publicRequest_('/auth/v1/user', { accessToken: accessToken });
-  } catch (error) {
-    throw userError_('session_expired', 'ログインの有効期限が切れました。');
-  }
-  if (!user || !user.id) throw userError_('auth_required', 'ログインしてください。');
-
-  const profiles = userRequest_('/rest/v1/profiles', accessToken, {
-    query: { select: 'id,user_type,display_name,login_id,status,legacy_user_id', id: 'eq.' + user.id, status: 'eq.active', limit: '1' },
-  });
-  if (!profiles.length) throw userError_('auth_required', '利用可能なユーザー情報がありません。');
-
-  const memberships = userRequest_('/rest/v1/team_members', accessToken, {
-    query: { select: 'team_id,team_role', user_id: 'eq.' + user.id },
-  });
-  if (!memberships.length) throw userError_('team_required', '所属チームが設定されていません。');
   const requestedTeamId = cleanText_(params.teamId);
-  const membershipTeamIds = memberships.map(function(item) { return item.team_id; }).join(',');
-  const teams = userRequest_('/rest/v1/teams', accessToken, {
-    query: { select: 'id,team_name,team_type,status', id: 'in.(' + membershipTeamIds + ')', status: 'eq.active', order: 'team_name.asc' },
-  });
-  if (!teams.length) throw userError_('team_required', '所属チームを確認できません。');
-  const team = teams.find(function(item) { return item.id === requestedTeamId; }) || teams[0];
-  const membership = memberships.find(function(item) { return item.team_id === team.id; });
-
-  let studentProfile = null;
-  if (profiles[0].user_type === 'student') {
-    const studentProfiles = userRequest_('/rest/v1/student_profiles', accessToken, {
-      query: { select: 'grade,role_label,term', user_id: 'eq.' + user.id, limit: '1' },
-    });
-    studentProfile = studentProfiles[0] || null;
-  }
-  return { accessToken: accessToken, user: user, profile: profiles[0], membership: membership, team: team, studentProfile: studentProfile };
+  return loadSessionContext_(accessToken, requestedTeamId);
 }
 
-function buildSessionResponse_(session, userId) {
-  const context = loadSessionContextAdmin_(userId);
+function buildSessionResponse_(session) {
+  const context = loadSessionContext_(session.access_token, '');
   return Object.assign({
     status: 'ok',
     accessToken: session.access_token,
@@ -509,30 +510,47 @@ function buildSessionResponse_(session, userId) {
   }, context);
 }
 
-function loadSessionContextAdmin_(userId) {
-  const profiles = adminRequest_('/rest/v1/profiles', {
-    query: { select: 'id,user_type,display_name,status', id: 'eq.' + userId, status: 'eq.active', limit: '1' },
-  });
-  if (!profiles.length) throw userError_('auth_required', '利用可能なユーザー情報がありません。');
-  const memberships = adminRequest_('/rest/v1/team_members', {
-    query: { select: 'team_id,team_role', user_id: 'eq.' + userId },
-  });
-  if (!memberships.length) throw userError_('team_required', '所属チームが設定されていません。');
-  const membershipTeamIds = memberships.map(function(item) { return item.team_id; }).join(',');
-  const teams = adminRequest_('/rest/v1/teams', {
-    query: { select: 'id,team_name,team_type', id: 'in.(' + membershipTeamIds + ')', status: 'eq.active', order: 'team_name.asc' },
-  });
-  if (!teams.length) throw userError_('team_required', '所属チームを確認できません。');
-  const team = teams[0];
-  const membership = memberships.find(function(item) { return item.team_id === team.id; });
+function loadSessionContext_(accessToken, requestedTeamId) {
+  let context;
+  try {
+    context = unwrapRpcResult_(userRequest_('/rest/v1/rpc/get_keiko_session_context', accessToken, {
+      method: 'post',
+      body: { p_team_id: requestedTeamId || null },
+    }));
+  } catch (error) {
+    if (error && error.userCode === 'auth_required') {
+      throw userError_('session_expired', 'ログインの有効期限が切れました。');
+    }
+    throw error;
+  }
+  if (!context || !context.user_id) {
+    throw userError_('auth_required', '利用可能なユーザー情報がありません。');
+  }
+  if (!context.team_id) {
+    throw userError_('team_required', '所属チームが設定されていません。');
+  }
   return {
-    userId: userId,
-    name: profiles[0].display_name,
-    teamId: team.id,
-    group: team.team_name,
-    teamType: team.team_type,
-    userType: profiles[0].user_type,
-    role: membership.team_role,
+    accessToken: accessToken,
+    user: { id: context.user_id },
+    profile: {
+      display_name: context.display_name,
+      user_type: context.user_type,
+      legacy_user_id: context.legacy_user_id,
+    },
+    membership: { team_id: context.team_id, team_role: context.team_role },
+    team: { id: context.team_id, team_name: context.team_name, team_type: context.team_type },
+    studentProfile: context.user_type === 'student' ? {
+      grade: context.grade || '',
+      role_label: context.role_label || '',
+      term: context.term || '',
+    } : null,
+    userId: context.user_id,
+    name: context.display_name,
+    teamId: context.team_id,
+    group: context.team_name,
+    teamType: context.team_type,
+    userType: context.user_type,
+    role: context.team_role,
   };
 }
 
@@ -675,6 +693,27 @@ function mapLog_(row) {
     retryPlan: row.retry_plan || '',
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  };
+}
+
+function unwrapRpcResult_(value) {
+  return Array.isArray(value) ? (value[0] || {}) : (value || {});
+}
+
+function parseLogCursor_(value) {
+  if (value === null || value === undefined || value === '') return null;
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    throw userError_('invalid_request', 'ログの続き位置が正しくありません。');
+  }
+  const date = validateDate_(value.date);
+  const createdAt = cleanText_(value.createdAt);
+  if (!createdAt || isNaN(new Date(createdAt).getTime())) {
+    throw userError_('invalid_request', 'ログの続き位置が正しくありません。');
+  }
+  return {
+    date: date,
+    createdAt: createdAt,
+    id: requireUuid_(value.id, 'ログ'),
   };
 }
 
