@@ -4,6 +4,7 @@ const SPREADSHEET_ID = '1x1HUq_FuRxEdGc3sNWut5rSlKKU0UIMcfn9VNNjF538';
 const USERS_SHEET = 'ユーザー';
 const DEFAULT_ADMIN_AUTH_USER_ID = '6603fa37-433e-4042-877c-98935ffabba0';
 const DEFAULT_ADMIN_LEGACY_USER_ID = 'usr_c9851540b96d4bf38872';
+const DEFAULT_ADMIN_PRIMARY_TEAM_LEGACY_ID = 'team_263f18863f204a5087dd';
 
 const applyChanges = process.argv.includes('--apply');
 const supabaseUrl = String(process.env.SUPABASE_URL || '').replace(/\/$/, '');
@@ -18,6 +19,10 @@ const adminAuthUserId = String(
 );
 const adminLegacyUserId = String(
   process.env.ADMIN_LEGACY_USER_ID || DEFAULT_ADMIN_LEGACY_USER_ID,
+);
+const adminPrimaryTeamLegacyId = String(
+  process.env.ADMIN_PRIMARY_TEAM_LEGACY_ID ||
+    DEFAULT_ADMIN_PRIMARY_TEAM_LEGACY_ID,
 );
 
 function normalizeName(value) {
@@ -277,5 +282,22 @@ const authUsers = new Map(
 for (const user of users) {
   await migrateUser(user, teams, authUsers);
   console.log(`Migrated ${user.legacyUserId}`);
+}
+
+const adminPrimaryTeam = teams.get(adminPrimaryTeamLegacyId);
+if (!adminPrimaryTeam) {
+  throw new Error(`Missing admin primary team ${adminPrimaryTeamLegacyId}`);
+}
+await upsert('team_members', 'team_id,user_id', {
+  team_id: adminPrimaryTeam.id,
+  user_id: adminAuthUserId,
+  team_role: 'owner_admin',
+});
+if (!adminPrimaryTeam.owner_user_id) {
+  await request(`/rest/v1/teams?id=eq.${encodeURIComponent(adminPrimaryTeam.id)}`, {
+    method: 'PATCH',
+    headers: { prefer: 'return=minimal' },
+    body: JSON.stringify({ owner_user_id: adminAuthUserId }),
+  });
 }
 console.log(JSON.stringify({ mode: 'applied', ...summary }, null, 2));
