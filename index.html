@@ -122,6 +122,7 @@ textarea:focus,input:focus{border-color:var(--red)}
 .note-comment-body{font-size:12px;color:var(--ink2);line-height:1.7;white-space:pre-wrap}
 .note-comment-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .note-comment-action{border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--ink2)}
+.note-comment-action:disabled{opacity:.5;cursor:not-allowed}
 .note-comment-action.danger{color:var(--red);border-color:#efc8c8}
 .note-comment-action.primary{background:var(--red);border-color:var(--red);color:#fff}
 .note-comment-edit-box{margin-top:8px}
@@ -580,6 +581,9 @@ const notesState = {
   loaded: false,
   lastFetchedAt: 0,
   submitting: false,
+  submittingCommentIds: new Set(),
+  updatingCommentIds: new Set(),
+  deletingCommentIds: new Set(),
   editingCommentId: '',
 };
 
@@ -1632,7 +1636,7 @@ function renderNotes() {
         ${renderNoteComments(note.comments)}
         <div class="note-comment-box">
           <textarea id="noteCommentInput_${escapeAttr(note.noteId)}" rows="3" placeholder="例：入りの合図は右手を上げた瞬間。自分は次回ここを重点的に確認する。"></textarea>
-          <button class="note-inline-btn" type="button" onclick="submitNoteComment('${escapeAttr(note.noteId)}')">アイデアをシェア</button>
+          <button class="note-inline-btn" id="noteCommentSubmit_${escapeAttr(note.noteId)}" type="button" onclick="submitNoteComment('${escapeAttr(note.noteId)}')" ${notesState.submittingCommentIds.has(note.noteId) ? 'disabled aria-busy="true"' : ''}>${notesState.submittingCommentIds.has(note.noteId) ? '投稿中...' : 'アイデアをシェア'}</button>
         </div>
       </div>
     </article>
@@ -1657,23 +1661,27 @@ function renderNoteComments(comments) {
 
 function renderNoteCommentActions(comment) {
   if (!comment || (!comment.canEdit && !comment.canDelete)) return '';
+  const isUpdating = notesState.updatingCommentIds.has(comment.commentId);
+  const isDeleting = notesState.deletingCommentIds.has(comment.commentId);
+  const isPending = isUpdating || isDeleting;
   const buttons = [];
   if (comment.canEdit) {
-    buttons.push(`<button class="note-comment-action" type="button" onclick="beginEditNoteComment('${escapeAttr(comment.commentId)}')">編集</button>`);
+    buttons.push(`<button class="note-comment-action" type="button" onclick="beginEditNoteComment('${escapeAttr(comment.commentId)}')" ${isPending ? 'disabled' : ''}>編集</button>`);
   }
   if (comment.canDelete) {
-    buttons.push(`<button class="note-comment-action danger" type="button" onclick="deleteNoteComment('${escapeAttr(comment.commentId)}')">削除</button>`);
+    buttons.push(`<button class="note-comment-action danger" id="noteCommentDelete_${escapeAttr(comment.commentId)}" type="button" onclick="deleteNoteComment('${escapeAttr(comment.commentId)}')" ${isPending ? 'disabled' : ''}>${isDeleting ? '削除中...' : '削除'}</button>`);
   }
   return `<div class="note-comment-actions">${buttons.join('')}</div>`;
 }
 
 function renderNoteCommentEditor(comment) {
+  const isUpdating = notesState.updatingCommentIds.has(comment.commentId);
   return `
     <div class="note-comment-edit-box">
-      <textarea id="editNoteCommentInput_${escapeAttr(comment.commentId)}" rows="3">${esc(comment.body)}</textarea>
+      <textarea id="editNoteCommentInput_${escapeAttr(comment.commentId)}" rows="3" ${isUpdating ? 'disabled' : ''}>${esc(comment.body)}</textarea>
       <div class="note-comment-actions" style="margin-top:8px">
-        <button class="note-comment-action" type="button" onclick="cancelEditNoteComment()">キャンセル</button>
-        <button class="note-comment-action primary" type="button" onclick="saveEditedNoteComment('${escapeAttr(comment.commentId)}')">保存</button>
+        <button class="note-comment-action" type="button" onclick="cancelEditNoteComment()" ${isUpdating ? 'disabled' : ''}>キャンセル</button>
+        <button class="note-comment-action primary" id="noteCommentUpdate_${escapeAttr(comment.commentId)}" type="button" onclick="saveEditedNoteComment('${escapeAttr(comment.commentId)}')" ${isUpdating ? 'disabled aria-busy="true"' : ''}>${isUpdating ? '保存中...' : '保存'}</button>
       </div>
     </div>
   `;
@@ -1745,8 +1753,13 @@ async function submitNote() {
 
 async function submitNoteComment(noteId) {
   const input = document.getElementById(`noteCommentInput_${noteId}`);
+  const button = document.getElementById(`noteCommentSubmit_${noteId}`);
   const body = input?.value.trim() || '';
   if (!body) { showToast('補足内容を入力してください'); return; }
+  if (notesState.submittingCommentIds.has(noteId)) return;
+
+  notesState.submittingCommentIds.add(noteId);
+  setPendingButton(button, true, '投稿中...', 'アイデアをシェア');
 
   try {
     const json = await apiRequest('addNoteComment', { teamId: getTeamId(), noteId, body });
@@ -1760,7 +1773,10 @@ async function submitNoteComment(noteId) {
     showToast('補足メモを記録しました');
   } catch (error) {
     console.error(error);
-    showToast('補足メモの記録に失敗しました');
+    showToast(error?.message || '補足メモの記録に失敗しました');
+  } finally {
+    notesState.submittingCommentIds.delete(noteId);
+    setPendingButton(document.getElementById(`noteCommentSubmit_${noteId}`), false, '投稿中...', 'アイデアをシェア');
   }
 }
 
@@ -1776,8 +1792,14 @@ function cancelEditNoteComment() {
 
 async function saveEditedNoteComment(commentId) {
   const input = document.getElementById(`editNoteCommentInput_${commentId}`);
+  const button = document.getElementById(`noteCommentUpdate_${commentId}`);
   const body = input?.value.trim() || '';
   if (!body) { showToast('補足内容を入力してください'); return; }
+  if (notesState.updatingCommentIds.has(commentId)) return;
+
+  notesState.updatingCommentIds.add(commentId);
+  if (input) input.disabled = true;
+  setPendingButton(button, true, '保存中...', '保存');
 
   try {
     const json = await apiRequest('updateNoteComment', { teamId: getTeamId(), commentId, body });
@@ -1791,11 +1813,20 @@ async function saveEditedNoteComment(commentId) {
   } catch (error) {
     console.error(error);
     showToast(error?.message || '補足メモの更新に失敗しました');
+  } finally {
+    notesState.updatingCommentIds.delete(commentId);
+    const currentInput = document.getElementById(`editNoteCommentInput_${commentId}`);
+    if (currentInput) currentInput.disabled = false;
+    setPendingButton(document.getElementById(`noteCommentUpdate_${commentId}`), false, '保存中...', '保存');
   }
 }
 
 async function deleteNoteComment(commentId) {
+  if (notesState.deletingCommentIds.has(commentId)) return;
   if (!confirm('この補足メモを削除しますか？')) return;
+
+  notesState.deletingCommentIds.add(commentId);
+  setPendingButton(document.getElementById(`noteCommentDelete_${commentId}`), true, '削除中...', '削除');
 
   try {
     const json = await apiRequest('deleteNoteComment', { teamId: getTeamId(), commentId });
@@ -1809,7 +1840,18 @@ async function deleteNoteComment(commentId) {
   } catch (error) {
     console.error(error);
     showToast(error?.message || '補足メモの削除に失敗しました');
+  } finally {
+    notesState.deletingCommentIds.delete(commentId);
+    setPendingButton(document.getElementById(`noteCommentDelete_${commentId}`), false, '削除中...', '削除');
   }
+}
+
+function setPendingButton(button, pending, pendingLabel, idleLabel) {
+  if (!button) return;
+  button.disabled = pending;
+  button.textContent = pending ? pendingLabel : idleLabel;
+  if (pending) button.setAttribute('aria-busy', 'true');
+  else button.removeAttribute('aria-busy');
 }
 
 function fmtDateTime(val) {
