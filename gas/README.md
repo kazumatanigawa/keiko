@@ -1,7 +1,8 @@
 # GAS Backend
 
-`gas/Code.gs` is the thin API layer between `index.html` and Supabase. It does
-not read or write Google Sheets.
+`gas/Code.gs` handles login, registration, token refresh, and writes from
+`index.html`. Authenticated reads in the current app call RLS-protected Supabase
+functions directly. GAS does not read or write Google Sheets.
 
 ## Script Properties
 

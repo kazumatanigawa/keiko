@@ -542,6 +542,8 @@ textarea:focus,input:focus{border-color:var(--red)}
 // 【設定】GASのウェブアプリURLをここに貼る
 // ============================================
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwm21rQITFGNgi-2TmnadTdd-rQaf425NKSUz0WJcPUYB6KrTQ7WtY6Rokn_aP-axabUg/exec";
+const SUPABASE_URL = "https://iablkvlcjzgigkiypyhy.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_bUsistuLUHYciU1MOvicYQ_JzvVpgeN";
 
 const DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1a9iaxd2OKBywSuRZvPib1gyGciL22HpM?usp=drive_link";
 const GOOD_NEWS_ROTATE_MS = 3000;
@@ -737,6 +739,59 @@ async function apiRequest(action, payload = {}, options = {}) {
   const error = new Error(json.message || '処理に失敗しました');
   error.code = json.code || 'request_failed';
   throw error;
+}
+
+async function supabaseRead(functionName, payload = {}, options = {}) {
+  const { retry = true } = options;
+  const accessToken = await ensureAccessToken();
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${encodeURIComponent(functionName)}`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_PUBLISHABLE_KEY,
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const text = await response.text();
+  let json = null;
+  try {
+    json = text ? JSON.parse(text) : null;
+  } catch (error) {
+    console.warn('Supabase response was not JSON', error);
+  }
+
+  if (response.ok) return Array.isArray(json) ? (json[0] || {}) : (json || {});
+
+  if (retry && (response.status === 401 || json?.code === 'PGRST301')) {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(TOKEN_EXPIRES_AT_KEY);
+    await refreshAccessToken();
+    return supabaseRead(functionName, payload, { retry: false });
+  }
+
+  const error = new Error(json?.message || json?.msg || `Supabaseの読み込みに失敗しました (${response.status})`);
+  error.code = json?.code || `http_${response.status}`;
+  throw error;
+}
+
+function mapSupabaseLog(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    date: row.date ?? row.practice_date ?? '',
+    cond: Number(row.cond ?? row.condition ?? 0),
+    learning: row.learning || '',
+    next: row.next ?? row.next_action ?? '',
+    goodNew: row.goodNew ?? row.good_new ?? '',
+    achievementStatus: row.achievementStatus ?? row.achievement_status ?? '',
+    whyMissed: row.whyMissed ?? row.why_missed ?? '',
+    retryPlan: row.retryPlan ?? row.retry_plan ?? '',
+    createdAt: row.createdAt ?? row.created_at ?? '',
+    updatedAt: row.updatedAt ?? row.updated_at ?? '',
+  };
 }
 
 async function ensureAccessToken() {
@@ -1235,12 +1290,12 @@ async function loadHome(options = {}) {
   if (showOverlay) showLoading();
 
   try {
-    const json = await apiRequest('getHome', { teamId: getTeamId() });
-    homeState.totalCount = Number(json.totalCount || 0);
-    homeState.averageCondition = json.averageCondition === null || json.averageCondition === undefined
+    const json = await supabaseRead('get_keiko_home_summary');
+    homeState.totalCount = Number(json.total_count || 0);
+    homeState.averageCondition = json.average_condition === null || json.average_condition === undefined
       ? null
-      : Number(json.averageCondition);
-    homeState.latestLog = json.latestLog || null;
+      : Number(json.average_condition);
+    homeState.latestLog = mapSupabaseLog(json.latest_log);
     homeState.loaded = true;
     homeState.lastFetchedAt = Date.now();
 
@@ -1249,7 +1304,6 @@ async function loadHome(options = {}) {
     } else if (!homeState.totalCount) {
       cachedLogs = [];
     }
-    if (json.userId) saveSession(json);
     cachePracticeData();
     updateHome();
   } catch (error) {
@@ -1319,7 +1373,10 @@ async function loadGoodNewsFeed({ force = false, background = false } = {}) {
   }
 
   try {
-    const json = await apiRequest('getGoodNews', { teamId: getTeamId() });
+    const json = await supabaseRead('get_keiko_good_news', {
+      p_team_id: getTeamId(),
+      p_limit: 50,
+    });
 
     goodNewsState.items = normalizeGoodNewsItems(json.items);
     goodNewsState.loaded = true;
@@ -1699,8 +1756,13 @@ async function loadLogs(options = {}) {
   updateLog();
 
   try {
-    const json = await apiRequest('getLogs', { teamId: getTeamId(), cursor });
-    const incoming = Array.isArray(json.logs) ? json.logs : [];
+    const json = await supabaseRead('get_keiko_logs_page', {
+      p_cursor_date: cursor?.date || null,
+      p_cursor_created_at: cursor?.createdAt || null,
+      p_cursor_id: cursor?.id || null,
+      p_limit: 20,
+    });
+    const incoming = Array.isArray(json.logs) ? json.logs.map(mapSupabaseLog).filter(Boolean) : [];
     if (reset) {
       cachedLogs = incoming;
     } else {
@@ -1711,7 +1773,6 @@ async function loadLogs(options = {}) {
     logState.hasMore = !!json.hasMore;
     logState.nextCursor = json.nextCursor || null;
     logState.lastFetchedAt = Date.now();
-    if (json.userId) saveSession(json);
     cachePracticeData();
   } catch (error) {
     console.error(error);
@@ -1895,7 +1956,10 @@ async function ensureNotesLoaded(options = {}) {
   if (!background || !notesState.items.length) renderNotes();
 
   try {
-    const json = await apiRequest('getNotes', { teamId: getTeamId() });
+    const json = await supabaseRead('get_keiko_notes', {
+      p_team_id: getTeamId(),
+      p_limit: 100,
+    });
 
     notesState.items = Array.isArray(json.notes) ? json.notes : [];
     notesState.loaded = true;

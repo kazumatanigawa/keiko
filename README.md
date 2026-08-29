@@ -5,15 +5,18 @@ Japanese drum practice logging app.
 ## Architecture
 
 - `index.html`: static mobile-first application
-- `gas/Code.gs`: Apps Script API gateway
+- `gas/Code.gs`: login, registration, token refresh, and write API gateway
 - Supabase Auth: PIN-based application login through derived passwords
 - Supabase Postgres: profiles, teams, practice logs, notes, and comments
 - Supabase RLS: per-user and per-team data access
-- Supabase RPC: one-call session context and lightweight home summaries
+- Supabase RPC: RLS-protected direct reads for home, logs, Good&New, and notes
 - Browser cache: user/team-scoped home data and up to 100 recent logs
 - Log pagination: cursor-based pages of 20 records
 
-The browser never receives the Supabase secret key or stores a user's PIN.
+Authenticated reads go directly from the browser to Supabase with the
+publishable key and the user's short-lived access token. The browser never
+receives the Supabase secret key or stores a user's PIN. Login and writes remain
+behind GAS so the auth pepper and privileged key stay server-only.
 Google Sheets are used only as the source for one-time migration scripts.
 
 ## Migration scripts
