@@ -545,9 +545,12 @@ function findProfileForLogin_(name) {
   const loginId = normalizeLoginId_(name);
   if (!loginId) return null;
   const rows = adminRequest_('/rest/v1/profiles', {
-    query: { select: 'id,display_name,login_id,status,legacy_user_id', login_id: 'eq.' + loginId, limit: '2' },
+    query: { select: 'id,display_name,login_id,status,legacy_user_id', status: 'eq.active', limit: '1000' },
   });
-  return rows.length === 1 ? rows[0] : null;
+  const matches = rows.filter(function(row) {
+    return normalizeLoginId_(row.login_id) === loginId;
+  });
+  return matches.length === 1 ? matches[0] : null;
 }
 
 function authPasswordLogin_(email, password) {
