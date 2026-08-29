@@ -1,5 +1,5 @@
 const CONFIG = Object.freeze({
-  apiVersion: '2026-08-29-01',
+  apiVersion: '2026-08-29-02',
   propertyNames: Object.freeze({
     supabaseUrl: 'SUPABASE_URL',
     secretKey: 'SUPABASE_SECRET_KEY',
