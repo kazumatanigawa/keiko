@@ -33,6 +33,12 @@ function doPost(e) {
   return routeRequest_(payload);
 }
 
+function testSupabaseConnection() {
+  const result = handleGetTeams_();
+  console.log(JSON.stringify(result));
+  return result;
+}
+
 function routeRequest_(params) {
   try {
     const action = cleanText_(params.action);
