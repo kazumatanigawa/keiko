@@ -594,7 +594,8 @@ function supabaseRequest_(path, options) {
   if (authMode === 'user' || options.accessToken) headers.Authorization = 'Bearer ' + options.accessToken;
   if (options.prefer) headers.Prefer = options.prefer;
 
-  const fetchOptions = { method: method, headers: headers, muteHttpExceptions: true };
+  // buildUrl_ already percent-encodes PostgREST filters, including Japanese names.
+  const fetchOptions = { method: method, headers: headers, muteHttpExceptions: true, escaping: false };
   if (options.body !== undefined) {
     headers['Content-Type'] = 'application/json';
     fetchOptions.payload = JSON.stringify(options.body);
