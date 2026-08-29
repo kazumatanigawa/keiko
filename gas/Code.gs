@@ -1,4 +1,5 @@
 const CONFIG = Object.freeze({
+  apiVersion: '2026-08-29-01',
   propertyNames: Object.freeze({
     supabaseUrl: 'SUPABASE_URL',
     secretKey: 'SUPABASE_SECRET_KEY',
@@ -17,7 +18,7 @@ const CONFIG = Object.freeze({
 function doGet(e) {
   const params = e && e.parameter ? e.parameter : {};
   if ((params.action || 'health') === 'health') {
-    return jsonOutput_({ status: 'ok', service: 'keiko-api' });
+    return jsonOutput_({ status: 'ok', service: 'keiko-api', version: CONFIG.apiVersion });
   }
   if (params.action === 'getTeams') {
     return routeRequest_(params);
