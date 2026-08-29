@@ -1461,7 +1461,10 @@ async function submitLog() {
       btn.disabled = false; btn.textContent = '記録を保存する ✓';
     }
   } catch(e) {
-    showToast('通信エラー。Wi-Fiを確認してください');
+    const message = e instanceof TypeError
+      ? '通信エラー。Wi-Fiを確認してください'
+      : (e.message || '送信エラー。もう一度試してください');
+    showToast(message);
     btn.disabled = false; btn.textContent = '記録を保存する ✓';
   }
 }

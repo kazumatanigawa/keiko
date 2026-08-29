@@ -1,5 +1,5 @@
 const CONFIG = Object.freeze({
-  apiVersion: '2026-08-29-02',
+  apiVersion: '2026-08-29-03',
   propertyNames: Object.freeze({
     supabaseUrl: 'SUPABASE_URL',
     secretKey: 'SUPABASE_SECRET_KEY',
@@ -271,8 +271,9 @@ function handleSaveLog_(params) {
         source_system: 'keiko_app',
         legacy_source_row_id: sourceRowId,
         achievement_status: achievementStatus || null,
-        why_missed: achievementStatus === 'pending' ? whyMissed : null,
-        retry_plan: achievementStatus === 'pending' ? retryPlan : null,
+        // These columns are NOT NULL in Supabase; empty means not applicable.
+        why_missed: achievementStatus === 'pending' ? whyMissed : '',
+        retry_plan: achievementStatus === 'pending' ? retryPlan : '',
         display_name_snapshot: auth.profile.display_name,
         grade_snapshot: auth.studentProfile ? auth.studentProfile.grade || '' : '',
         term_snapshot: auth.studentProfile ? auth.studentProfile.term || '' : '',
