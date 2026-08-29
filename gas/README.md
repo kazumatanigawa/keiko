@@ -10,12 +10,18 @@ Set these values in Apps Script under **Project Settings > Script Properties**.
 | Property | Purpose |
 | --- | --- |
 | `SUPABASE_URL` | Project URL such as `https://PROJECT_REF.supabase.co` |
-| `SUPABASE_SECRET_KEY` | Server-only Supabase secret key |
+| `SUPABASE_SECRET_KEY` | Legacy `service_role` JWT for Apps Script compatibility |
 | `SUPABASE_PUBLISHABLE_KEY` | Browser-safe key used for Auth and RLS requests |
 | `KEIKO_AUTH_PEPPER` | Same secret value used by the migration scripts |
 | `KEIKO_REGISTRATION_CODE` | Code required for all new registrations |
 
 Never place the secret key, auth pepper, or registration code in `index.html`.
+
+Apps Script's URL Fetch service uses a browser-like `Mozilla/5.0` User-Agent.
+Supabase rejects new `sb_secret_` keys from browser User-Agents, so this GAS
+deployment must currently use the legacy `service_role` JWT from the Legacy API
+Keys tab. Keep it server-only. Replace GAS with an Edge Function before Supabase
+retires legacy keys.
 
 ## Deploy
 

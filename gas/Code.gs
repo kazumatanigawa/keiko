@@ -590,6 +590,7 @@ function supabaseRequest_(path, options) {
   const authMode = options.authMode || 'public';
   const key = authMode === 'admin' ? settings.secretKey : settings.publishableKey;
   const headers = { apikey: key, Accept: 'application/json' };
+  if (authMode === 'admin' && key.indexOf('eyJ') === 0) headers.Authorization = 'Bearer ' + key;
   if (authMode === 'user' || options.accessToken) headers.Authorization = 'Bearer ' + options.accessToken;
   if (options.prefer) headers.Prefer = options.prefer;
 
