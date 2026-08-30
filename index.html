@@ -141,44 +141,8 @@ textarea:focus,input:focus{border-color:var(--red)}
 .note-comment-box textarea{min-height:88px}
 .note-inline-btn{border:none;background:var(--gold);color:#fff;border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer}
 .note-inline-btn:disabled{opacity:.5;cursor:not-allowed}
-.lib-tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:16px;overflow-x:auto}
-.lib-tab{padding:10px 16px;border:none;background:none;font-size:13px;font-weight:700;font-family:inherit;color:var(--ink3);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px}
-.lib-tab.active{color:var(--red);border-bottom-color:var(--red)}
-.lib-panel{display:none}
-.lib-panel.active{display:block}
-.drive-section{margin-bottom:20px}
-.drive-section-title{font-size:14px;font-weight:700;color:var(--ink);border-bottom:2px solid var(--red);padding-bottom:6px;margin-bottom:10px}
-.drive-item{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none}
-.drive-icon{font-size:24px;width:36px;text-align:center}
-.drive-name{font-size:13px;font-weight:700;flex:1;color:var(--ink)}
-.drive-meta{font-size:11px;color:var(--ink3)}
-.drive-arrow{color:var(--ink3);font-size:16px}
-.slide-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.slide-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:transform 0.15s}
-.slide-card:active{transform:scale(0.97)}
-.slide-thumb{height:90px;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative}
-.slide-thumb-tag{position:absolute;top:6px;right:6px;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px}
-.slide-body{padding:8px 10px}
-.slide-title{font-size:12px;font-weight:700;line-height:1.4;margin-bottom:3px}
-.slide-date{font-size:10px;color:var(--ink3)}
-.drive-url-box{background:#fff;border:1.5px dashed var(--border);border-radius:var(--radius);padding:14px;margin-bottom:16px}
-.drive-url-label{font-size:12px;font-weight:700;color:var(--ink3);margin-bottom:8px}
-.drive-url-row{display:flex;gap:8px}
-.drive-url-row input{flex:1;font-size:12px;padding:8px 10px}
-.drive-url-btn{padding:8px 14px;background:var(--red);color:#fff;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap}
-.slide-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:flex-end;justify-content:center}
-.slide-modal-bg.show{display:flex}
-.slide-modal{background:#fff;border-radius:var(--radius) var(--radius) 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto}
-.slide-modal-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
-.slide-modal-title{font-size:16px;font-weight:700;flex:1;padding-right:12px;line-height:1.4}
-.slide-modal-close{background:var(--bg);border:none;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;flex-shrink:0}
-.slide-modal-visual{background:var(--bg);border-radius:var(--radius-sm);padding:20px;margin-bottom:14px;text-align:center;font-size:48px}
-.slide-modal-tag{display:inline-block;background:var(--red-pale);color:var(--red);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:10px}
-.slide-modal-body{font-size:13px;color:var(--ink2);line-height:1.8}
-.slide-modal-points{margin:10px 0;padding-left:0;list-style:none}
-.slide-modal-points li{padding:6px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:flex-start}
-.slide-modal-points li::before{content:'▶';color:var(--red);font-size:10px;margin-top:3px;flex-shrink:0}
-.slide-modal-gdrive{display:block;width:100%;margin-top:14px;padding:12px;background:var(--red);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;text-align:center;text-decoration:none}
+.note-toggle-btn{border:0;background:transparent;color:var(--red);font-size:12px;font-weight:800;font-family:inherit;cursor:pointer;padding:6px 0}
+.note-toggle-btn:disabled{opacity:.5;cursor:not-allowed}
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;opacity:0;transition:all 0.3s;pointer-events:none;z-index:999;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .success-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center}
@@ -248,8 +212,8 @@ textarea:focus,input:focus{border-color:var(--red)}
   <div class="auth-sub">supported by <a href="https://sites.google.com/view/kokongakumeiza/" target="_blank" rel="noopener noreferrer">古今樂明座</a></div>
   <div class="auth-card">
     <div class="auth-tabs">
-      <button class="auth-tab active" onclick="switchAuthTab('login')">ログイン</button>
-      <button class="auth-tab" onclick="switchAuthTab('register')">はじめて登録</button>
+      <button class="auth-tab active" type="button" onclick="switchAuthTab('login')">ログイン</button>
+      <button class="auth-tab" type="button" onclick="switchAuthTab('register')">はじめて登録</button>
     </div>
 
 <!-- ログインパネル -->
@@ -258,13 +222,13 @@ textarea:focus,input:focus{border-color:var(--red)}
   <input class="auth-input" id="loginName" type="text" placeholder="田中 太郎" maxlength="20" style="letter-spacing:normal;text-align:left">
   <label class="auth-label">4桁PIN</label>
   <div class="pin-row">
-    <input class="pin-digit" id="lp0" type="password" inputmode="numeric" maxlength="1" oninput="pinMove(this,'lp1')">
-    <input class="pin-digit" id="lp1" type="password" inputmode="numeric" maxlength="1" oninput="pinMove(this,'lp2')">
-    <input class="pin-digit" id="lp2" type="password" inputmode="numeric" maxlength="1" oninput="pinMove(this,'lp3')">
-    <input class="pin-digit" id="lp3" type="password" inputmode="numeric" maxlength="1" oninput="pinMove(this,null)">
+    <input class="pin-digit" id="lp0" type="password" inputmode="numeric" autocomplete="current-password" maxlength="1" oninput="pinMove(this,'lp1')">
+    <input class="pin-digit" id="lp1" type="password" inputmode="numeric" autocomplete="current-password" maxlength="1" oninput="pinMove(this,'lp2')">
+    <input class="pin-digit" id="lp2" type="password" inputmode="numeric" autocomplete="current-password" maxlength="1" oninput="pinMove(this,'lp3')">
+    <input class="pin-digit" id="lp3" type="password" inputmode="numeric" autocomplete="current-password" maxlength="1" oninput="pinMove(this,null)">
   </div>
   <div class="auth-err" id="loginErr"></div>
-  <button class="auth-btn" onclick="doLogin()">ログイン</button>
+  <button class="auth-btn" type="button" onclick="doLogin()">ログイン</button>
   <div class="auth-hint">※ PINを忘れた場合は指導員に相談してください</div>
 </div>
 
@@ -308,15 +272,15 @@ textarea:focus,input:focus{border-color:var(--red)}
   </div>
   <label class="auth-label">4桁のパスワードを設定（好きな数字4つ）</label>
   <div class="pin-row">
-    <input class="pin-digit" id="rp0" type="password" inputmode="numeric" maxlength="1" oninput="pinMove(this,'rp1')">
-    <input class="pin-digit" id="rp1" type="password" inputmode="numeric" maxlength="1" oninput="pinMove(this,'rp2')">
-    <input class="pin-digit" id="rp2" type="password" inputmode="numeric" maxlength="1" oninput="pinMove(this,'rp3')">
-    <input class="pin-digit" id="rp3" type="password" inputmode="numeric" maxlength="1" oninput="pinMove(this,null)">
+    <input class="pin-digit" id="rp0" type="password" inputmode="numeric" autocomplete="new-password" maxlength="1" oninput="pinMove(this,'rp1')">
+    <input class="pin-digit" id="rp1" type="password" inputmode="numeric" autocomplete="new-password" maxlength="1" oninput="pinMove(this,'rp2')">
+    <input class="pin-digit" id="rp2" type="password" inputmode="numeric" autocomplete="new-password" maxlength="1" oninput="pinMove(this,'rp3')">
+    <input class="pin-digit" id="rp3" type="password" inputmode="numeric" autocomplete="new-password" maxlength="1" oninput="pinMove(this,null)">
   </div>
   <label class="auth-label">登録コード</label>
-  <input class="auth-input" id="registrationCode" type="password" placeholder="指導員から共有されたコード" maxlength="64" style="letter-spacing:normal;text-align:left">
+  <input class="auth-input" id="registrationCode" type="password" autocomplete="off" placeholder="指導員から共有されたコード" maxlength="64" style="letter-spacing:normal;text-align:left">
   <div class="auth-err" id="regErr"></div>
-  <button class="auth-btn" onclick="doRegister()">登録してはじめる</button>
+  <button class="auth-btn" type="button" onclick="doRegister()">登録してはじめる</button>
   <div class="auth-hint">※ 4桁PINは自分だけの番号です。忘れないようにしよう！</div>
 </div>
 
@@ -338,21 +302,6 @@ textarea:focus,input:focus{border-color:var(--red)}
   </div>
 </div>
 
-<!-- SLIDE MODAL -->
-
-<div class="slide-modal-bg" id="slideModal">
-  <div class="slide-modal">
-    <div class="slide-modal-header">
-      <div class="slide-modal-title" id="modalTitle"></div>
-      <button class="slide-modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="slide-modal-visual" id="modalVisual"></div>
-    <div class="slide-modal-tag" id="modalTag"></div>
-    <div class="slide-modal-body" id="modalBody"></div>
-    <a class="slide-modal-gdrive" id="modalGdrive" target="_blank">Googleドライブで開く →</a>
-  </div>
-</div>
-
 <!-- HOME -->
 
 <div class="screen" id="screen-home">
@@ -366,7 +315,7 @@ textarea:focus,input:focus{border-color:var(--red)}
   <div class="content">
     <div class="goodnews-card" id="goodNewsCard">
       <div class="goodnews-header">
-        <div class="goodnews-title">みんなの Good&New</div>
+      <div class="goodnews-title">みんなの Good&amp;New</div>
         <div class="goodnews-badge">3 SEC</div>
       </div>
       <div class="goodnews-text is-placeholder" id="goodNewsText">読み込み中...</div>
@@ -452,7 +401,7 @@ textarea:focus,input:focus{border-color:var(--red)}
       <div class="char-count" id="charNext">0/60</div>
     </div>
     <div class="form-section">
-      <label class="form-label">Good & New</label>
+      <label class="form-label">Good &amp; New</label>
       <div class="form-hint">今日の「良かったこと」や「新しい発見」を1つ</div>
       <textarea id="fieldGoodNew" rows="2" placeholder="例：Aパートを止まらずに最後まで叩けた！" oninput="updateChar(this,'charGoodNew',80)"></textarea>
       <div class="char-count" id="charGoodNew">0/80</div>
@@ -491,11 +440,11 @@ textarea:focus,input:focus{border-color:var(--red)}
       <div class="note-compose-title">指導内容・練習内容をまとめる</div>
       <div class="form-section" style="margin-bottom:12px">
         <label class="form-label">タイトル</label>
-        <input type="text" id="noteTitleInput" placeholder="例：Aパート基礎打ちで意識すること">
+        <input type="text" id="noteTitleInput" placeholder="例：Aパート基礎打ちで意識すること" oninput="saveNoteDraft()">
       </div>
       <div class="form-section" style="margin-bottom:0">
         <label class="form-label">内容</label>
-        <textarea id="noteBodyInput" rows="6" placeholder="例：今日はAパートの入りとリズムを重点確認。次回は入りのタイミングをそろえてから通しに入る。"></textarea>
+        <textarea id="noteBodyInput" rows="6" placeholder="例：今日はAパートの入りとリズムを重点確認。次回は入りのタイミングをそろえてから通しに入る。" oninput="saveNoteDraft()"></textarea>
       </div>
       <div class="note-compose-actions">
         <button class="note-submit-btn" id="noteSubmitBtn" type="button" onclick="submitNote()">記録</button>
@@ -539,18 +488,16 @@ textarea:focus,input:focus{border-color:var(--red)}
 
 <script>
 // ============================================
-// 【設定】GASのウェブアプリURLをここに貼る
+// 【設定】Supabase
 // ============================================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwm21rQITFGNgi-2TmnadTdd-rQaf425NKSUz0WJcPUYB6KrTQ7WtY6Rokn_aP-axabUg/exec";
 const SUPABASE_URL = "https://iablkvlcjzgigkiypyhy.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_bUsistuLUHYciU1MOvicYQ_JzvVpgeN";
-
-const DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1a9iaxd2OKBywSuRZvPib1gyGciL22HpM?usp=drive_link";
+const EDGE_API_URL = `${SUPABASE_URL}/functions/v1/keiko-api`;
 const GOOD_NEWS_ROTATE_MS = 3000;
 const GOOD_NEWS_REFRESH_MS = 60000;
 const GOOD_NEWS_RECENT_LIMIT = 4;
 const NOTES_REFRESH_MS = 45000;
-const APP_VERSION = '2026-08-27-01';
+const APP_VERSION = '2026-08-30-01';
 const APP_VERSION_KEY = 'taiko_app_version';
 const TEAM_CACHE_KEY = 'taiko_team_options';
 const PRACTICE_CACHE_PREFIX = 'taiko_practice_cache_v1:';
@@ -559,6 +506,9 @@ const PRACTICE_REFRESH_MS = 300000;
 const ACCESS_TOKEN_KEY = 'taiko_access_token';
 const REFRESH_TOKEN_KEY = 'taiko_refresh_token';
 const TOKEN_EXPIRES_AT_KEY = 'taiko_token_expires_at';
+const NOTES_CACHE_PREFIX = 'taiko_notes_cache_v1:';
+const DRAFT_PREFIX = 'taiko_draft_v1:';
+const OUTBOX_PREFIX = 'taiko_outbox_v1:';
 
 const COND_EMOJI = ['','☠️','💦','😃','💪','🔥'];
 let selCond = 0;
@@ -610,6 +560,10 @@ const notesState = {
   updatingCommentIds: new Set(),
   deletingCommentIds: new Set(),
   editingCommentId: '',
+  loadingMore: false,
+  hasMore: false,
+  nextCursor: null,
+  expandedNoteIds: new Set(),
 };
 
 const goodNewsElements = {
@@ -620,6 +574,7 @@ const goodNewsElements = {
 
 document.addEventListener('DOMContentLoaded', initializeGoodNewsFeed);
 document.addEventListener('DOMContentLoaded', initializeAuthUi);
+window.addEventListener('online', () => flushOutbox());
 
 function initializeGoodNewsFeed() {
   renderGoodNewsPlaceholder('loading', '読み込み中...', 'みんなの前向きな変化が3秒ごとに流れます');
@@ -633,30 +588,24 @@ function initializeAuthUi() {
   if (launchInput) {
     launchInput.addEventListener('input', handleLaunchTeamNameInput);
   }
-  loadTeamOptions();
 }
 // ============================================
 // 起動処理
 // ============================================
 window.onload = async function() {
-  const versionStatus = enforceAppVersion();
+  enforceAppVersion();
   const name = localStorage.getItem('taiko_name');
   if (name) document.getElementById('loginName').value = name;
-
-  if (versionStatus.requiresRelogin) {
-    const err = document.getElementById('loginErr');
-    if (err) err.textContent = 'アプリが更新されました。もう一度ログインしてください。';
-    showToast('アプリ更新のため再ログインしてください');
-    return;
-  }
 
   if (hasSession()) {
     try {
       await ensureAccessToken();
       document.getElementById('authOverlay').classList.add('hidden');
       hydratePracticeCache();
+      hydrateNotesCache();
       goTo('home');
       loadHome({ background: homeState.loaded });
+      flushOutbox();
     } catch (error) {
       clearSession();
       const err = document.getElementById('loginErr');
@@ -667,22 +616,7 @@ window.onload = async function() {
 
 function enforceAppVersion() {
   const storedVersion = localStorage.getItem(APP_VERSION_KEY);
-  const hadSession = hasSession();
-
-  if (!storedVersion) {
-    localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
-    return { requiresRelogin: false };
-  }
-
-  if (storedVersion !== APP_VERSION) {
-    localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
-    if (hadSession) {
-      clearSession();
-      return { requiresRelogin: true };
-    }
-  }
-
-  return { requiresRelogin: false };
+  if (storedVersion !== APP_VERSION) localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
 }
 
 // ============================================
@@ -693,6 +627,7 @@ function switchAuthTab(tab) {
   document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
   document.querySelector(`.auth-tab[onclick*="${tab}"]`).classList.add('active');
   document.getElementById('auth-' + tab).classList.add('active');
+  if (tab === 'register') loadTeamOptions();
 }
 
 // PINの自動フォーカス移動
@@ -717,25 +652,20 @@ function hasSession() {
   return !!localStorage.getItem(REFRESH_TOKEN_KEY);
 }
 
-async function apiRequest(action, payload = {}, options = {}) {
-  const { auth = true, retry = true } = options;
+async function edgeRequest(action, payload = {}) {
   const body = { action, ...payload };
-  if (auth) body.accessToken = await ensureAccessToken();
 
-  const response = await fetch(GAS_URL, {
+  const response = await fetch(EDGE_API_URL, {
     method: 'POST',
-    headers: {'Content-Type':'text/plain'},
+    headers: {
+      apikey: SUPABASE_PUBLISHABLE_KEY,
+      'Content-Type':'application/json',
+    },
     body: JSON.stringify(body),
   });
   const json = await response.json();
   if (json.status === 'ok' || json.status === 'exists' || json.status === 'team_exists') return json;
 
-  if (auth && retry && ['auth_required', 'session_expired'].includes(json.code)) {
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(TOKEN_EXPIRES_AT_KEY);
-    await refreshAccessToken();
-    return apiRequest(action, payload, { auth: true, retry: false });
-  }
   const error = new Error(json.message || '処理に失敗しました');
   error.code = json.code || 'request_failed';
   throw error;
@@ -807,10 +737,16 @@ async function refreshAccessToken() {
   const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY) || '';
   if (!refreshToken) throw new Error('ログインが必要です');
 
-  refreshPromise = apiRequest('refreshSession', { refreshToken }, { auth: false, retry: false })
-    .then(json => {
-      saveSession(json);
-      return json.accessToken;
+  refreshPromise = fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+    method: 'POST',
+    headers: { apikey: SUPABASE_PUBLISHABLE_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  })
+    .then(async response => {
+      const json = await response.json();
+      if (!response.ok || !json.access_token) throw new Error('ログインの有効期限が切れました。');
+      saveAuthTokens(json);
+      return json.access_token;
     })
     .catch(error => {
       clearSession();
@@ -818,6 +754,17 @@ async function refreshAccessToken() {
     })
     .finally(() => { refreshPromise = null; });
   return refreshPromise;
+}
+
+function saveAuthTokens(session) {
+  const accessToken = session.access_token || session.accessToken;
+  const refreshToken = session.refresh_token || session.refreshToken;
+  const expiresAt = session.expires_at || session.expiresAt;
+  const expiresIn = session.expires_in || session.expiresIn;
+  if (accessToken) localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+  if (refreshToken) localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+  if (expiresAt) localStorage.setItem(TOKEN_EXPIRES_AT_KEY, String(Number(expiresAt) * 1000));
+  else if (expiresIn) localStorage.setItem(TOKEN_EXPIRES_AT_KEY, String(Date.now() + Number(expiresIn) * 1000));
 }
 
 function hydrateCachedTeamOptions() {
@@ -849,7 +796,7 @@ async function loadTeamOptions(force = false) {
   updateTeamLoadingMessage('所属チームを読み込み中...');
 
   try {
-    const json = await apiRequest('getTeams', {}, { auth: false });
+    const json = await edgeRequest('getTeams');
     if (!Array.isArray(json.teams)) throw new Error('team fetch failed');
     teamState.items = json.teams
       .filter((team) => team && team.teamId && team.teamName)
@@ -1072,7 +1019,7 @@ async function doRegister() {
 
   err.textContent = '登録中...';
   try {
-    const json = await apiRequest('register', { name: nameFields.name, pin, registrationCode, ...nameFields, ...teamPayload }, { auth: false });
+    const json = await edgeRequest('register', { name: nameFields.name, pin, registrationCode, ...nameFields, ...teamPayload });
     if (json.status === 'exists') { err.textContent = 'この名前はすでに登録されています。ログインしてください'; return; }
     if (json.status === 'team_exists') { err.textContent = 'そのチーム名は既に存在します。所属チームから選択してください'; loadTeamOptions(true); return; }
     saveSession(json);
@@ -1100,7 +1047,7 @@ async function doLogin() {
 
   err.textContent = '確認中...';
   try {
-    const json = await apiRequest('login', { name, pin }, { auth: false });
+    const json = await edgeRequest('login', { name, pin });
     saveSession(json);
     clearPin('lp');
     hideAuth();
@@ -1114,10 +1061,7 @@ async function doLogin() {
 
 function saveSession(session) {
   localStorage.setItem('taiko_name', session.name || '');
-  if (session.accessToken) localStorage.setItem(ACCESS_TOKEN_KEY, session.accessToken);
-  if (session.refreshToken) localStorage.setItem(REFRESH_TOKEN_KEY, session.refreshToken);
-  if (session.expiresAt) localStorage.setItem(TOKEN_EXPIRES_AT_KEY, String(Number(session.expiresAt) * 1000));
-  else if (session.expiresIn) localStorage.setItem(TOKEN_EXPIRES_AT_KEY, String(Date.now() + Number(session.expiresIn) * 1000));
+  saveAuthTokens(session);
   if (session.userId) localStorage.setItem('taiko_user_id', session.userId);
   else localStorage.removeItem('taiko_user_id');
   if (session.teamId) localStorage.setItem('taiko_team_id', session.teamId);
@@ -1133,6 +1077,7 @@ function saveSession(session) {
 
 function clearSession() {
   clearPracticeCache();
+  clearNotesCache();
   ['taiko_name', 'taiko_user_id', 'taiko_team_id', 'taiko_group', 'taiko_team_type', 'taiko_user_type', ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, TOKEN_EXPIRES_AT_KEY, 'taiko_pin']
     .forEach(key => localStorage.removeItem(key));
 }
@@ -1164,7 +1109,6 @@ function goTo(s) {
   if (s === 'form')    updateForm();
   if (s === 'log')     ensureLogsLoaded();
   if (s === 'notes')   updateNotes();
-  if (s === 'library') updateLibrary();
   syncGoodNewsTickerWithView();
 }
 
@@ -1172,8 +1116,81 @@ function getName()  { return localStorage.getItem('taiko_name') || ''; }
 function getUserId() { return localStorage.getItem('taiko_user_id') || ''; }
 function getTeamId() { return localStorage.getItem('taiko_team_id') || ''; }
 function getGroup()  { return localStorage.getItem('taiko_group') || ''; }
-function getTeamType() { return localStorage.getItem('taiko_team_type') || ''; }
-function getUserType() { return localStorage.getItem('taiko_user_type') || ''; }
+
+function scopedStorageKey(prefix, suffix = '') {
+  const scope = `${getUserId()}:${getTeamId()}`;
+  return getUserId() && getTeamId() ? `${prefix}${scope}${suffix ? `:${suffix}` : ''}` : '';
+}
+
+function getOutbox() {
+  const key = scopedStorageKey(OUTBOX_PREFIX);
+  if (!key) return [];
+  try { return JSON.parse(localStorage.getItem(key) || '[]').filter(Boolean); }
+  catch (error) { console.warn('outbox hydrate failed', error); return []; }
+}
+
+function saveOutbox(items) {
+  const key = scopedStorageKey(OUTBOX_PREFIX);
+  if (key) localStorage.setItem(key, JSON.stringify(items));
+}
+
+function enqueueOutbox(functionName, payload, kind) {
+  const items = getOutbox();
+  items.push({ id: createRequestId(), functionName, payload, kind, createdAt: new Date().toISOString() });
+  saveOutbox(items);
+}
+
+let outboxFlushPromise = null;
+async function flushOutbox() {
+  if (outboxFlushPromise || !hasSession() || !navigator.onLine) return outboxFlushPromise;
+  outboxFlushPromise = (async () => {
+    const items = getOutbox();
+    const remaining = [];
+    let completed = 0;
+    for (let index = 0; index < items.length; index += 1) {
+      const item = items[index];
+      try {
+        await supabaseRead(item.functionName, item.payload);
+        completed += 1;
+      } catch (error) {
+        remaining.push(item);
+        if (isNetworkError(error)) {
+          remaining.push(...items.slice(index + 1));
+          break;
+        }
+      }
+    }
+    saveOutbox(remaining);
+    if (completed) {
+      loadHome({ background: true });
+      ensureNotesLoaded({ force: true, background: true });
+      loadGoodNewsFeed({ force: true, background: true });
+      showToast(`${completed}件の送信待ちデータを保存しました`);
+    }
+  })().finally(() => { outboxFlushPromise = null; });
+  return outboxFlushPromise;
+}
+
+function isNetworkError(error) {
+  return !navigator.onLine || error instanceof TypeError || error?.code === 'network_error';
+}
+
+function getDraft(key) {
+  const storageKey = scopedStorageKey(DRAFT_PREFIX, key);
+  if (!storageKey) return null;
+  try { return JSON.parse(localStorage.getItem(storageKey) || 'null'); }
+  catch (error) { return null; }
+}
+
+function setDraft(key, value) {
+  const storageKey = scopedStorageKey(DRAFT_PREFIX, key);
+  if (storageKey) localStorage.setItem(storageKey, JSON.stringify(value));
+}
+
+function clearDraft(key) {
+  const storageKey = scopedStorageKey(DRAFT_PREFIX, key);
+  if (storageKey) localStorage.removeItem(storageKey);
+}
 
 function getPracticeCacheKey() {
   const userId = getUserId();
@@ -1250,6 +1267,11 @@ function clearPracticeCache() {
   if (key) localStorage.removeItem(key);
 }
 
+function clearNotesCache() {
+  const key = getNotesCacheKey();
+  if (key) localStorage.removeItem(key);
+}
+
 function getLatestLog() {
   return homeState.latestLog || cachedLogs[0] || null;
 }
@@ -1265,16 +1287,6 @@ function getDateKey() {
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
-}
-
-function getTeamNameFromState(teamId) {
-  const team = teamState.items.find((item) => item.teamId === teamId);
-  return team ? team.teamName : '';
-}
-
-function getTeamTypeFromState(teamId) {
-  const team = teamState.items.find((item) => item.teamId === teamId);
-  return team ? team.teamType : '';
 }
 
 // ============================================
@@ -1399,7 +1411,7 @@ async function loadGoodNewsFeed({ force = false, background = false } = {}) {
     goodNewsState.error = 'feed-unavailable';
     goodNewsState.loaded = true;
     if (!goodNewsState.items.length) {
-      renderGoodNewsPlaceholder('error', 'みんなの Good&New は準備中です', 'GAS 側に getGoodNews を追加するとここに全員分が流れます。');
+      renderGoodNewsPlaceholder('error', 'みんなの Good&New を取得できませんでした', '通信状態を確認して、しばらくしてから再度お試しください。');
     } else {
       const meta = goodNewsElements.meta();
       if (meta) meta.textContent = '最新の取得に失敗したため、前回の内容を表示しています。';
@@ -1586,11 +1598,14 @@ function updateForm() {
   toggleFailureFields(false);
   document.getElementById('achievementSection').style.display = latestLog?.next ? 'block' : 'none';
   document.getElementById('submitBtn').disabled = false;
+  document.getElementById('submitBtn').textContent = '記録を保存する ✓';
+  hydrateLogDraft();
 }
 
 function selectCond(btn, val) {
   document.querySelectorAll('.cond-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected'); selCond = val;
+  saveLogDraft();
 }
 function selectAchievement(val) {
   selAchievement = val;
@@ -1600,6 +1615,7 @@ function selectAchievement(val) {
   if (val === 'done') doneBtn.classList.add('selected', 'done');
   if (val === 'pending') pendingBtn.classList.add('selected', 'pending');
   toggleFailureFields(val === 'pending');
+  saveLogDraft();
 }
 function toggleFailureFields(show) {
   const box = document.getElementById('failureFields');
@@ -1609,10 +1625,45 @@ function toggleFailureFields(show) {
 function updateChar(el, outId, max) {
   document.getElementById(outId).textContent = el.value.length + '/' + max;
   if (el.value.length > max) el.value = el.value.substring(0, max);
+  saveLogDraft();
+}
+
+function saveLogDraft() {
+  setDraft('log', {
+    cond: selCond,
+    achievementStatus: selAchievement,
+    learning: document.getElementById('fieldLearning')?.value || '',
+    next: document.getElementById('fieldNext')?.value || '',
+    goodNew: document.getElementById('fieldGoodNew')?.value || '',
+    whyMissed: document.getElementById('fieldWhyMissed')?.value || '',
+    retryPlan: document.getElementById('fieldRetryPlan')?.value || '',
+  });
+}
+
+function hydrateLogDraft() {
+  const draft = getDraft('log');
+  if (!draft) return;
+  const condButtons = document.querySelectorAll('.cond-btn');
+  if (Number(draft.cond) >= 1 && Number(draft.cond) <= 5) selectCond(condButtons[Number(draft.cond) - 1], Number(draft.cond));
+  if (['done', 'pending'].includes(draft.achievementStatus) && getLatestLog()?.next) selectAchievement(draft.achievementStatus);
+  const fields = [
+    ['fieldLearning', 'charLearning', 100, draft.learning],
+    ['fieldNext', 'charNext', 60, draft.next],
+    ['fieldGoodNew', 'charGoodNew', 80, draft.goodNew],
+    ['fieldWhyMissed', 'charWhyMissed', 80, draft.whyMissed],
+    ['fieldRetryPlan', 'charRetryPlan', 80, draft.retryPlan],
+  ];
+  fields.forEach(([id, countId, max, value]) => {
+    const input = document.getElementById(id);
+    if (!input) return;
+    input.value = String(value || '').slice(0, max);
+    document.getElementById(countId).textContent = `${input.value.length}/${max}`;
+  });
+  saveLogDraft();
 }
 
 // ============================================
-// ログ送信（GAS POST）
+// ログ送信
 // ============================================
 async function submitLog() {
   if (!selCond)    { showToast('コンディションを選んでください'); return; }
@@ -1633,60 +1684,71 @@ async function submitLog() {
   btn.disabled = true; btn.textContent = '送信中...';
 
   const payload = {
-    teamId:   getTeamId(),
-    requestId: createRequestId(),
-    date:     getDateKey(),
-    cond:     selCond,
-    learning, next, goodNew,
-    achievementStatus: hasPreviousMission ? selAchievement : '',
-    whyMissed: selAchievement === 'pending' ? whyMissed : '',
-    retryPlan: selAchievement === 'pending' ? retryPlan : '',
+    p_team_id: getTeamId(),
+    p_request_id: createRequestId(),
+    p_date: getDateKey(),
+    p_condition: selCond,
+    p_learning: learning,
+    p_next_action: next,
+    p_good_new: goodNew,
+    p_achievement_status: hasPreviousMission ? selAchievement : '',
+    p_why_missed: selAchievement === 'pending' ? whyMissed : '',
+    p_retry_plan: selAchievement === 'pending' ? retryPlan : '',
   };
 
   try {
-    const json = await apiRequest('saveLog', payload);
+    const json = await supabaseRead('save_keiko_log', payload);
     if (json.status === 'ok') {
-      const savedLog = {
-        id: json.id || `local_${payload.requestId}`,
-        userId: getUserId(),
-        group: getGroup(),
-        cond: selCond,
-        learning,
-        next,
-        goodNew,
-        date: getDateKey(),
-        createdAt: new Date().toISOString(),
-        achievementStatus: hasPreviousMission ? selAchievement : '',
-        whyMissed: selAchievement === 'pending' ? whyMissed : '',
-        retryPlan: selAchievement === 'pending' ? retryPlan : ''
-      };
-      cachedLogs = [savedLog, ...cachedLogs.filter(log => log.id !== savedLog.id)];
-      if (!json.duplicate) {
-        const previousCount = homeState.totalCount;
-        const previousAverage = Number(homeState.averageCondition || 0);
-        homeState.totalCount = previousCount + 1;
-        homeState.averageCondition = ((previousAverage * previousCount) + selCond) / homeState.totalCount;
-      }
-      homeState.latestLog = savedLog;
-      homeState.loaded = true;
-      homeState.lastFetchedAt = Date.now();
-      cachePracticeData();
-      loadHome({ background: true });
-      loadGoodNewsFeed({ force: true, background: true });
-      document.getElementById('successText').textContent =
-        `「${next.substring(0,20)}${next.length>20?'…':''}」を次の稽古の誓いに登録しました！`;
-      document.getElementById('successOverlay').classList.add('show');
+      applySavedLog(json, payload, false);
     } else {
-      showToast('送信エラー。もう一度試してください');
-      btn.disabled = false; btn.textContent = '記録を保存する ✓';
+      throw new Error('送信エラー。もう一度試してください');
     }
   } catch(e) {
-    const message = e instanceof TypeError
-      ? '通信エラー。Wi-Fiを確認してください'
-      : (e.message || '送信エラー。もう一度試してください');
-    showToast(message);
+    if (isNetworkError(e)) {
+      enqueueOutbox('save_keiko_log', payload, 'log');
+      applySavedLog({ status: 'ok', id: `pending_${payload.p_request_id}`, duplicate: false }, payload, true);
+    } else {
+      showToast(e.message || '送信エラー。もう一度試してください');
+    }
+  } finally {
     btn.disabled = false; btn.textContent = '記録を保存する ✓';
   }
+}
+
+function applySavedLog(json, payload, queued) {
+  const savedLog = mapSupabaseLog(json.log) || {
+    id: json.id || `pending_${payload.p_request_id}`,
+    cond: payload.p_condition,
+    learning: payload.p_learning,
+    next: payload.p_next_action,
+    goodNew: payload.p_good_new,
+    date: payload.p_date,
+    createdAt: new Date().toISOString(),
+    achievementStatus: payload.p_achievement_status,
+    whyMissed: payload.p_why_missed,
+    retryPlan: payload.p_retry_plan,
+    pending: queued,
+  };
+  cachedLogs = [savedLog, ...cachedLogs.filter(log => log.id !== savedLog.id)];
+  if (!json.duplicate) {
+    const previousCount = homeState.totalCount;
+    const previousAverage = Number(homeState.averageCondition || 0);
+    homeState.totalCount = previousCount + 1;
+    homeState.averageCondition = ((previousAverage * previousCount) + payload.p_condition) / homeState.totalCount;
+  }
+  homeState.latestLog = savedLog;
+  homeState.loaded = true;
+  homeState.lastFetchedAt = Date.now();
+  clearDraft('log');
+  cachePracticeData();
+  if (!queued) {
+    loadHome({ background: true });
+    loadGoodNewsFeed({ force: true, background: true });
+  }
+  document.getElementById('successText').textContent = queued
+    ? '通信が戻り次第、自動で保存します。入力内容はこの端末に保持されています。'
+    : `「${payload.p_next_action.substring(0,20)}${payload.p_next_action.length>20?'…':''}」を次の稽古の誓いに登録しました！`;
+  document.getElementById('successOverlay').classList.add('show');
 }
 
 function createRequestId() {
@@ -1702,7 +1764,7 @@ function closeSuccess() {
 }
 
 // ============================================
-// ログ取得（GAS GET）- ローディングオーバーレイ
+// ログ取得 - ローディングオーバーレイ
 // ============================================
 let _loadingEl = null;
 function showLoading() {
@@ -1866,8 +1928,57 @@ function updateNotes() {
   if (sub) {
     sub.textContent = groupName ? `${groupName} のメンバー内だけで稽古内容を蓄積できます` : '同じチーム内だけで稽古内容を蓄積できます';
   }
+  hydrateNoteDraft();
   renderNotes();
   ensureNotesLoaded({ background: true });
+}
+
+function getNotesCacheKey() {
+  return scopedStorageKey(NOTES_CACHE_PREFIX);
+}
+
+function hydrateNotesCache() {
+  const key = getNotesCacheKey();
+  if (!key || notesState.loaded) return;
+  try {
+    const cached = JSON.parse(localStorage.getItem(key) || 'null');
+    if (!cached || cached.version !== 1 || !Array.isArray(cached.items)) return;
+    notesState.items = cached.items;
+    notesState.loaded = true;
+    notesState.hasMore = !!cached.hasMore;
+    notesState.nextCursor = cached.nextCursor || null;
+    notesState.lastFetchedAt = Number(cached.lastFetchedAt || 0);
+  } catch (error) {
+    console.warn('notes cache hydrate failed', error);
+  }
+}
+
+function cacheNotes() {
+  const key = getNotesCacheKey();
+  if (!key) return;
+  localStorage.setItem(key, JSON.stringify({
+    version: 1,
+    items: notesState.items.slice(0, 60),
+    hasMore: notesState.hasMore,
+    nextCursor: notesState.nextCursor,
+    lastFetchedAt: notesState.lastFetchedAt,
+  }));
+}
+
+function saveNoteDraft() {
+  setDraft('note', {
+    title: document.getElementById('noteTitleInput')?.value || '',
+    body: document.getElementById('noteBodyInput')?.value || '',
+  });
+}
+
+function hydrateNoteDraft() {
+  const draft = getDraft('note');
+  if (!draft) return;
+  const title = document.getElementById('noteTitleInput');
+  const body = document.getElementById('noteBodyInput');
+  if (title && !title.value) title.value = draft.title || '';
+  if (body && !body.value) body.value = draft.body || '';
 }
 
 function renderNotes() {
@@ -1884,21 +1995,30 @@ function renderNotes() {
     return;
   }
 
-  content.innerHTML = notesState.items.map((note) => `
+  const cards = notesState.items.map((note) => {
+    const expanded = notesState.expandedNoteIds.has(note.noteId);
+    const count = Number(note.commentCount ?? note.comments?.length ?? 0);
+    return `
     <article class="note-card">
       <div class="note-title">${esc(note.title)}</div>
       <div class="note-meta">まとめた人: ${esc(note.authorName || '未設定')} / ${esc(fmtDateTime(note.createdAt))}</div>
       <div class="note-body">${esc(note.body)}</div>
       <div class="note-comments">
-        <div class="note-comments-title">コメント ${Array.isArray(note.comments) ? `(${note.comments.length})` : '(0)'}</div>
-        ${renderNoteComments(note.comments)}
+        ${note.pending ? '<div class="note-meta">送信待ちです。通信復帰後にコメントできます。</div>' : `<button class="note-toggle-btn" type="button" onclick="toggleNoteComments('${escapeAttr(note.noteId)}')" ${note.commentsLoading ? 'disabled' : ''}>${note.commentsLoading ? 'コメントを読み込み中...' : `${expanded ? 'コメントを閉じる' : 'コメントを表示'} (${count})`}</button>`}
+        ${expanded ? `${renderNoteComments(note.comments)}
+        ${note.commentsHasMore ? `<button class="note-toggle-btn" type="button" onclick="loadNoteComments('${escapeAttr(note.noteId)}', true)">さらにコメントを読み込む</button>` : ''}
         <div class="note-comment-box">
           <textarea id="noteCommentInput_${escapeAttr(note.noteId)}" rows="3" placeholder="例：入りの合図は右手を上げた瞬間。自分は次回ここを重点的に確認する。"></textarea>
           <button class="note-inline-btn" id="noteCommentSubmit_${escapeAttr(note.noteId)}" type="button" onclick="submitNoteComment('${escapeAttr(note.noteId)}')" ${notesState.submittingCommentIds.has(note.noteId) ? 'disabled aria-busy="true"' : ''}>${notesState.submittingCommentIds.has(note.noteId) ? '投稿中...' : 'アイデアをシェア'}</button>
-        </div>
+        </div>` : ''}
       </div>
     </article>
-  `).join('');
+  `;
+  }).join('');
+  const more = notesState.hasMore
+    ? `<div class="log-load-more"><button class="log-load-more-btn" type="button" onclick="loadMoreNotes()" ${notesState.loadingMore ? 'disabled' : ''}>${notesState.loadingMore ? '読み込み中...' : 'さらにノートを読み込む'}</button></div>`
+    : '';
+  content.innerHTML = cards + more;
 }
 
 function renderNoteComments(comments) {
@@ -1956,19 +2076,88 @@ async function ensureNotesLoaded(options = {}) {
   if (!background || !notesState.items.length) renderNotes();
 
   try {
-    const json = await supabaseRead('get_keiko_notes', {
+    const json = await supabaseRead('get_keiko_notes_page', {
       p_team_id: getTeamId(),
-      p_limit: 100,
+      p_cursor_created_at: null,
+      p_cursor_id: null,
+      p_limit: 20,
     });
 
     notesState.items = Array.isArray(json.notes) ? json.notes : [];
+    notesState.hasMore = !!json.hasMore;
+    notesState.nextCursor = json.nextCursor || null;
     notesState.loaded = true;
     notesState.lastFetchedAt = Date.now();
+    cacheNotes();
   } catch (error) {
     console.error(error);
     showToast('ノートの取得に失敗しました');
   } finally {
     notesState.loading = false;
+    renderNotes();
+  }
+}
+
+async function loadMoreNotes() {
+  if (notesState.loadingMore || !notesState.hasMore || !notesState.nextCursor) return;
+  notesState.loadingMore = true;
+  renderNotes();
+  try {
+    const json = await supabaseRead('get_keiko_notes_page', {
+      p_team_id: getTeamId(),
+      p_cursor_created_at: notesState.nextCursor.createdAt,
+      p_cursor_id: notesState.nextCursor.id,
+      p_limit: 20,
+    });
+    const existing = new Set(notesState.items.map(note => note.noteId));
+    notesState.items.push(...(json.notes || []).filter(note => !existing.has(note.noteId)));
+    notesState.hasMore = !!json.hasMore;
+    notesState.nextCursor = json.nextCursor || null;
+    cacheNotes();
+  } catch (error) {
+    showToast('ノートの続きを取得できませんでした');
+  } finally {
+    notesState.loadingMore = false;
+    renderNotes();
+  }
+}
+
+function toggleNoteComments(noteId) {
+  if (notesState.expandedNoteIds.has(noteId)) {
+    notesState.expandedNoteIds.delete(noteId);
+    renderNotes();
+    return;
+  }
+  notesState.expandedNoteIds.add(noteId);
+  renderNotes();
+  const note = notesState.items.find(item => item.noteId === noteId);
+  if (note && !note.commentsLoaded) loadNoteComments(noteId, false);
+}
+
+async function loadNoteComments(noteId, append = false) {
+  const note = notesState.items.find(item => item.noteId === noteId);
+  if (!note || note.commentsLoading) return;
+  note.commentsLoading = true;
+  renderNotes();
+  const cursor = append ? note.commentsNextCursor : null;
+  try {
+    const json = await supabaseRead('get_keiko_note_comments', {
+      p_team_id: getTeamId(),
+      p_note_id: noteId,
+      p_cursor_created_at: cursor?.createdAt || null,
+      p_cursor_id: cursor?.id || null,
+      p_limit: 20,
+    });
+    note.comments = append ? [...(note.comments || []), ...(json.comments || [])] : (json.comments || []);
+    note.commentsLoaded = true;
+    note.commentsHasMore = !!json.hasMore;
+    note.commentsNextCursor = json.nextCursor || null;
+    cacheNotes();
+  } catch (error) {
+    showToast('コメントを取得できませんでした');
+  } finally {
+    note.commentsLoading = false;
+    cacheNotes();
     renderNotes();
   }
 }
@@ -1991,15 +2180,26 @@ async function submitNote() {
   }
 
   try {
-    const json = await apiRequest('saveNote', { teamId: getTeamId(), title, body });
+    const payload = { p_team_id: getTeamId(), p_request_id: createRequestId(), p_title: title, p_body: body };
+    let json;
+    try {
+      json = await supabaseRead('save_keiko_note', payload);
+    } catch (error) {
+      if (!isNetworkError(error)) throw error;
+      enqueueOutbox('save_keiko_note', payload, 'note');
+      json = { status: 'ok', note: { noteId: `pending_${payload.p_request_id}`, authorUserId: getUserId(), authorName: getName(), title, body, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), commentCount: 0, comments: [], commentsLoaded: true, pending: true } };
+      showToast('通信復帰後に自動で記録します');
+    }
 
-    notesState.items = Array.isArray(json.notes) ? json.notes : [];
+    if (json.note && !json.duplicate) notesState.items = [json.note, ...notesState.items];
     notesState.loaded = true;
     notesState.lastFetchedAt = Date.now();
     titleInput.value = '';
     bodyInput.value = '';
+    clearDraft('note');
+    cacheNotes();
     renderNotes();
-    showToast('稽古内容を記録しました');
+    if (!json.note?.pending) showToast('稽古内容を記録しました');
   } catch (error) {
     console.error(error);
     showToast('ノートの記録に失敗しました');
@@ -2023,15 +2223,30 @@ async function submitNoteComment(noteId) {
   setPendingButton(button, true, '投稿中...', 'アイデアをシェア');
 
   try {
-    const json = await apiRequest('addNoteComment', { teamId: getTeamId(), noteId, body });
+    const payload = { p_team_id: getTeamId(), p_note_id: noteId, p_request_id: createRequestId(), p_body: body };
+    let json;
+    try {
+      json = await supabaseRead('add_keiko_note_comment', payload);
+    } catch (error) {
+      if (!isNetworkError(error)) throw error;
+      enqueueOutbox('add_keiko_note_comment', payload, 'comment');
+      json = { status: 'ok', comment: { commentId: `pending_${payload.p_request_id}`, noteId, authorUserId: getUserId(), authorName: getName(), body, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), canEdit: false, canDelete: false, pending: true } };
+      showToast('通信復帰後に自動で投稿します');
+    }
 
-    notesState.items = Array.isArray(json.notes) ? json.notes : [];
+    const note = notesState.items.find(item => item.noteId === noteId);
+    if (note && json.comment && !json.duplicate) {
+      note.comments = [...(note.comments || []), json.comment];
+      note.commentsLoaded = true;
+      note.commentCount = Number(note.commentCount || 0) + 1;
+    }
     notesState.loaded = true;
     notesState.lastFetchedAt = Date.now();
     if (input) input.value = '';
     notesState.editingCommentId = '';
+    cacheNotes();
     renderNotes();
-    showToast('補足メモを記録しました');
+    if (!json.comment?.pending) showToast('補足メモを記録しました');
   } catch (error) {
     console.error(error);
     showToast(error?.message || '補足メモの記録に失敗しました');
@@ -2063,12 +2278,21 @@ async function saveEditedNoteComment(commentId) {
   setPendingButton(button, true, '保存中...', '保存');
 
   try {
-    const json = await apiRequest('updateNoteComment', { teamId: getTeamId(), commentId, body });
-
-    notesState.items = Array.isArray(json.notes) ? json.notes : [];
+    const payload = { p_team_id: getTeamId(), p_comment_id: commentId, p_body: body };
+    try {
+      const json = await supabaseRead('update_keiko_note_comment', payload);
+      replaceNoteComment(json.comment);
+    } catch (error) {
+      if (!isNetworkError(error)) throw error;
+      enqueueOutbox('update_keiko_note_comment', payload, 'comment_update');
+      const current = findNoteComment(commentId);
+      if (current) replaceNoteComment({ ...current, body, updatedAt: new Date().toISOString(), isEdited: true, pending: true });
+      showToast('通信復帰後に自動で更新します');
+    }
     notesState.loaded = true;
     notesState.lastFetchedAt = Date.now();
     notesState.editingCommentId = '';
+    cacheNotes();
     renderNotes();
     showToast('補足メモを更新しました');
   } catch (error) {
@@ -2090,12 +2314,26 @@ async function deleteNoteComment(commentId) {
   setPendingButton(document.getElementById(`noteCommentDelete_${commentId}`), true, '削除中...', '削除');
 
   try {
-    const json = await apiRequest('deleteNoteComment', { teamId: getTeamId(), commentId });
-
-    notesState.items = Array.isArray(json.notes) ? json.notes : [];
+    const payload = { p_team_id: getTeamId(), p_comment_id: commentId };
+    let noteId = '';
+    try {
+      const json = await supabaseRead('delete_keiko_note_comment', payload);
+      noteId = json.noteId || '';
+    } catch (error) {
+      if (!isNetworkError(error)) throw error;
+      enqueueOutbox('delete_keiko_note_comment', payload, 'comment_delete');
+      noteId = findNoteComment(commentId)?.noteId || '';
+      showToast('通信復帰後に自動で削除します');
+    }
+    const note = notesState.items.find(item => item.noteId === noteId);
+    if (note) {
+      note.comments = (note.comments || []).filter(comment => comment.commentId !== commentId);
+      note.commentCount = Math.max(0, Number(note.commentCount || 0) - 1);
+    }
     notesState.loaded = true;
     notesState.lastFetchedAt = Date.now();
     if (notesState.editingCommentId === commentId) notesState.editingCommentId = '';
+    cacheNotes();
     renderNotes();
     showToast('補足メモを削除しました');
   } catch (error) {
@@ -2105,6 +2343,21 @@ async function deleteNoteComment(commentId) {
     notesState.deletingCommentIds.delete(commentId);
     setPendingButton(document.getElementById(`noteCommentDelete_${commentId}`), false, '削除中...', '削除');
   }
+}
+
+function replaceNoteComment(updatedComment) {
+  if (!updatedComment) return;
+  const note = notesState.items.find(item => item.noteId === updatedComment.noteId);
+  if (!note) return;
+  note.comments = (note.comments || []).map(comment => comment.commentId === updatedComment.commentId ? updatedComment : comment);
+}
+
+function findNoteComment(commentId) {
+  for (const note of notesState.items) {
+    const comment = (note.comments || []).find(item => item.commentId === commentId);
+    if (comment) return comment;
+  }
+  return null;
 }
 
 function setPendingButton(button, pending, pendingLabel, idleLabel) {
@@ -2121,11 +2374,6 @@ function fmtDateTime(val) {
   if (Number.isNaN(d.getTime())) return String(val);
   return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
-
-// ============================================
-// ライブラリ
-// ============================================
-function updateLibrary() {}
 
 // ============================================
 // ユーティリティ

@@ -1,30 +1,25 @@
-# Supabase database changes
+# Supabase backend
 
-Apply SQL migrations in filename order from the Supabase SQL Editor before
-deploying a GAS version that depends on them.
+Apply SQL files in `migrations` in filename order. The current release adds
+direct authenticated writes, idempotency indexes, 20-item note pages, and lazy
+comment pages in `2026083001_direct_write_and_note_paging.sql`.
 
-## 20260829 read-path optimization
+Deploy `functions/keiko-api` with JWT verification disabled because login and
+registration do not have a user JWT yet. The function still validates every
+action and only exposes login, registration, health, and the active team list.
 
-Run `migrations/20260829_optimize_read_paths.sql` first. It adds:
+Set these Edge Function secrets:
 
-- a single-call authenticated session context function;
-- a single-call home summary function that returns only the latest log;
-- user/date and team/date indexes for practice-log reads.
+| Secret | Purpose |
+| --- | --- |
+| `KEIKO_AUTH_PEPPER` | Existing value used to derive Auth passwords |
+| `KEIKO_REGISTRATION_CODE` | Existing registration code |
 
-After the query succeeds, replace Apps Script `Code.gs` with `gas/Code.gs` and
-deploy a new Web App version. Finally reload `index.html` and verify login,
-home, the first 20 logs, and the load-more button.
+`SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` are supplied
+by Supabase. Never place server secrets in `index.html` or commit them to Git.
 
-## 20260829 direct browser reads
-
-Run `migrations/20260829_direct_read_api.sql` after the optimization migration.
-It adds authenticated, RLS-protected functions for:
-
-- 20-item cursor-based practice-log pages;
-- team Good&New items;
-- team notes with their comments.
-
-The existing home-summary function is reused. After the migration succeeds,
-the current `index.html` reads home, logs, Good&New, and notes directly from
-Supabase. Login, registration, token refresh, and all writes continue to use
-GAS. Only the publishable key belongs in `index.html`; never add the secret key.
+```sh
+supabase db push
+supabase secrets set KEIKO_AUTH_PEPPER=... KEIKO_REGISTRATION_CODE=...
+supabase functions deploy keiko-api --no-verify-jwt
+```

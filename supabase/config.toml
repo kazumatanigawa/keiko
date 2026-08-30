@@ -1,0 +1,4 @@
+project_id = "iablkvlcjzgigkiypyhy"
+
+[functions.keiko-api]
+verify_jwt = false

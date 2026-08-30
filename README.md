@@ -5,18 +5,19 @@ Japanese drum practice logging app.
 ## Architecture
 
 - `index.html`: static mobile-first application
-- `gas/Code.gs`: login, registration, token refresh, and write API gateway
+- `supabase/functions/keiko-api`: login and registration API
 - Supabase Auth: PIN-based application login through derived passwords
 - Supabase Postgres: profiles, teams, practice logs, notes, and comments
 - Supabase RLS: per-user and per-team data access
-- Supabase RPC: RLS-protected direct reads for home, logs, Good&New, and notes
-- Browser cache: user/team-scoped home data and up to 100 recent logs
-- Log pagination: cursor-based pages of 20 records
+- Supabase RPC: RLS-protected reads and writes for logs, Good&New, notes, and comments
+- Browser cache: user/team-scoped home data, recent logs, and notes
+- Cursor pagination: logs, notes, and comments load in pages of 20
+- Offline support: local drafts and an idempotent write outbox
 
-Authenticated reads go directly from the browser to Supabase with the
+Authenticated reads and writes go directly from the browser to Supabase with the
 publishable key and the user's short-lived access token. The browser never
-receives the Supabase secret key or stores a user's PIN. Login and writes remain
-behind GAS so the auth pepper and privileged key stay server-only.
+receives the Supabase secret key, auth pepper, registration code, or stores a
+user's PIN. Login and registration run in a Supabase Edge Function.
 Google Sheets are used only as the source for one-time migration scripts.
 
 ## Migration scripts
@@ -31,4 +32,4 @@ node scripts/migrate-practice-logs-to-supabase.mjs
 node scripts/migrate-team-notes-to-supabase.mjs
 ```
 
-GAS configuration and deployment steps are in `gas/README.md`.
+Database and Edge Function deployment steps are in `supabase/README.md`.
