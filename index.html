@@ -74,7 +74,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;backgroun
 .quick-btn{width:100%;padding:14px;border-radius:var(--radius);border:none;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:0.03em}
 .btn-primary{background:var(--red);color:#fff}
 .btn-secondary{background:#fff;color:var(--red);border:2px solid var(--red)}
-.practice-day-card{position:relative;overflow:hidden;background:linear-gradient(135deg,#fffdf6 0%,#fff 55%,#f8eed7 100%);border:1px solid #e4c77d;border-radius:var(--radius);padding:17px 20px;margin:14px 0 12px;text-align:center;box-shadow:0 10px 24px rgba(139,26,26,.08)}
+.practice-day-card{position:relative;overflow:hidden;background:linear-gradient(135deg,#fffdf6 0%,#fff 55%,#f8eed7 100%);border:1px solid #e4c77d;border-radius:var(--radius);padding:17px 20px;margin:0 0 12px;text-align:center;box-shadow:0 10px 24px rgba(139,26,26,.08)}
 .practice-day-card::before{content:'積';position:absolute;right:-4px;bottom:-30px;color:rgba(201,168,76,.1);font-size:100px;font-weight:900;line-height:1}
 .practice-day-kicker{position:relative;font-size:10px;font-weight:800;letter-spacing:.2em;color:#9a781f;margin-bottom:2px}
 .practice-day-text{position:relative;color:var(--red);font-size:20px;font-weight:800;letter-spacing:.04em}
@@ -341,12 +341,12 @@ textarea:focus,input:focus{border-color:var(--red)}
       <div class="hero-focus-label">今回の稽古で意識すること</div>
       <div id="missionText" class="hero-focus-empty">読み込み中...</div>
     </div>
-    <button class="quick-btn btn-primary" onclick="goTo('form')">📝 稽古ログを記録する</button>
-    <button class="quick-btn btn-secondary" onclick="goTo('log')">📖 過去のログを見る</button>
     <div class="practice-day-card" aria-label="これまでの稽古回数">
       <div class="practice-day-kicker">KEIKO HISTORY</div>
       <div class="practice-day-text">稽古<span class="practice-day-number" id="practiceDayCount">0</span>日目！</div>
     </div>
+    <button class="quick-btn btn-primary" onclick="goTo('form')">📝 稽古ログを記録する</button>
+    <button class="quick-btn btn-secondary" onclick="goTo('log')">📖 過去のログを見る</button>
     <div class="card">
       <div class="card-title">使い方</div>
       <div style="font-size:13px;color:var(--ink2);line-height:1.8">1️⃣ 稽古前：「今日の意識」を確認<br>2️⃣ 稽古後：ログを記録する<br>3️⃣ 次回の稽古でまた確認！</div>
