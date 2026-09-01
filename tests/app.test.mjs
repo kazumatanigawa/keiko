@@ -84,3 +84,12 @@ test('timekeeper rotation is server-managed and available on the home dashboard'
   assert.match(html, /replace_keiko_timekeeper/);
   assert.match(html, /交代中\.\.\./);
 });
+
+test('home emphasizes practice day count without redundant condition summary', async () => {
+  const html = await read('index.html');
+  assert.match(html, /id="practiceDayCount"/);
+  assert.match(html, /稽古<span class="practice-day-number"/);
+  assert.doesNotMatch(html, /id="totalCount"/);
+  assert.doesNotMatch(html, /id="statAvgCond"/);
+  assert.doesNotMatch(html, /平均コンディション/);
+});
