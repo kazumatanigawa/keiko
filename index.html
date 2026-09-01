@@ -35,6 +35,13 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;backgroun
 .hero{background:linear-gradient(135deg,var(--red) 0%,#6B1111 100%);color:#fff;border-radius:var(--radius);padding:20px;margin-bottom:16px;position:relative;overflow:hidden}
 .hero::after{content:'太鼓';position:absolute;right:-10px;bottom:-20px;font-size:100px;opacity:0.08;font-weight:900;line-height:1}
 .hero-date{font-size:12px;opacity:0.8;margin-bottom:4px}
+.timekeeper-card{position:relative;z-index:1;margin:12px 0 4px;padding:13px 14px;border:1px solid rgba(255,255,255,.3);border-radius:12px;background:rgba(255,255,255,.12);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.timekeeper-copy{min-width:0}
+.timekeeper-label{font-size:10px;font-weight:800;letter-spacing:.12em;color:rgba(255,255,255,.72);margin-bottom:3px}
+.timekeeper-name{font-size:21px;font-weight:800;line-height:1.35;color:#fff}
+.timekeeper-meta{font-size:10px;line-height:1.5;color:rgba(255,255,255,.78);margin-top:3px}
+.timekeeper-btn{flex:none;border:1px solid rgba(255,255,255,.55);border-radius:999px;background:rgba(255,255,255,.12);color:#fff;padding:8px 10px;font-family:inherit;font-size:10px;font-weight:700;cursor:pointer}
+.timekeeper-btn:disabled{opacity:.55;cursor:default}
 .hero-count{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.2);border-radius:20px;padding:4px 10px;font-size:12px;margin-top:8px}
 .hero-focus-label{font-size:11px;font-weight:800;letter-spacing:0.1em;color:rgba(255,255,255,0.8);margin-top:16px;margin-bottom:6px}
 .hero-focus-text{font-size:20px;font-weight:700;line-height:1.6;color:#fff}
@@ -323,6 +330,14 @@ textarea:focus,input:focus{border-color:var(--red)}
     </div>
     <div class="hero">
       <div class="hero-date" id="heroDate"></div>
+      <div class="timekeeper-card" id="timekeeperCard">
+        <div class="timekeeper-copy">
+          <div class="timekeeper-label">本日のタイムキーパー</div>
+          <div class="timekeeper-name" id="timekeeperName">選出中...</div>
+          <div class="timekeeper-meta" id="timekeeperMeta">全員が一巡する順番で選出します</div>
+        </div>
+        <button class="timekeeper-btn" id="timekeeperReplaceBtn" type="button" onclick="replaceTimekeeper()">欠席のため交代</button>
+      </div>
       <div class="hero-count">📝 <span id="totalCount">0</span> 回記録達成！</div>
       <div class="hero-focus-label">今回の稽古で意識すること</div>
       <div id="missionText" class="hero-focus-empty">読み込み中...</div>
@@ -497,7 +512,7 @@ const GOOD_NEWS_ROTATE_MS = 3000;
 const GOOD_NEWS_REFRESH_MS = 60000;
 const GOOD_NEWS_RECENT_LIMIT = 4;
 const NOTES_REFRESH_MS = 45000;
-const APP_VERSION = '2026-08-30-01';
+const APP_VERSION = '2026-09-01-01';
 const APP_VERSION_KEY = 'taiko_app_version';
 const TEAM_CACHE_KEY = 'taiko_team_options';
 const PRACTICE_CACHE_PREFIX = 'taiko_practice_cache_v1:';
@@ -518,6 +533,8 @@ const homeState = {
   totalCount: 0,
   averageCondition: null,
   latestLog: null,
+  timekeeper: null,
+  replacingTimekeeper: false,
   loaded: false,
   loading: false,
   lastFetchedAt: 0,
@@ -1217,6 +1234,9 @@ function hydratePracticeCache() {
         ? null
         : cachedAverage;
       homeState.latestLog = parsed.home.latestLog || null;
+      homeState.timekeeper = parsed.home.timekeeper?.practiceDate === getDateKey()
+        ? parsed.home.timekeeper
+        : null;
       homeState.loaded = true;
       homeState.lastFetchedAt = Number(parsed.home.lastFetchedAt || 0);
     }
@@ -1249,6 +1269,7 @@ function cachePracticeData() {
         totalCount: homeState.totalCount,
         averageCondition: homeState.averageCondition,
         latestLog: homeState.latestLog,
+        timekeeper: homeState.timekeeper,
         lastFetchedAt: homeState.lastFetchedAt,
       },
       logs,
@@ -1302,12 +1323,16 @@ async function loadHome(options = {}) {
   if (showOverlay) showLoading();
 
   try {
-    const json = await supabaseRead('get_keiko_home_summary');
+    const json = await supabaseRead('get_keiko_home_dashboard', {
+      p_team_id: getTeamId(),
+      p_date: getDateKey(),
+    });
     homeState.totalCount = Number(json.total_count || 0);
     homeState.averageCondition = json.average_condition === null || json.average_condition === undefined
       ? null
       : Number(json.average_condition);
     homeState.latestLog = mapSupabaseLog(json.latest_log);
+    homeState.timekeeper = json.timekeeper || null;
     homeState.loaded = true;
     homeState.lastFetchedAt = Date.now();
 
@@ -1332,6 +1357,7 @@ async function loadHome(options = {}) {
 
 function updateHome() {
   document.getElementById('heroDate').textContent = getDateStr();
+  renderTimekeeper();
   document.getElementById('headerUserName').textContent = getGroup() ? `${getName()} | ${getGroup()}` : getName();
   const total = homeState.totalCount;
   document.getElementById('totalCount').textContent = total;
@@ -1350,6 +1376,64 @@ function updateHome() {
     document.getElementById('statAvgCond').textContent = '-';
   }
   ensureGoodNewsFeed();
+}
+
+function renderTimekeeper() {
+  const timekeeper = homeState.timekeeper;
+  const name = document.getElementById('timekeeperName');
+  const meta = document.getElementById('timekeeperMeta');
+  const button = document.getElementById('timekeeperReplaceBtn');
+  if (!name || !meta || !button) return;
+
+  if (!timekeeper) {
+    name.textContent = homeState.loading ? '選出中...' : '取得できませんでした';
+    meta.textContent = '通信状態を確認して、もう一度ホームを開いてください';
+    button.disabled = true;
+    return;
+  }
+
+  name.textContent = timekeeper.assignedName || 'メンバー';
+  if (timekeeper.isSubstitute) {
+    const absentNames = Array.isArray(timekeeper.absentNames) ? timekeeper.absentNames.join('・') : '';
+    meta.textContent = `${absentNames || timekeeper.scheduledName}さんは欠席・次回担当予定`;
+  } else {
+    const position = Number(timekeeper.cyclePosition || 0);
+    const size = Number(timekeeper.cycleSize || 0);
+    const next = timekeeper.nextName ? `・次回予定 ${timekeeper.nextName}` : '';
+    meta.textContent = `今回の巡回 ${position} / ${size}${next}`;
+  }
+  setPendingButton(
+    button,
+    homeState.replacingTimekeeper,
+    '交代中...',
+    '欠席のため交代'
+  );
+  if (!homeState.replacingTimekeeper) button.disabled = !timekeeper.canReplace;
+}
+
+async function replaceTimekeeper() {
+  const current = homeState.timekeeper;
+  if (!current || homeState.replacingTimekeeper || !current.canReplace) return;
+  if (!window.confirm(`${current.assignedName || '担当者'}さんは本日お休みですか？\n交代すると、この人は次回の担当になります。`)) return;
+
+  homeState.replacingTimekeeper = true;
+  renderTimekeeper();
+  try {
+    const previousName = current.assignedName || '欠席者';
+    homeState.timekeeper = await supabaseRead('replace_keiko_timekeeper', {
+      p_team_id: getTeamId(),
+      p_date: getDateKey(),
+    });
+    cachePracticeData();
+    renderTimekeeper();
+    showToast(`${homeState.timekeeper.assignedName}さんに交代しました。${previousName}さんは次回担当です`);
+  } catch (error) {
+    console.error(error);
+    showToast(error?.message || 'タイムキーパーの交代に失敗しました');
+  } finally {
+    homeState.replacingTimekeeper = false;
+    renderTimekeeper();
+  }
 }
 
 function isHomeScreenActive() {

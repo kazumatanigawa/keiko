@@ -64,3 +64,23 @@ test('all application collections use bounded reads', async () => {
   const cleanup = await read('supabase/migrations/2026083002_remove_legacy_notes_rpc.sql');
   assert.match(cleanup, /drop function if exists public\.get_keiko_notes\(uuid, integer\)/);
 });
+
+test('timekeeper rotation is server-managed and available on the home dashboard', async () => {
+  const sql = await read('supabase/migrations/2026090101_timekeeper_rotation.sql');
+  const html = await read('index.html');
+
+  assert.match(sql, /create table if not exists public\.timekeeper_cycles/);
+  assert.match(sql, /create table if not exists public\.timekeeper_assignments/);
+  assert.match(sql, /alter table public\.timekeeper_cycles enable row level security/);
+  assert.match(sql, /array_agg\(m\.user_id order by m\.sort_group, m\.carryover_position, random\(\)\)/);
+  assert.match(sql, /unique \(team_id, practice_date\)/);
+  assert.match(sql, /create or replace function public\.replace_keiko_timekeeper/);
+  assert.match(sql, /carryover_order = v_new_absent/);
+  assert.match(sql, /create or replace function public\.get_keiko_home_dashboard/);
+  assert.match(sql, /grant execute on function public\.get_keiko_home_dashboard\(uuid, date\) to authenticated/);
+
+  assert.match(html, /id="timekeeperName"/);
+  assert.match(html, /get_keiko_home_dashboard/);
+  assert.match(html, /replace_keiko_timekeeper/);
+  assert.match(html, /交代中\.\.\./);
+});
