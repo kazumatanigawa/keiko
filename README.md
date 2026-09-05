@@ -5,7 +5,7 @@ Japanese drum practice logging app.
 ## Architecture
 
 - `index.html`: static mobile-first application
-- `supabase/functions/keiko-api`: login and registration API
+- `supabase/functions/keiko-api`: login, registration, and authenticated membership management API
 - Supabase Auth: PIN-based application login through derived passwords
 - Supabase Postgres: profiles, teams, practice logs, notes, and comments
 - Supabase RLS: per-user and per-team data access
@@ -13,6 +13,7 @@ Japanese drum practice logging app.
 - Browser cache: user/team-scoped home data, recent logs, and notes
 - Cursor pagination: logs, notes, and comments load in pages of 20
 - Offline support: local drafts and an idempotent write outbox
+- Multi-team support: users can join multiple teams, transfer, or graduate to personal mode
 
 Authenticated reads and writes go directly from the browser to Supabase with the
 publishable key and the user's short-lived access token. The browser never

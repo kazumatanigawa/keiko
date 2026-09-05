@@ -21,10 +21,11 @@ Deno.serve(async (request) => {
     const action = text(payload.action);
     if (!action) throw userError('invalid_request', '操作が指定されていません。');
 
-    if (action === 'health') return json({ status: 'ok', service: 'keiko-api', version: '2026-08-30-01' });
+    if (action === 'health') return json({ status: 'ok', service: 'keiko-api', version: '2026-09-05-01' });
     if (action === 'getTeams') return json(await getTeams());
     if (action === 'login') return json(await login(payload));
     if (action === 'register') return json(await register(payload));
+    if (action === 'manageMembership') return json(await manageMembership(request, payload));
     throw userError('unsupported_action', 'この操作には対応していません。');
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
@@ -39,11 +40,13 @@ Deno.serve(async (request) => {
 
 async function getTeams() {
   const teams = await adminRequest('/rest/v1/teams', {
-    query: { select: 'id,team_name,team_type', status: 'eq.active', order: 'team_name.asc' },
+    query: { select: 'id,team_name,team_type,category', status: 'eq.active', order: 'team_name.asc' },
   }) as JsonRecord[];
   return {
     status: 'ok',
-    teams: teams.map((team) => ({ teamId: team.id, teamName: team.team_name, teamType: team.team_type || 'general' })),
+    teams: teams
+      .filter((team) => team.category !== 'personal')
+      .map((team) => ({ teamId: team.id, teamName: team.team_name, teamType: team.team_type || 'general' })),
   };
 }
 
@@ -153,13 +156,60 @@ async function register(payload: JsonRecord) {
 async function buildSessionResponse(session: JsonRecord) {
   const accessToken = String(session.access_token || '');
   const context = await userRequest('/rest/v1/rpc/get_keiko_session_context', accessToken, { method: 'POST', body: { p_team_id: null } }) as JsonRecord;
-  if (!context.user_id || !context.team_id) throw userError('team_required', '所属チームが設定されていません。');
+  if (!context.user_id) throw userError('profile_required', '利用者情報が設定されていません。');
   return {
     status: 'ok', accessToken, refreshToken: session.refresh_token,
     expiresIn: Number(session.expires_in || 3600), expiresAt: Number(session.expires_at || 0),
     userId: context.user_id, name: context.display_name, teamId: context.team_id,
     group: context.team_name, teamType: context.team_type, userType: context.user_type, role: context.team_role,
+    isPersonal: Boolean(context.is_personal), teams: Array.isArray(context.teams) ? context.teams : [],
   };
+}
+
+async function manageMembership(request: Request, payload: JsonRecord) {
+  const operation = text(payload.operation);
+  if (!['join', 'transfer', 'graduate'].includes(operation)) {
+    throw userError('invalid_request', '所属変更の種類が正しくありません。');
+  }
+  if (operation !== 'graduate' && !constantTimeEquals(text(payload.registrationCode), REGISTRATION_CODE)) {
+    throw userError('registration_denied', '登録コードが正しくありません。');
+  }
+
+  const accessToken = readBearerToken(request);
+  const authUser = await userRequest('/auth/v1/user', accessToken) as JsonRecord;
+  const userId = requireUuid(authUser.id, '利用者');
+  const targetTeamId = operation === 'graduate' ? null : requireUuid(payload.teamId, 'チーム');
+  const preferredTeamId = text(payload.currentTeamId)
+    ? requireUuid(payload.currentTeamId, '現在のチーム')
+    : null;
+
+  const context = await adminRequest('/rest/v1/rpc/manage_keiko_membership', {
+    method: 'POST',
+    body: {
+      p_user_id: userId,
+      p_action: operation,
+      p_target_team_id: targetTeamId,
+      p_preferred_team_id: operation === 'transfer' ? targetTeamId : preferredTeamId,
+    },
+  }) as JsonRecord;
+
+  return {
+    status: 'ok',
+    teamId: context.team_id,
+    group: context.team_name,
+    teamType: context.team_type,
+    userType: context.user_type,
+    role: context.team_role,
+    isPersonal: Boolean(context.is_personal),
+    teams: Array.isArray(context.teams) ? context.teams : [],
+  };
+}
+
+function readBearerToken(request: Request) {
+  const authorization = request.headers.get('authorization') || '';
+  const match = authorization.match(/^Bearer\s+(.+)$/i);
+  if (!match?.[1]) throw userError('auth_required', 'ログインの有効期限が切れました。');
+  return match[1];
 }
 
 async function findProfile(name: unknown) {

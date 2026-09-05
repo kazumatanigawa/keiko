@@ -1,12 +1,13 @@
 # Supabase backend
 
-Apply SQL files in `migrations` in filename order. The current release adds
-direct authenticated writes, idempotency indexes, 20-item note pages, and lazy
-comment pages in `2026083001_direct_write_and_note_paging.sql`.
+Apply SQL files in `migrations` in filename order. The current release includes
+direct authenticated writes, paged reads, rotating timekeepers, and audited
+multi-team membership changes.
 
 Deploy `functions/keiko-api` with JWT verification disabled because login and
 registration do not have a user JWT yet. The function still validates every
-action and only exposes login, registration, health, and the active team list.
+action. Membership changes require a valid user access token; joining and
+transferring also require the registration code.
 
 Set these Edge Function secrets:
 

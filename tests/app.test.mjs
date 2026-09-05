@@ -50,6 +50,9 @@ test('Edge API has a deliberately small public action surface', async () => {
   }
   assert.match(source, /KEIKO_AUTH_PEPPER/);
   assert.match(source, /KEIKO_REGISTRATION_CODE/);
+  assert.match(source, /action === 'manageMembership'/);
+  assert.match(source, /readBearerToken\(request\)/);
+  assert.match(source, /constantTimeEquals\(text\(payload\.registrationCode\), REGISTRATION_CODE\)/);
   const config = await read('supabase/config.toml');
   assert.match(config, /\[functions\.keiko-api\][\s\S]*verify_jwt\s*=\s*false/);
 });
@@ -92,4 +95,32 @@ test('home emphasizes practice day count without redundant condition summary', a
   assert.doesNotMatch(html, /id="totalCount"/);
   assert.doesNotMatch(html, /id="statAvgCond"/);
   assert.doesNotMatch(html, /平均コンディション/);
+});
+
+test('multi-team membership changes are audited and restricted to the server', async () => {
+  const sql = await read('supabase/migrations/2026090501_multi_team_memberships.sql');
+  for (const name of ['keiko_membership_context_for_user', 'get_keiko_session_context', 'manage_keiko_membership']) {
+    assert.match(sql, new RegExp(`create or replace function public\\.${name}\\b`));
+  }
+  assert.match(sql, /create table if not exists public\.team_membership_events/);
+  assert.match(sql, /alter table public\.team_membership_events enable row level security/);
+  assert.match(sql, /coalesce\(category, ''\) = 'personal'/);
+  assert.match(sql, /action in \('join', 'transfer_in', 'transfer_out', 'graduate'\)/);
+  assert.match(sql, /auth\.role\(\) <> 'service_role'/);
+  assert.match(sql, /grant execute on function public\.manage_keiko_membership[\s\S]*to service_role/);
+  assert.doesNotMatch(sql, /grant execute on function public\.manage_keiko_membership[\s\S]*to authenticated/);
+});
+
+test('home settings and log form support multiple teams without cluttering single-team users', async () => {
+  const html = await read('index.html');
+  const helpPosition = html.indexOf('id="helpSection"');
+  const settingsPosition = html.indexOf('id="personalSettings"');
+  assert.ok(helpPosition > 0 && settingsPosition > helpPosition);
+  assert.match(html, /id="formTeamPicker"/);
+  assert.match(html, /picker\.classList\.toggle\('show', teams\.length > 1\)/);
+  assert.match(html, /p_team_id: getSelectedLogTeamId\(\)/);
+  assert.match(html, /openMembershipEditor\('join'\)/);
+  assert.match(html, /openMembershipEditor\('transfer'\)/);
+  assert.match(html, /graduateFromTeams\(\)/);
+  assert.match(html, /if \(s === 'notes' && isPersonalMode\(\)\)/);
 });

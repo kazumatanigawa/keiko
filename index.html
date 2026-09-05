@@ -79,6 +79,35 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;backgroun
 .practice-day-kicker{position:relative;font-size:10px;font-weight:800;letter-spacing:.2em;color:#9a781f;margin-bottom:2px}
 .practice-day-text{position:relative;color:var(--red);font-size:20px;font-weight:800;letter-spacing:.04em}
 .practice-day-number{display:inline-block;margin:0 5px;color:#b48616;font-size:38px;font-weight:900;line-height:1.1;vertical-align:-3px}
+.form-team-picker{display:none;background:#fff;border:2px solid var(--gold);border-radius:var(--radius);padding:14px;margin-bottom:16px;box-shadow:0 8px 20px rgba(201,168,76,.12)}
+.form-team-picker.show{display:block}
+.form-team-picker-label{font-size:11px;font-weight:800;letter-spacing:.08em;color:#8b6813;margin-bottom:7px}
+.form-team-picker select,.membership-editor select{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 12px;background:#fff;color:var(--ink);font-size:14px;font-family:inherit}
+.form-team-picker-hint{font-size:10px;color:var(--ink3);line-height:1.5;margin-top:6px}
+.help-card{background:linear-gradient(135deg,#fff 0%,#fffaf0 100%);border:1px solid #ead9b6;border-radius:var(--radius);padding:17px;margin-bottom:12px}
+.help-title,.settings-title{font-size:15px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:8px}
+.help-lead,.settings-lead{font-size:12px;color:var(--ink3);line-height:1.7;margin-top:6px}
+.help-steps{display:grid;gap:8px;margin-top:13px}
+.help-step{display:flex;align-items:flex-start;gap:10px;padding:10px 11px;background:rgba(255,255,255,.8);border:1px solid #f0e5ce;border-radius:10px}
+.help-step-number{flex:none;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--red);color:#fff;font-size:11px;font-weight:800}
+.help-step-copy{font-size:12px;color:var(--ink2);line-height:1.6}
+.settings-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:17px;margin-bottom:4px}
+.membership-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.membership-chip{display:inline-flex;align-items:center;gap:5px;background:#f7f2e8;border:1px solid #e8dcc5;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:700;color:var(--ink2)}
+.membership-chip.current{background:var(--red-pale);border-color:#e4baba;color:var(--red)}
+.membership-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}
+.membership-btn{border:1px solid var(--red);border-radius:10px;background:#fff;color:var(--red);padding:10px 8px;font-family:inherit;font-size:11px;font-weight:800;cursor:pointer}
+.membership-btn.danger{grid-column:1/-1;border-color:#ddd;color:var(--ink3)}
+.membership-btn:disabled{opacity:.45;cursor:default}
+.membership-editor{display:none;margin-top:12px;padding:13px;background:#faf7f1;border:1px solid #eadfc9;border-radius:10px}
+.membership-editor.show{display:block}
+.membership-editor-title{font-size:12px;font-weight:800;color:var(--ink);margin-bottom:8px}
+.membership-editor input{margin-top:8px}
+.membership-editor-actions{display:flex;gap:8px;margin-top:10px}
+.membership-editor-actions button{flex:1;border:0;border-radius:9px;padding:10px 8px;font-family:inherit;font-size:11px;font-weight:800;cursor:pointer}
+.membership-editor-submit{background:var(--red);color:#fff}
+.membership-editor-cancel{background:#eee9df;color:var(--ink2)}
+.membership-status{min-height:18px;margin-top:8px;font-size:11px;color:var(--red);line-height:1.6}
 .form-section{margin-bottom:16px}
 .form-label{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px;display:block}
 .form-hint{font-size:11px;color:var(--ink3);margin-bottom:6px}
@@ -347,9 +376,34 @@ textarea:focus,input:focus{border-color:var(--red)}
     </div>
     <button class="quick-btn btn-primary" onclick="goTo('form')">📝 稽古ログを記録する</button>
     <button class="quick-btn btn-secondary" onclick="goTo('log')">📖 過去のログを見る</button>
-    <div class="card">
-      <div class="card-title">使い方</div>
-      <div style="font-size:13px;color:var(--ink2);line-height:1.8">1️⃣ 稽古前：「今日の意識」を確認<br>2️⃣ 稽古後：ログを記録する<br>3️⃣ 次回の稽古でまた確認！</div>
+    <div class="help-card" id="helpSection">
+      <div class="help-title">？ KEIKO ヘルプ</div>
+      <div class="help-lead">KEIKOは、毎回の気づきを次の行動につなげる稽古ノートです。</div>
+      <div class="help-steps">
+        <div class="help-step"><span class="help-step-number">1</span><div class="help-step-copy">稽古前に「今回意識すること」とタイムキーパーを確認します。</div></div>
+        <div class="help-step"><span class="help-step-number">2</span><div class="help-step-copy">稽古後に、コンディション・一番の学び・次回やることを記録します。</div></div>
+        <div class="help-step"><span class="help-step-number">3</span><div class="help-step-copy">過去ログやチームノートを見返し、次の稽古へつなげます。</div></div>
+      </div>
+    </div>
+    <div class="settings-card" id="personalSettings">
+      <div class="settings-title">⚙ 個人設定</div>
+      <div class="settings-lead" id="membershipLead">所属チームを確認・変更できます。</div>
+      <div class="membership-list" id="membershipList"><span class="membership-chip">読み込み中...</span></div>
+      <div class="membership-actions">
+        <button class="membership-btn" type="button" onclick="openMembershipEditor('join')">＋ チームを掛け持ち</button>
+        <button class="membership-btn" type="button" onclick="openMembershipEditor('transfer')">↪ チームを移籍</button>
+        <button class="membership-btn danger" id="graduateTeamBtn" type="button" onclick="graduateFromTeams()">チームを卒業して個人利用にする</button>
+      </div>
+      <div class="membership-editor" id="membershipEditor">
+        <div class="membership-editor-title" id="membershipEditorTitle">参加するチームを選択</div>
+        <select id="membershipTeamSelect"></select>
+        <input type="password" id="membershipRegistrationCode" autocomplete="off" maxlength="64" placeholder="登録コード">
+        <div class="membership-editor-actions">
+          <button class="membership-editor-cancel" type="button" onclick="closeMembershipEditor()">キャンセル</button>
+          <button class="membership-editor-submit" id="membershipSubmitBtn" type="button" onclick="submitMembershipChange()">変更する</button>
+        </div>
+      </div>
+      <div class="membership-status" id="membershipStatus"></div>
     </div>
   </div>
   <div class="bottom-nav">
@@ -366,6 +420,11 @@ textarea:focus,input:focus{border-color:var(--red)}
 <div class="screen" id="screen-form">
   <div class="header"><div><div class="header-title">📝 稽古ログ記録</div><div class="header-sub" id="formDate"></div></div></div>
   <div class="content">
+    <div class="form-team-picker" id="formTeamPicker">
+      <div class="form-team-picker-label">この記録を保存するチーム</div>
+      <select id="formTeamSelect" onchange="handleFormTeamChange()"></select>
+      <div class="form-team-picker-hint">掛け持ちしている場合は、今日稽古したチームを選んでください。</div>
+    </div>
     <div class="mission-card" style="margin-bottom:16px">
       <div class="mission-label">▶ 前回決めた「今日のやること」</div>
       <div id="formMission" class="mission-empty">記録なし</div>
@@ -511,9 +570,10 @@ const GOOD_NEWS_ROTATE_MS = 3000;
 const GOOD_NEWS_REFRESH_MS = 60000;
 const GOOD_NEWS_RECENT_LIMIT = 4;
 const NOTES_REFRESH_MS = 45000;
-const APP_VERSION = '2026-09-01-02';
+const APP_VERSION = '2026-09-05-01';
 const APP_VERSION_KEY = 'taiko_app_version';
 const TEAM_CACHE_KEY = 'taiko_team_options';
+const MEMBERSHIP_CACHE_KEY = 'taiko_memberships_v1';
 const PRACTICE_CACHE_PREFIX = 'taiko_practice_cache_v1:';
 const PRACTICE_CACHE_MAX_LOGS = 100;
 const PRACTICE_REFRESH_MS = 300000;
@@ -552,6 +612,13 @@ const teamState = {
   loading: false,
   suggestedTeamIds: [],
   ignoredSuggestionKey: ''
+};
+const membershipState = {
+  items: [],
+  loaded: false,
+  loading: false,
+  submitting: false,
+  action: '',
 };
 const goodNewsState = {
   items: [],
@@ -597,6 +664,7 @@ function initializeGoodNewsFeed() {
 }
 function initializeAuthUi() {
   hydrateCachedTeamOptions();
+  hydrateMembershipCache();
   renderTeamOptions();
   toggleTeamLaunchMode(false);
   const launchInput = document.getElementById('launchTeamName');
@@ -615,6 +683,7 @@ window.onload = async function() {
   if (hasSession()) {
     try {
       await ensureAccessToken();
+      await refreshMembershipContext();
       document.getElementById('authOverlay').classList.add('hidden');
       hydratePracticeCache();
       hydrateNotesCache();
@@ -683,6 +752,24 @@ async function edgeRequest(action, payload = {}) {
 
   const error = new Error(json.message || '処理に失敗しました');
   error.code = json.code || 'request_failed';
+  throw error;
+}
+
+async function authenticatedEdgeRequest(action, payload = {}) {
+  const accessToken = await ensureAccessToken();
+  const response = await fetch(EDGE_API_URL, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_PUBLISHABLE_KEY,
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ action, ...payload }),
+  });
+  const json = await response.json().catch(() => ({}));
+  if (response.ok && json.status === 'ok') return json;
+  const error = new Error(json.message || '所属情報の変更に失敗しました');
+  error.code = json.code || `http_${response.status}`;
   throw error;
 }
 
@@ -824,10 +911,12 @@ async function loadTeamOptions(force = false) {
     teamState.loaded = true;
     cacheTeamOptions();
     renderTeamOptions();
+    renderMembershipTeamOptions();
     updateTeamLoadingMessage(teamState.items.length ? '' : '所属チームがまだ登録されていません。');
   } catch (error) {
     console.warn(error);
     renderTeamOptions();
+    renderMembershipTeamOptions();
     updateTeamLoadingMessage(teamState.items.length ? '最新の所属チーム取得に失敗したため、前回の一覧を表示しています。' : '所属チーム一覧を取得できませんでした。ローンチ登録は可能です。');
   } finally {
     teamState.loading = false;
@@ -1079,22 +1168,248 @@ function saveSession(session) {
   saveAuthTokens(session);
   if (session.userId) localStorage.setItem('taiko_user_id', session.userId);
   else localStorage.removeItem('taiko_user_id');
-  if (session.teamId) localStorage.setItem('taiko_team_id', session.teamId);
-  else localStorage.removeItem('taiko_team_id');
-  if (session.group) localStorage.setItem('taiko_group', session.group);
-  else localStorage.removeItem('taiko_group');
-  if (session.teamType) localStorage.setItem('taiko_team_type', session.teamType);
-  else localStorage.removeItem('taiko_team_type');
   if (session.userType) localStorage.setItem('taiko_user_type', session.userType);
   else localStorage.removeItem('taiko_user_type');
+  applyMembershipContext(session);
   localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
 }
 
 function clearSession() {
   clearPracticeCache();
   clearNotesCache();
-  ['taiko_name', 'taiko_user_id', 'taiko_team_id', 'taiko_group', 'taiko_team_type', 'taiko_user_type', ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, TOKEN_EXPIRES_AT_KEY, 'taiko_pin']
+  ['taiko_name', 'taiko_user_id', 'taiko_team_id', 'taiko_group', 'taiko_team_type', 'taiko_user_type', 'taiko_is_personal', MEMBERSHIP_CACHE_KEY, ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, TOKEN_EXPIRES_AT_KEY, 'taiko_pin']
     .forEach(key => localStorage.removeItem(key));
+  membershipState.items = [];
+  membershipState.loaded = false;
+}
+
+function normalizeMemberships(items) {
+  if (!Array.isArray(items)) return [];
+  return items
+    .filter(item => item && (item.teamId || item.team_id))
+    .map(item => ({
+      teamId: String(item.teamId || item.team_id),
+      teamName: String(item.teamName || item.team_name || 'チーム'),
+      teamType: String(item.teamType || item.team_type || 'general'),
+      teamRole: String(item.teamRole || item.team_role || 'member'),
+      isPersonal: Boolean(item.isPersonal ?? item.is_personal),
+    }));
+}
+
+function hydrateMembershipCache() {
+  try {
+    membershipState.items = normalizeMemberships(JSON.parse(localStorage.getItem(MEMBERSHIP_CACHE_KEY) || '[]'));
+    membershipState.loaded = membershipState.items.length > 0;
+  } catch (error) {
+    console.warn('membership cache hydrate failed', error);
+    localStorage.removeItem(MEMBERSHIP_CACHE_KEY);
+  }
+}
+
+function cacheMemberships() {
+  localStorage.setItem(MEMBERSHIP_CACHE_KEY, JSON.stringify(membershipState.items));
+}
+
+function resetTeamScopedState() {
+  clearPracticeCache();
+  clearNotesCache();
+  stopGoodNewsTicker();
+  stopGoodNewsRefresh();
+  cachedLogs = [];
+  Object.assign(homeState, { totalCount: 0, latestLog: null, timekeeper: null, loaded: false, loading: false, lastFetchedAt: 0 });
+  Object.assign(logState, { loaded: false, loading: false, loadingMore: false, hasMore: false, nextCursor: null, lastFetchedAt: 0, error: '' });
+  Object.assign(goodNewsState, { items: [], loading: false, loaded: false, lastFetchedAt: 0, currentItemId: null, recentIds: [], recentNames: [], error: '' });
+  Object.assign(notesState, { items: [], loading: false, loaded: false, lastFetchedAt: 0, loadingMore: false, hasMore: false, nextCursor: null });
+}
+
+function applyMembershipContext(context) {
+  const previousTeamId = getTeamId();
+  const userType = context.userType || context.user_type;
+  if (userType) localStorage.setItem('taiko_user_type', String(userType));
+  const items = normalizeMemberships(context.teams);
+  membershipState.items = items;
+  membershipState.loaded = true;
+  cacheMemberships();
+
+  const requestedTeamId = String(context.teamId || context.team_id || '');
+  const current = items.find(item => item.teamId === requestedTeamId)
+    || items.find(item => item.teamId === previousTeamId)
+    || items[0]
+    || null;
+  if (previousTeamId && current?.teamId && previousTeamId !== current.teamId) resetTeamScopedState();
+
+  if (current) {
+    localStorage.setItem('taiko_team_id', current.teamId);
+    localStorage.setItem('taiko_group', current.teamName);
+    localStorage.setItem('taiko_team_type', current.teamType);
+    localStorage.setItem('taiko_is_personal', current.isPersonal ? '1' : '0');
+  } else {
+    ['taiko_team_id', 'taiko_group', 'taiko_team_type', 'taiko_is_personal'].forEach(key => localStorage.removeItem(key));
+  }
+
+  renderMembershipSettings();
+  renderFormTeamPicker();
+  syncAudienceUi();
+  return previousTeamId !== (current?.teamId || '');
+}
+
+async function refreshMembershipContext() {
+  const context = await supabaseRead('get_keiko_session_context', { p_team_id: getTeamId() || null });
+  if (!context.user_id) throw new Error('所属情報を取得できませんでした');
+  return applyMembershipContext(context);
+}
+
+function getMemberships() {
+  return membershipState.items;
+}
+
+function isPersonalMode() {
+  const current = getMemberships().find(item => item.teamId === getTeamId());
+  return current ? current.isPersonal : localStorage.getItem('taiko_is_personal') === '1';
+}
+
+function syncAudienceUi() {
+  const personal = isPersonalMode();
+  const goodNewsCard = document.getElementById('goodNewsCard');
+  const timekeeperCard = document.getElementById('timekeeperCard');
+  if (goodNewsCard) goodNewsCard.style.display = personal ? 'none' : '';
+  if (timekeeperCard) timekeeperCard.style.display = personal ? 'none' : '';
+  document.querySelectorAll('.nav-item[onclick*="notes"]').forEach(button => {
+    button.style.display = personal ? 'none' : '';
+  });
+  if (personal) {
+    stopGoodNewsTicker();
+    stopGoodNewsRefresh();
+  }
+}
+
+function renderMembershipSettings() {
+  const list = document.getElementById('membershipList');
+  const lead = document.getElementById('membershipLead');
+  const graduateButton = document.getElementById('graduateTeamBtn');
+  if (!list || !lead || !graduateButton) return;
+
+  const memberships = getMemberships();
+  if (!memberships.length) {
+    list.innerHTML = '<span class="membership-chip">所属情報がありません</span>';
+    lead.textContent = '所属情報を再読み込みしてください。';
+  } else {
+    list.innerHTML = memberships.map(team => `
+      <span class="membership-chip ${team.teamId === getTeamId() ? 'current' : ''}">
+        ${team.isPersonal ? '個人利用' : esc(team.teamName)}${team.teamId === getTeamId() ? '・表示中' : ''}
+      </span>
+    `).join('');
+    lead.textContent = isPersonalMode()
+      ? '個人利用中です。自分のログとグローバル公開の情報だけを利用できます。'
+      : memberships.length > 1
+        ? `${memberships.length}チームに所属しています。記録時に保存先を選べます。`
+        : '所属チームを確認・変更できます。';
+  }
+  graduateButton.disabled = isPersonalMode() || membershipState.submitting;
+}
+
+async function openMembershipEditor(action) {
+  if (!['join', 'transfer'].includes(action) || membershipState.submitting) return;
+  membershipState.action = action;
+  const editor = document.getElementById('membershipEditor');
+  const title = document.getElementById('membershipEditorTitle');
+  const status = document.getElementById('membershipStatus');
+  if (editor) editor.classList.add('show');
+  if (title) title.textContent = action === 'join' ? '掛け持ちするチームを選択' : '移籍先のチームを選択';
+  if (status) status.textContent = '';
+  await loadTeamOptions();
+  renderMembershipTeamOptions();
+}
+
+function closeMembershipEditor() {
+  membershipState.action = '';
+  document.getElementById('membershipEditor')?.classList.remove('show');
+  const code = document.getElementById('membershipRegistrationCode');
+  if (code) code.value = '';
+}
+
+function renderMembershipTeamOptions() {
+  const select = document.getElementById('membershipTeamSelect');
+  if (!select) return;
+  const membershipIds = new Set(getMemberships().filter(team => !team.isPersonal).map(team => team.teamId));
+  const candidates = teamState.items.filter(team => {
+    if (membershipState.action === 'join') return !membershipIds.has(team.teamId);
+    return team.teamId !== getTeamId();
+  });
+  select.innerHTML = ['<option value="">チームを選択してください</option>']
+    .concat(candidates.map(team => `<option value="${escapeAttr(team.teamId)}">${esc(formatTeamOptionLabel(team))}${membershipIds.has(team.teamId) ? '・所属中' : ''}</option>`))
+    .join('');
+}
+
+async function submitMembershipChange() {
+  const action = membershipState.action;
+  const teamId = document.getElementById('membershipTeamSelect')?.value || '';
+  const registrationCode = document.getElementById('membershipRegistrationCode')?.value.trim() || '';
+  const status = document.getElementById('membershipStatus');
+  const button = document.getElementById('membershipSubmitBtn');
+  if (!['join', 'transfer'].includes(action)) return;
+  if (!teamId) { status.textContent = 'チームを選択してください。'; return; }
+  if (!registrationCode) { status.textContent = '登録コードを入力してください。'; return; }
+  if (getOutbox().length) { status.textContent = '送信待ちの記録を保存してから所属を変更してください。'; return; }
+  if (action === 'transfer' && !confirm('現在の所属を終了し、選択したチームへ移籍しますか？\n過去の稽古ログは削除されません。')) return;
+
+  membershipState.submitting = true;
+  setPendingButton(button, true, '変更中...', '変更する');
+  renderMembershipSettings();
+  status.textContent = '所属情報を更新しています...';
+  try {
+    const result = await authenticatedEdgeRequest('manageMembership', {
+      operation: action,
+      teamId,
+      currentTeamId: getTeamId(),
+      registrationCode,
+    });
+    const changedTeam = applyMembershipContext(result);
+    closeMembershipEditor();
+    status.textContent = '';
+    if (changedTeam) hydratePracticeCache();
+    loadHome({ background: homeState.loaded });
+    showToast(action === 'join' ? '新しいチームに参加しました' : 'チームを移籍しました');
+  } catch (error) {
+    console.error(error);
+    status.textContent = error?.message || '所属情報を変更できませんでした。';
+  } finally {
+    membershipState.submitting = false;
+    setPendingButton(button, false, '変更中...', '変更する');
+    renderMembershipSettings();
+  }
+}
+
+async function graduateFromTeams() {
+  if (isPersonalMode() || membershipState.submitting) return;
+  if (getOutbox().length) {
+    showToast('送信待ちの記録を保存してから卒業してください');
+    return;
+  }
+  if (!confirm('すべての所属チームを卒業して、個人利用へ切り替えますか？\n過去の稽古ログは削除されません。')) return;
+  if (!confirm('チームノートとチーム内Good&Newは見られなくなります。続けますか？')) return;
+
+  membershipState.submitting = true;
+  renderMembershipSettings();
+  const status = document.getElementById('membershipStatus');
+  status.textContent = '個人利用へ切り替えています...';
+  try {
+    const result = await authenticatedEdgeRequest('manageMembership', {
+      operation: 'graduate',
+      currentTeamId: getTeamId(),
+    });
+    applyMembershipContext(result);
+    hydratePracticeCache();
+    loadHome({ background: false });
+    status.textContent = '';
+    showToast('個人利用へ切り替えました');
+  } catch (error) {
+    console.error(error);
+    status.textContent = error?.message || '個人利用へ切り替えられませんでした。';
+  } finally {
+    membershipState.submitting = false;
+    renderMembershipSettings();
+  }
 }
 
 function hideAuth() {
@@ -1118,6 +1433,10 @@ function doLogout() {
 // 画面切り替え
 // ============================================
 function goTo(s) {
+  if (s === 'notes' && isPersonalMode()) {
+    showToast('個人利用ではチームノートは表示されません');
+    s = 'home';
+  }
   document.querySelectorAll('.screen').forEach(x => x.classList.remove('active'));
   document.getElementById('screen-' + s).classList.add('active');
   if (s === 'home')    updateHome();
@@ -1316,10 +1635,12 @@ async function loadHome(options = {}) {
   if (showOverlay) showLoading();
 
   try {
-    const json = await supabaseRead('get_keiko_home_dashboard', {
-      p_team_id: getTeamId(),
-      p_date: getDateKey(),
-    });
+    const json = isPersonalMode()
+      ? await supabaseRead('get_keiko_home_summary')
+      : await supabaseRead('get_keiko_home_dashboard', {
+          p_team_id: getTeamId(),
+          p_date: getDateKey(),
+        });
     homeState.totalCount = Number(json.total_count || 0);
     homeState.latestLog = mapSupabaseLog(json.latest_log);
     homeState.timekeeper = json.timekeeper || null;
@@ -1348,6 +1669,8 @@ async function loadHome(options = {}) {
 function updateHome() {
   document.getElementById('heroDate').textContent = getDateStr();
   renderTimekeeper();
+  renderMembershipSettings();
+  syncAudienceUi();
   document.getElementById('headerUserName').textContent = getGroup() ? `${getName()} | ${getGroup()}` : getName();
   const total = homeState.totalCount;
   document.getElementById('practiceDayCount').textContent = total;
@@ -1426,11 +1749,11 @@ function isHomeScreenActive() {
 }
 
 function canRunGoodNewsTicker() {
-  return isHomeScreenActive() && !document.hidden && hasSession();
+  return !isPersonalMode() && isHomeScreenActive() && !document.hidden && hasSession();
 }
 
 function ensureGoodNewsFeed(force = false) {
-  if (!hasSession()) return;
+  if (!hasSession() || isPersonalMode()) return;
   const isStale = Date.now() - goodNewsState.lastFetchedAt > GOOD_NEWS_REFRESH_MS;
   if ((force || !goodNewsState.loaded || isStale) && !goodNewsState.loading) {
     loadGoodNewsFeed({ force, background: goodNewsState.loaded && !force });
@@ -1640,6 +1963,7 @@ function syncGoodNewsTickerWithView() {
 // ============================================
 function updateForm() {
   document.getElementById('formDate').textContent = getDateStr();
+  renderFormTeamPicker();
   const m = document.getElementById('formMission');
   const note = document.getElementById('achievementNote');
   const hint = document.getElementById('formMissionHint');
@@ -1670,6 +1994,29 @@ function updateForm() {
   hydrateLogDraft();
 }
 
+function renderFormTeamPicker() {
+  const picker = document.getElementById('formTeamPicker');
+  const select = document.getElementById('formTeamSelect');
+  if (!picker || !select) return;
+  const teams = getMemberships().filter(team => !team.isPersonal);
+  const previousValue = select.value;
+  select.innerHTML = teams.map(team => `<option value="${escapeAttr(team.teamId)}">${esc(team.teamName)}</option>`).join('');
+  const preferred = teams.find(team => team.teamId === previousValue)
+    || teams.find(team => team.teamId === getTeamId())
+    || teams[0];
+  if (preferred) select.value = preferred.teamId;
+  picker.classList.toggle('show', teams.length > 1);
+}
+
+function handleFormTeamChange() {
+  saveLogDraft();
+}
+
+function getSelectedLogTeamId() {
+  const selected = document.getElementById('formTeamSelect')?.value || '';
+  return selected || getTeamId();
+}
+
 function selectCond(btn, val) {
   document.querySelectorAll('.cond-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected'); selCond = val;
@@ -1698,6 +2045,7 @@ function updateChar(el, outId, max) {
 
 function saveLogDraft() {
   setDraft('log', {
+    teamId: getSelectedLogTeamId(),
     cond: selCond,
     achievementStatus: selAchievement,
     learning: document.getElementById('fieldLearning')?.value || '',
@@ -1711,6 +2059,10 @@ function saveLogDraft() {
 function hydrateLogDraft() {
   const draft = getDraft('log');
   if (!draft) return;
+  const teamSelect = document.getElementById('formTeamSelect');
+  if (teamSelect && Array.from(teamSelect.options).some(option => option.value === draft.teamId)) {
+    teamSelect.value = draft.teamId;
+  }
   const condButtons = document.querySelectorAll('.cond-btn');
   if (Number(draft.cond) >= 1 && Number(draft.cond) <= 5) selectCond(condButtons[Number(draft.cond) - 1], Number(draft.cond));
   if (['done', 'pending'].includes(draft.achievementStatus) && getLatestLog()?.next) selectAchievement(draft.achievementStatus);
@@ -1752,7 +2104,7 @@ async function submitLog() {
   btn.disabled = true; btn.textContent = '送信中...';
 
   const payload = {
-    p_team_id: getTeamId(),
+    p_team_id: getSelectedLogTeamId(),
     p_request_id: createRequestId(),
     p_date: getDateKey(),
     p_condition: selCond,
