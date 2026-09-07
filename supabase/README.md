@@ -2,7 +2,8 @@
 
 Apply SQL files in `migrations` in filename order. The current release includes
 direct authenticated writes, paged reads, rotating timekeepers, and audited
-multi-team membership changes.
+multi-team membership changes. Global notes are opt-in, school teams are blocked
+from global publishing, and operator-only moderation is stored in Postgres.
 
 Deploy `functions/keiko-api` with JWT verification disabled because login and
 registration do not have a user JWT yet. The function still validates every
@@ -15,6 +16,8 @@ Set these Edge Function secrets:
 | --- | --- |
 | `KEIKO_AUTH_PEPPER` | Existing value used to derive Auth passwords |
 | `KEIKO_REGISTRATION_CODE` | Existing registration code |
+| `RESEND_API_KEY` | Resend API key used to email content reports |
+| `KEIKO_REPORT_FROM_EMAIL` | Verified sender, for example `KEIKO OS <report@example.com>` |
 
 `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` are supplied
 by Supabase. Never place server secrets in `index.html` or commit them to Git.
@@ -22,5 +25,6 @@ by Supabase. Never place server secrets in `index.html` or commit them to Git.
 ```sh
 supabase db push
 supabase secrets set KEIKO_AUTH_PEPPER=... KEIKO_REGISTRATION_CODE=...
+supabase secrets set RESEND_API_KEY=... KEIKO_REPORT_FROM_EMAIL='KEIKO OS <report@example.com>'
 supabase functions deploy keiko-api --no-verify-jwt
 ```

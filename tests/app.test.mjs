@@ -51,6 +51,9 @@ test('Edge API has a deliberately small public action surface', async () => {
   assert.match(source, /KEIKO_AUTH_PEPPER/);
   assert.match(source, /KEIKO_REGISTRATION_CODE/);
   assert.match(source, /action === 'manageMembership'/);
+  for (const action of ['getOperatorDashboard', 'updateTeamSettings', 'reportContent', 'moderateReport']) {
+    assert.match(source, new RegExp(`action === '${action}'`));
+  }
   assert.match(source, /readBearerToken\(request\)/);
   assert.match(source, /constantTimeEquals\(text\(payload\.registrationCode\), REGISTRATION_CODE\)/);
   const config = await read('supabase/config.toml');
@@ -59,9 +62,9 @@ test('Edge API has a deliberately small public action surface', async () => {
 
 test('all application collections use bounded reads', async () => {
   const html = await read('index.html');
-  assert.match(html, /get_keiko_logs_page/);
-  assert.match(html, /get_keiko_notes_page/);
-  assert.match(html, /get_keiko_note_comments/);
+  assert.match(html, /get_keiko_logs_page_v2/);
+  assert.match(html, /get_keiko_notes_feed/);
+  assert.match(html, /get_keiko_note_comments_v2/);
   assert.doesNotMatch(html, /get_keiko_notes['"]/);
   assert.match(html, /p_limit:\s*20/);
   const cleanup = await read('supabase/migrations/2026083002_remove_legacy_notes_rpc.sql');
@@ -70,6 +73,7 @@ test('all application collections use bounded reads', async () => {
 
 test('timekeeper rotation is server-managed and available on the home dashboard', async () => {
   const sql = await read('supabase/migrations/2026090101_timekeeper_rotation.sql');
+  const contextSql = await read('supabase/migrations/2026090502_context_global_moderation.sql');
   const html = await read('index.html');
 
   assert.match(sql, /create table if not exists public\.timekeeper_cycles/);
@@ -79,6 +83,8 @@ test('timekeeper rotation is server-managed and available on the home dashboard'
   assert.match(sql, /unique \(team_id, practice_date\)/);
   assert.match(sql, /create or replace function public\.replace_keiko_timekeeper/);
   assert.match(sql, /carryover_order = v_new_absent/);
+  assert.match(contextSql, /from unnest\(v_cycle\.member_order\)[\s\S]*join public\.team_members/);
+  assert.doesNotMatch(contextSql, /select tm\.user_id into v_candidate[\s\S]*order by random\(\)/);
   assert.match(sql, /create or replace function public\.get_keiko_home_dashboard/);
   assert.match(sql, /grant execute on function public\.get_keiko_home_dashboard\(uuid, date\) to authenticated/);
 
@@ -119,8 +125,45 @@ test('home settings and log form support multiple teams without cluttering singl
   assert.match(html, /id="formTeamPicker"/);
   assert.match(html, /picker\.classList\.toggle\('show', teams\.length > 1\)/);
   assert.match(html, /p_team_id: getSelectedLogTeamId\(\)/);
+  assert.match(html, /get_keiko_log_target_summary/);
   assert.match(html, /openMembershipEditor\('join'\)/);
   assert.match(html, /openMembershipEditor\('transfer'\)/);
   assert.match(html, /graduateFromTeams\(\)/);
-  assert.match(html, /if \(s === 'notes' && isPersonalMode\(\)\)/);
+  assert.doesNotMatch(html, /個人利用ではチームノートは表示されません/);
+});
+
+test('global notes are opt-in, explicitly scoped, and operator moderated', async () => {
+  const sql = await read('supabase/migrations/2026090502_context_global_moderation.sql');
+  const html = await read('index.html');
+  const edge = await read('supabase/functions/keiko-api/index.ts');
+
+  for (const name of [
+    'set_keiko_global_participation',
+    'get_keiko_notes_feed',
+    'save_keiko_note_v2',
+    'add_keiko_note_comment_v2',
+    'create_keiko_content_report',
+    'update_keiko_team_global_settings',
+    'moderate_keiko_report',
+  ]) assert.match(sql, new RegExp(`create or replace function public\\.${name}\\b`));
+
+  assert.match(sql, /app_role in \('player', 'operator'\)/);
+  assert.match(sql, /visibility in \('private', 'team', 'global'\)/);
+  assert.match(sql, /team_type = 'student'[\s\S]*school_global_forbidden/);
+  assert.match(sql, /update public\.team_notes n[\s\S]*set visibility = 'team'/);
+  assert.match(sql, /global_participation_enabled/);
+  assert.match(sql, /create table if not exists public\.content_reports/);
+  assert.match(sql, /unique \(reporter_user_id, content_type, content_id\)/);
+
+  assert.match(html, /id="viewContextButtons"/);
+  assert.match(html, /id="globalParticipationBtn"/);
+  assert.match(html, /id="noteScopeButtons"/);
+  assert.match(html, /selectNoteScope\('private'\)/);
+  assert.match(html, /selectNoteScope\('global'\)/);
+  assert.match(html, /id="operatorSettings"/);
+  assert.match(html, /reportContent\('note'/);
+
+  assert.match(edge, /🚨KEIKO OS からの通報🚨/);
+  assert.match(edge, /kokongakumeiza@gmail\.com/);
+  assert.match(edge, /RESEND_API_KEY/);
 });

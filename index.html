@@ -108,6 +108,48 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;backgroun
 .membership-editor-submit{background:var(--red);color:#fff}
 .membership-editor-cancel{background:#eee9df;color:var(--ink2)}
 .membership-status{min-height:18px;margin-top:8px;font-size:11px;color:var(--red);line-height:1.6}
+.context-panel{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;box-shadow:0 8px 18px rgba(23,20,15,.04)}
+.context-label{font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--ink3);margin-bottom:8px}
+.context-buttons,.note-scope-buttons{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.context-buttons::-webkit-scrollbar,.note-scope-buttons::-webkit-scrollbar{display:none}
+.context-btn,.note-scope-btn{flex:none;border:1px solid #ddd2bd;background:#faf7f1;color:var(--ink2);border-radius:999px;padding:8px 12px;font-family:inherit;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
+.context-btn.active,.note-scope-btn.active{background:var(--red);border-color:var(--red);color:#fff}
+.membership-chip{cursor:pointer;font-family:inherit}
+.global-card{display:none;background:linear-gradient(135deg,#162a28 0%,#234d45 100%);color:#fff;border-radius:var(--radius);padding:17px;margin-bottom:12px;position:relative;overflow:hidden}
+.global-card.show{display:block}
+.global-card::after{content:'輪';position:absolute;right:-8px;bottom:-28px;font-size:92px;font-weight:900;opacity:.08}
+.global-title{position:relative;font-size:16px;font-weight:800}
+.global-copy{position:relative;font-size:12px;line-height:1.7;color:rgba(255,255,255,.78);margin-top:6px}
+.global-action{position:relative;margin-top:12px;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:9px 14px;font-family:inherit;font-size:11px;font-weight:800;cursor:pointer}
+.global-action:disabled{opacity:.55;cursor:not-allowed}
+.global-home-card{display:none;background:linear-gradient(145deg,#173b36,#102724);color:#fff;border-radius:var(--radius);padding:24px 20px;margin-bottom:12px;text-align:center}
+.global-home-card.show{display:block}
+.global-home-kicker{font-size:10px;font-weight:800;letter-spacing:.18em;color:#bcd8d2}
+.global-home-title{font-size:24px;font-weight:900;margin-top:6px}
+.global-home-copy{font-size:12px;line-height:1.8;color:rgba(255,255,255,.75);margin-top:8px}
+.global-home-btn{margin-top:16px;border:0;border-radius:999px;background:#fff;color:#173b36;padding:11px 18px;font-family:inherit;font-size:12px;font-weight:900;cursor:pointer}
+.note-scope-panel{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:13px;margin-bottom:12px}
+.note-scope-hint{font-size:10px;color:var(--ink3);line-height:1.6;margin-top:7px}
+.visibility-badge{display:inline-flex;align-items:center;padding:3px 7px;border-radius:999px;background:#f1eee7;color:var(--ink3);font-size:9px;font-weight:800;margin-left:5px}
+.visibility-badge.global{background:#e4f2ef;color:#176659}
+.visibility-badge.private{background:#eef1f5;color:#4c596c}
+.report-btn{border:0;background:transparent;color:#a34a4a;font-family:inherit;font-size:10px;font-weight:700;cursor:pointer;padding:5px 0}
+.report-btn:disabled{opacity:.45;cursor:not-allowed}
+.operator-card{display:none;background:#fff;border:2px solid #202d2b;border-radius:var(--radius);padding:17px;margin:12px 0 4px}
+.operator-card.show{display:block}
+.operator-badge{display:inline-flex;padding:4px 8px;border-radius:999px;background:#202d2b;color:#fff;font-size:9px;font-weight:900;letter-spacing:.1em;margin-bottom:8px}
+.operator-team-row,.operator-report{padding:12px 0;border-top:1px solid var(--border)}
+.operator-team-row:first-child,.operator-report:first-child{border-top:0}
+.operator-team-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.operator-team-name{font-size:12px;font-weight:800;color:var(--ink)}
+.operator-team-meta,.operator-report-meta{font-size:10px;color:var(--ink3);line-height:1.6;margin-top:3px}
+.operator-toggle{border:1px solid var(--red);background:#fff;color:var(--red);border-radius:999px;padding:7px 10px;font-family:inherit;font-size:10px;font-weight:800;cursor:pointer}
+.operator-toggle.enabled{background:var(--red);color:#fff}
+.operator-toggle:disabled{opacity:.45;cursor:not-allowed}
+.operator-report-body{font-size:11px;color:var(--ink2);line-height:1.7;margin-top:7px;white-space:pre-wrap}
+.operator-report-actions{display:flex;gap:6px;margin-top:8px}
+.operator-report-actions button{flex:1;border:1px solid var(--border);background:#fff;border-radius:8px;padding:8px 5px;font-family:inherit;font-size:10px;font-weight:800;cursor:pointer}
+.operator-report-actions .hide{border-color:var(--red);color:var(--red)}
 .form-section{margin-bottom:16px}
 .form-label{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px;display:block}
 .form-hint{font-size:11px;color:var(--ink3);margin-bottom:6px}
@@ -349,6 +391,10 @@ textarea:focus,input:focus{border-color:var(--red)}
     </div>
   </div>
   <div class="content">
+    <div class="context-panel" id="viewContextPanel">
+      <div class="context-label">現在の表示先</div>
+      <div class="context-buttons" id="viewContextButtons"></div>
+    </div>
     <div class="goodnews-card" id="goodNewsCard">
       <div class="goodnews-header">
       <div class="goodnews-title">みんなの Good&amp;New</div>
@@ -357,7 +403,7 @@ textarea:focus,input:focus{border-color:var(--red)}
       <div class="goodnews-text is-placeholder" id="goodNewsText">読み込み中...</div>
       <div class="goodnews-meta" id="goodNewsMeta">みんなの前向きな変化が3秒ごとに流れます</div>
     </div>
-    <div class="hero">
+    <div class="hero" id="practiceHero">
       <div class="hero-date" id="heroDate"></div>
       <div class="timekeeper-card" id="timekeeperCard">
         <div class="timekeeper-copy">
@@ -370,12 +416,23 @@ textarea:focus,input:focus{border-color:var(--red)}
       <div class="hero-focus-label">今回の稽古で意識すること</div>
       <div id="missionText" class="hero-focus-empty">読み込み中...</div>
     </div>
-    <div class="practice-day-card" aria-label="これまでの稽古回数">
+    <div class="practice-day-card" id="practiceDayCard" aria-label="これまでの稽古回数">
       <div class="practice-day-kicker">KEIKO HISTORY</div>
       <div class="practice-day-text">稽古<span class="practice-day-number" id="practiceDayCount">0</span>日目！</div>
     </div>
-    <button class="quick-btn btn-primary" onclick="goTo('form')">📝 稽古ログを記録する</button>
-    <button class="quick-btn btn-secondary" onclick="goTo('log')">📖 過去のログを見る</button>
+    <button class="quick-btn btn-primary" id="homeRecordBtn" onclick="goTo('form')">📝 稽古ログを記録する</button>
+    <button class="quick-btn btn-secondary" id="homeLogsBtn" onclick="goTo('log')">📖 過去のログを見る</button>
+    <div class="global-home-card" id="globalHomeCard">
+      <div class="global-home-kicker">KEIKO GLOBAL</div>
+      <div class="global-home-title">稽古の知恵を、ひらく。</div>
+      <div class="global-home-copy">個人やチームの枠を越えて、公開されたノートを読み、学びを共有できます。</div>
+      <button class="global-home-btn" type="button" onclick="goTo('notes')">グローバルノートを見る</button>
+    </div>
+    <div class="global-card show" id="globalParticipationCard">
+      <div class="global-title" id="globalParticipationTitle">グローバルに参加する</div>
+      <div class="global-copy" id="globalParticipationCopy">参加すると、公開された稽古ノートを読んだり、自分または許可されたチーム名で投稿できます。</div>
+      <button class="global-action" id="globalParticipationBtn" type="button" onclick="toggleGlobalParticipation()">グローバルに参加する</button>
+    </div>
     <div class="help-card" id="helpSection">
       <div class="help-title">？ KEIKO ヘルプ</div>
       <div class="help-lead">KEIKOは、毎回の気づきを次の行動につなげる稽古ノートです。</div>
@@ -404,6 +461,14 @@ textarea:focus,input:focus{border-color:var(--red)}
         </div>
       </div>
       <div class="membership-status" id="membershipStatus"></div>
+    </div>
+    <div class="operator-card" id="operatorSettings">
+      <div class="operator-badge">KEIKO 運営</div>
+      <div class="settings-title">⚙ チーム設定</div>
+      <div class="settings-lead">学校以外のチームについて、グローバルノートへの投稿を許可できます。</div>
+      <div id="operatorTeams"><div class="note-empty">管理情報を読み込み中...</div></div>
+      <div class="settings-title" style="margin-top:14px">🚨 未対応の通報</div>
+      <div id="operatorReports"><div class="note-empty">通報を読み込み中...</div></div>
     </div>
   </div>
   <div class="bottom-nav">
@@ -507,10 +572,19 @@ textarea:focus,input:focus{border-color:var(--red)}
 <!-- NOTES -->
 
 <div class="screen" id="screen-notes">
-  <div class="header"><div><div class="header-title">🗒️ チームノート</div><div class="header-sub" id="notesGroupName">同じチーム内で稽古内容を積み上げます</div></div></div>
+  <div class="header"><div><div class="header-title">🗒️ 稽古ノート</div><div class="header-sub" id="notesGroupName">公開範囲を選んで稽古内容を積み上げます</div></div></div>
   <div class="content">
+    <div class="note-scope-panel">
+      <div class="context-label">表示・投稿先</div>
+      <div class="note-scope-buttons" id="noteScopeButtons"></div>
+      <div class="note-scope-hint" id="noteScopeHint">自分だけ、チーム内、グローバルから選べます。</div>
+      <div class="form-team-picker" id="globalAuthorPicker" style="margin:10px 0 0;padding:10px">
+        <div class="form-team-picker-label">投稿者の所属表示</div>
+        <select id="globalAuthorTeamSelect" onchange="handleGlobalAuthorTeamChange()"></select>
+      </div>
+    </div>
     <div class="note-compose">
-      <div class="note-compose-title">指導内容・練習内容をまとめる</div>
+      <div class="note-compose-title" id="noteComposeTitle">指導内容・練習内容をまとめる</div>
       <div class="form-section" style="margin-bottom:12px">
         <label class="form-label">タイトル</label>
         <input type="text" id="noteTitleInput" placeholder="例：Aパート基礎打ちで意識すること" oninput="saveNoteDraft()">
@@ -570,8 +644,11 @@ const GOOD_NEWS_ROTATE_MS = 3000;
 const GOOD_NEWS_REFRESH_MS = 60000;
 const GOOD_NEWS_RECENT_LIMIT = 4;
 const NOTES_REFRESH_MS = 45000;
-const APP_VERSION = '2026-09-05-01';
+const APP_VERSION = '2026-09-05-02';
 const APP_VERSION_KEY = 'taiko_app_version';
+const VIEW_KIND_KEY = 'taiko_view_kind';
+const APP_ROLE_KEY = 'taiko_app_role';
+const GLOBAL_PARTICIPATION_KEY = 'taiko_global_participation';
 const TEAM_CACHE_KEY = 'taiko_team_options';
 const MEMBERSHIP_CACHE_KEY = 'taiko_memberships_v1';
 const PRACTICE_CACHE_PREFIX = 'taiko_practice_cache_v1:';
@@ -620,6 +697,18 @@ const membershipState = {
   submitting: false,
   action: '',
 };
+const globalState = {
+  enabled: false,
+  updating: false,
+};
+const operatorState = {
+  teams: [],
+  reports: [],
+  loaded: false,
+  loading: false,
+  updatingTeamIds: new Set(),
+  moderatingReportIds: new Set(),
+};
 const goodNewsState = {
   items: [],
   timerId: null,
@@ -633,6 +722,8 @@ const goodNewsState = {
   error: ''
 };
 const notesState = {
+  scope: '',
+  teamId: '',
   items: [],
   loading: false,
   loaded: false,
@@ -646,6 +737,13 @@ const notesState = {
   hasMore: false,
   nextCursor: null,
   expandedNoteIds: new Set(),
+  reportingContentIds: new Set(),
+};
+const formMissionState = {
+  teamId: '',
+  latestLog: null,
+  loading: false,
+  requestId: 0,
 };
 
 const goodNewsElements = {
@@ -821,6 +919,8 @@ function mapSupabaseLog(row) {
     achievementStatus: row.achievementStatus ?? row.achievement_status ?? '',
     whyMissed: row.whyMissed ?? row.why_missed ?? '',
     retryPlan: row.retryPlan ?? row.retry_plan ?? '',
+    teamId: row.teamId ?? row.team_id ?? '',
+    group: row.teamName ?? row.team_name ?? row.group ?? '',
     createdAt: row.createdAt ?? row.created_at ?? '',
     updatedAt: row.updatedAt ?? row.updated_at ?? '',
   };
@@ -905,7 +1005,9 @@ async function loadTeamOptions(force = false) {
       .map((team) => ({
         teamId: String(team.teamId),
         teamName: String(team.teamName),
-        teamType: String(team.teamType || 'general')
+        teamType: String(team.teamType || 'general'),
+        globalNotesEnabled: !!team.globalNotesEnabled,
+        globalScope: String(team.globalScope || 'disabled')
       }))
       .sort((a, b) => a.teamName.localeCompare(b.teamName, 'ja'));
     teamState.loaded = true;
@@ -1170,14 +1272,22 @@ function saveSession(session) {
   else localStorage.removeItem('taiko_user_id');
   if (session.userType) localStorage.setItem('taiko_user_type', session.userType);
   else localStorage.removeItem('taiko_user_type');
+  localStorage.setItem(APP_ROLE_KEY, session.appRole || 'player');
+  localStorage.setItem(GLOBAL_PARTICIPATION_KEY, session.globalParticipationEnabled ? '1' : '0');
+  globalState.enabled = !!session.globalParticipationEnabled;
   applyMembershipContext(session);
   localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
 }
 
 function clearSession() {
-  clearPracticeCache();
-  clearNotesCache();
-  ['taiko_name', 'taiko_user_id', 'taiko_team_id', 'taiko_group', 'taiko_team_type', 'taiko_user_type', 'taiko_is_personal', MEMBERSHIP_CACHE_KEY, ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, TOKEN_EXPIRES_AT_KEY, 'taiko_pin']
+  const userId = getUserId();
+  if (userId) {
+    const prefixes = [PRACTICE_CACHE_PREFIX, NOTES_CACHE_PREFIX, DRAFT_PREFIX, OUTBOX_PREFIX];
+    Object.keys(localStorage).forEach(key => {
+      if (prefixes.some(prefix => key.startsWith(prefix) && key.includes(userId))) localStorage.removeItem(key);
+    });
+  }
+  ['taiko_name', 'taiko_user_id', 'taiko_team_id', 'taiko_group', 'taiko_team_type', 'taiko_user_type', 'taiko_is_personal', MEMBERSHIP_CACHE_KEY, ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, TOKEN_EXPIRES_AT_KEY, VIEW_KIND_KEY, APP_ROLE_KEY, GLOBAL_PARTICIPATION_KEY, 'taiko_pin']
     .forEach(key => localStorage.removeItem(key));
   membershipState.items = [];
   membershipState.loaded = false;
@@ -1193,6 +1303,8 @@ function normalizeMemberships(items) {
       teamType: String(item.teamType || item.team_type || 'general'),
       teamRole: String(item.teamRole || item.team_role || 'member'),
       isPersonal: Boolean(item.isPersonal ?? item.is_personal),
+      globalNotesEnabled: Boolean(item.globalNotesEnabled ?? item.global_notes_enabled),
+      globalScope: String(item.globalScope || item.global_scope || 'disabled'),
     }));
 }
 
@@ -1211,8 +1323,6 @@ function cacheMemberships() {
 }
 
 function resetTeamScopedState() {
-  clearPracticeCache();
-  clearNotesCache();
   stopGoodNewsTicker();
   stopGoodNewsRefresh();
   cachedLogs = [];
@@ -1220,12 +1330,19 @@ function resetTeamScopedState() {
   Object.assign(logState, { loaded: false, loading: false, loadingMore: false, hasMore: false, nextCursor: null, lastFetchedAt: 0, error: '' });
   Object.assign(goodNewsState, { items: [], loading: false, loaded: false, lastFetchedAt: 0, currentItemId: null, recentIds: [], recentNames: [], error: '' });
   Object.assign(notesState, { items: [], loading: false, loaded: false, lastFetchedAt: 0, loadingMore: false, hasMore: false, nextCursor: null });
+  notesState.expandedNoteIds.clear();
+  Object.assign(formMissionState, { teamId: '', latestLog: null, loading: false, requestId: formMissionState.requestId + 1 });
 }
 
 function applyMembershipContext(context) {
   const previousTeamId = getTeamId();
   const userType = context.userType || context.user_type;
   if (userType) localStorage.setItem('taiko_user_type', String(userType));
+  const appRole = context.appRole || context.app_role;
+  if (appRole) localStorage.setItem(APP_ROLE_KEY, String(appRole));
+  const globalEnabled = Boolean(context.globalParticipationEnabled ?? context.global_participation_enabled ?? globalState.enabled);
+  globalState.enabled = globalEnabled;
+  localStorage.setItem(GLOBAL_PARTICIPATION_KEY, globalEnabled ? '1' : '0');
   const items = normalizeMemberships(context.teams);
   membershipState.items = items;
   membershipState.loaded = true;
@@ -1249,6 +1366,9 @@ function applyMembershipContext(context) {
 
   renderMembershipSettings();
   renderFormTeamPicker();
+  renderViewContextSwitcher();
+  renderGlobalParticipation();
+  renderOperatorSettings();
   syncAudienceUi();
   return previousTeamId !== (current?.teamId || '');
 }
@@ -1268,19 +1388,108 @@ function isPersonalMode() {
   return current ? current.isPersonal : localStorage.getItem('taiko_is_personal') === '1';
 }
 
+function getCurrentMembership() {
+  return getMemberships().find(item => item.teamId === getTeamId()) || null;
+}
+
+function getPersonalTeam() {
+  return getMemberships().find(item => item.isPersonal) || null;
+}
+
+function getRegularTeams() {
+  return getMemberships().filter(item => !item.isPersonal);
+}
+
+function isGlobalView() {
+  return localStorage.getItem(VIEW_KIND_KEY) === 'global' && isGlobalParticipant();
+}
+
+function isGlobalParticipant() {
+  return globalState.enabled || localStorage.getItem(GLOBAL_PARTICIPATION_KEY) === '1';
+}
+
+function isOperator() {
+  return localStorage.getItem(APP_ROLE_KEY) === 'operator';
+}
+
+function canTeamPublishGlobal(team) {
+  return !!team && (team.isPersonal || (team.teamType !== 'student' && team.globalNotesEnabled && team.globalScope === 'global'));
+}
+
+function renderViewContextSwitcher() {
+  const container = document.getElementById('viewContextButtons');
+  if (!container) return;
+  const teamButtons = getMemberships().map(team => `
+    <button class="context-btn ${!isGlobalView() && team.teamId === getTeamId() ? 'active' : ''}" type="button" onclick="switchViewContext('team','${escapeAttr(team.teamId)}')">
+      ${team.isPersonal ? '自分' : esc(team.teamName)}
+    </button>`);
+  if (isGlobalParticipant()) {
+    teamButtons.push(`<button class="context-btn ${isGlobalView() ? 'active' : ''}" type="button" onclick="switchViewContext('global')">グローバル</button>`);
+  }
+  container.innerHTML = teamButtons.join('');
+}
+
+async function switchViewContext(kind, teamId = '') {
+  if (kind === 'global' && !isGlobalParticipant()) {
+    showToast('先にグローバルへ参加してください');
+    return;
+  }
+  if (kind === 'team' && teamId === getTeamId() && !isGlobalView()) return;
+  if (kind === 'global' && isGlobalView()) return;
+
+  if (getOutbox().length) {
+    await flushOutbox();
+    if (getOutbox().length) {
+      showToast('送信待ちデータがあるため表示先を変更できません');
+      return;
+    }
+  }
+
+  if (document.getElementById('screen-notes')?.classList.contains('active')) saveNoteDraft();
+  clearNoteComposerFields();
+  resetTeamScopedState();
+  if (kind === 'global') {
+    localStorage.setItem(VIEW_KIND_KEY, 'global');
+    notesState.scope = 'global';
+    notesState.teamId = '';
+  } else {
+    const team = getMemberships().find(item => item.teamId === teamId);
+    if (!team) return;
+    localStorage.setItem(VIEW_KIND_KEY, 'team');
+    localStorage.setItem('taiko_team_id', team.teamId);
+    localStorage.setItem('taiko_group', team.teamName);
+    localStorage.setItem('taiko_team_type', team.teamType);
+    localStorage.setItem('taiko_is_personal', team.isPersonal ? '1' : '0');
+    notesState.scope = team.isPersonal ? 'private' : 'team';
+    notesState.teamId = team.teamId;
+    hydratePracticeCache();
+  }
+  hydrateNotesCache();
+  updateHome();
+  if (!isGlobalView()) loadHome({ background: homeState.loaded });
+  if (document.getElementById('screen-notes')?.classList.contains('active')) updateNotes();
+}
+
 function syncAudienceUi() {
+  const global = isGlobalView();
   const personal = isPersonalMode();
   const goodNewsCard = document.getElementById('goodNewsCard');
   const timekeeperCard = document.getElementById('timekeeperCard');
-  if (goodNewsCard) goodNewsCard.style.display = personal ? 'none' : '';
-  if (timekeeperCard) timekeeperCard.style.display = personal ? 'none' : '';
-  document.querySelectorAll('.nav-item[onclick*="notes"]').forEach(button => {
-    button.style.display = personal ? 'none' : '';
+  if (goodNewsCard) goodNewsCard.style.display = personal || global ? 'none' : '';
+  if (timekeeperCard) timekeeperCard.style.display = personal || global ? 'none' : '';
+  ['practiceHero', 'practiceDayCard', 'homeRecordBtn', 'homeLogsBtn'].forEach(id => {
+    const element = document.getElementById(id);
+    if (element) element.style.display = global ? 'none' : '';
   });
-  if (personal) {
+  document.getElementById('globalHomeCard')?.classList.toggle('show', global);
+  document.querySelectorAll('.nav-item[onclick*="\'form\'"],.nav-item[onclick*="\'log\'"]').forEach(button => {
+    button.style.display = global ? 'none' : '';
+  });
+  if (personal || global) {
     stopGoodNewsTicker();
     stopGoodNewsRefresh();
   }
+  renderViewContextSwitcher();
 }
 
 function renderMembershipSettings() {
@@ -1290,22 +1499,215 @@ function renderMembershipSettings() {
   if (!list || !lead || !graduateButton) return;
 
   const memberships = getMemberships();
+  const regularTeams = getRegularTeams();
   if (!memberships.length) {
     list.innerHTML = '<span class="membership-chip">所属情報がありません</span>';
     lead.textContent = '所属情報を再読み込みしてください。';
   } else {
     list.innerHTML = memberships.map(team => `
-      <span class="membership-chip ${team.teamId === getTeamId() ? 'current' : ''}">
-        ${team.isPersonal ? '個人利用' : esc(team.teamName)}${team.teamId === getTeamId() ? '・表示中' : ''}
-      </span>
+      <button class="membership-chip ${!isGlobalView() && team.teamId === getTeamId() ? 'current' : ''}" type="button" onclick="switchViewContext('team','${escapeAttr(team.teamId)}')">
+        ${team.isPersonal ? '個人利用' : esc(team.teamName)}${!isGlobalView() && team.teamId === getTeamId() ? '・表示中' : ''}
+      </button>
     `).join('');
-    lead.textContent = isPersonalMode()
-      ? '個人利用中です。自分のログとグローバル公開の情報だけを利用できます。'
-      : memberships.length > 1
-        ? `${memberships.length}チームに所属しています。記録時に保存先を選べます。`
+    lead.textContent = regularTeams.length === 0
+      ? '個人利用中です。自分のログとノートを利用できます。'
+      : regularTeams.length > 1
+        ? `${regularTeams.length}チームに所属しています。タップして表示先を変更できます。`
         : '所属チームを確認・変更できます。';
   }
-  graduateButton.disabled = isPersonalMode() || membershipState.submitting;
+  graduateButton.disabled = regularTeams.length === 0 || membershipState.submitting;
+}
+
+function renderGlobalParticipation() {
+  const title = document.getElementById('globalParticipationTitle');
+  const copy = document.getElementById('globalParticipationCopy');
+  const button = document.getElementById('globalParticipationBtn');
+  if (!title || !copy || !button) return;
+  const enabled = isGlobalParticipant();
+  title.textContent = enabled ? 'グローバル参加中' : 'グローバルに参加する';
+  copy.textContent = enabled
+    ? '表示先の「グローバル」から、公開された稽古ノートを確認できます。'
+    : '参加すると、公開された稽古ノートを読んだり、自分または許可されたチーム名で投稿できます。';
+  setPendingButton(button, globalState.updating, '更新中...', enabled ? 'グローバルから退出する' : 'グローバルに参加する');
+}
+
+async function toggleGlobalParticipation() {
+  if (globalState.updating) return;
+  const enabled = isGlobalParticipant();
+  let hideExisting = false;
+  if (enabled) {
+    if (!confirm('グローバルから退出しますか？')) return;
+    hideExisting = confirm('これまでの自分のグローバル投稿も非公開にしますか？\nOK: 非公開にする / キャンセル: 投稿は残す');
+  } else if (!confirm('グローバルの利用ルールに同意して参加しますか？\n他者を傷つける投稿や個人情報の掲載は禁止です。')) {
+    return;
+  }
+
+  globalState.updating = true;
+  renderGlobalParticipation();
+  try {
+    const result = await supabaseRead('set_keiko_global_participation', {
+      p_enabled: !enabled,
+      p_hide_existing: hideExisting,
+    });
+    globalState.enabled = !!result.globalParticipationEnabled;
+    localStorage.setItem(GLOBAL_PARTICIPATION_KEY, globalState.enabled ? '1' : '0');
+    if (Array.isArray(result.teams)) {
+      membershipState.items = normalizeMemberships(result.teams);
+      cacheMemberships();
+    }
+    renderGlobalParticipation();
+    renderViewContextSwitcher();
+    if (globalState.enabled) {
+      await switchViewContext('global');
+      showToast('グローバルに参加しました');
+    } else {
+      localStorage.setItem(VIEW_KIND_KEY, 'team');
+      const fallback = getRegularTeams()[0] || getPersonalTeam();
+      if (fallback) {
+        resetTeamScopedState();
+        localStorage.setItem('taiko_team_id', fallback.teamId);
+        localStorage.setItem('taiko_group', fallback.teamName);
+        localStorage.setItem('taiko_team_type', fallback.teamType);
+        localStorage.setItem('taiko_is_personal', fallback.isPersonal ? '1' : '0');
+        hydratePracticeCache();
+        updateHome();
+        loadHome({ background: homeState.loaded });
+      }
+      showToast('グローバルから退出しました');
+    }
+  } catch (error) {
+    console.error(error);
+    showToast(error?.message || 'グローバル設定を更新できませんでした');
+  } finally {
+    globalState.updating = false;
+    renderGlobalParticipation();
+  }
+}
+
+function renderOperatorSettings() {
+  const card = document.getElementById('operatorSettings');
+  if (!card) return;
+  card.classList.toggle('show', isOperator());
+  if (!isOperator()) return;
+  renderOperatorTeams();
+  renderOperatorReports();
+  if (!operatorState.loaded && !operatorState.loading) loadOperatorDashboard();
+}
+
+async function loadOperatorDashboard(force = false) {
+  if (!isOperator() || operatorState.loading || (!force && operatorState.loaded)) return;
+  operatorState.loading = true;
+  renderOperatorTeams();
+  renderOperatorReports();
+  try {
+    const result = await authenticatedEdgeRequest('getOperatorDashboard');
+    operatorState.teams = Array.isArray(result.teams) ? result.teams : [];
+    operatorState.reports = Array.isArray(result.reports) ? result.reports : [];
+    operatorState.loaded = true;
+  } catch (error) {
+    console.error(error);
+    showToast('運営情報を取得できませんでした');
+  } finally {
+    operatorState.loading = false;
+    renderOperatorTeams();
+    renderOperatorReports();
+  }
+}
+
+function renderOperatorTeams() {
+  const container = document.getElementById('operatorTeams');
+  if (!container || !isOperator()) return;
+  if (operatorState.loading && !operatorState.teams.length) {
+    container.innerHTML = '<div class="note-empty">チーム設定を読み込み中...</div>';
+    return;
+  }
+  if (!operatorState.teams.length) {
+    container.innerHTML = '<div class="note-empty">管理対象のチームはありません。</div>';
+    return;
+  }
+  container.innerHTML = operatorState.teams.map(team => {
+    const isSchool = team.teamType === 'student';
+    const enabled = !!team.globalNotesEnabled;
+    const pending = operatorState.updatingTeamIds.has(team.teamId);
+    return `<div class="operator-team-row">
+      <div class="operator-team-head">
+        <div><div class="operator-team-name">${esc(team.teamName)}</div><div class="operator-team-meta">${isSchool ? '学校チーム・グローバル禁止' : enabled ? 'グローバル投稿を許可中' : 'チーム内のみ'}</div></div>
+        <button class="operator-toggle ${enabled ? 'enabled' : ''}" type="button" onclick="updateTeamGlobalSetting('${escapeAttr(team.teamId)}',${enabled ? 'false' : 'true'})" ${isSchool || pending ? 'disabled' : ''}>${pending ? '更新中...' : enabled ? '公開を停止' : '公開を許可'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function updateTeamGlobalSetting(teamId, enabled) {
+  if (!isOperator() || operatorState.updatingTeamIds.has(teamId)) return;
+  const team = operatorState.teams.find(item => item.teamId === teamId);
+  if (!team) return;
+  if (!confirm(`${team.teamName}のグローバル投稿を${enabled ? '許可' : '停止'}しますか？`)) return;
+  operatorState.updatingTeamIds.add(teamId);
+  renderOperatorTeams();
+  try {
+    await authenticatedEdgeRequest('updateTeamSettings', { teamId, globalNotesEnabled: enabled });
+    team.globalNotesEnabled = enabled;
+    team.globalScope = enabled ? 'global' : 'disabled';
+    const membership = getMemberships().find(item => item.teamId === teamId);
+    if (membership) {
+      membership.globalNotesEnabled = enabled;
+      membership.globalScope = team.globalScope;
+      cacheMemberships();
+    }
+    renderNoteScopeButtons();
+    showToast('チーム設定を更新しました');
+  } catch (error) {
+    console.error(error);
+    showToast(error?.message || 'チーム設定を更新できませんでした');
+  } finally {
+    operatorState.updatingTeamIds.delete(teamId);
+    renderOperatorTeams();
+  }
+}
+
+function renderOperatorReports() {
+  const container = document.getElementById('operatorReports');
+  if (!container || !isOperator()) return;
+  if (operatorState.loading && !operatorState.loaded) {
+    container.innerHTML = '<div class="note-empty">通報を読み込み中...</div>';
+    return;
+  }
+  if (!operatorState.reports.length) {
+    container.innerHTML = '<div class="note-empty">未対応の通報はありません。</div>';
+    return;
+  }
+  container.innerHTML = operatorState.reports.map(report => {
+    const pending = operatorState.moderatingReportIds.has(report.reportId);
+    return `<div class="operator-report">
+      <div class="operator-team-name">${esc(report.authorName || '投稿者不明')}・${esc(report.teamName || '個人')}</div>
+      <div class="operator-report-meta">${esc(fmtDateTime(report.createdAt))} / メール ${esc(report.emailStatus || 'pending')}</div>
+      <div class="operator-report-body">理由: ${esc(report.reason)}\n\n${esc(report.content)}</div>
+      <div class="operator-report-actions">
+        <button type="button" onclick="moderateReport('${escapeAttr(report.reportId)}','dismiss')" ${pending ? 'disabled' : ''}>問題なし</button>
+        <button type="button" onclick="moderateReport('${escapeAttr(report.reportId)}','resolve')" ${pending ? 'disabled' : ''}>対応済み</button>
+        <button class="hide" type="button" onclick="moderateReport('${escapeAttr(report.reportId)}','hide_content')" ${pending ? 'disabled' : ''}>投稿を非表示</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function moderateReport(reportId, operation) {
+  if (!isOperator() || operatorState.moderatingReportIds.has(reportId)) return;
+  if (operation === 'hide_content' && !confirm('対象の投稿を全員から非表示にしますか？')) return;
+  operatorState.moderatingReportIds.add(reportId);
+  renderOperatorReports();
+  try {
+    await authenticatedEdgeRequest('moderateReport', { reportId, operation });
+    operatorState.reports = operatorState.reports.filter(item => item.reportId !== reportId);
+    showToast(operation === 'hide_content' ? '投稿を非表示にしました' : '通報を処理しました');
+  } catch (error) {
+    console.error(error);
+    showToast(error?.message || '通報を処理できませんでした');
+  } finally {
+    operatorState.moderatingReportIds.delete(reportId);
+    renderOperatorReports();
+  }
 }
 
 async function openMembershipEditor(action) {
@@ -1381,7 +1783,7 @@ async function submitMembershipChange() {
 }
 
 async function graduateFromTeams() {
-  if (isPersonalMode() || membershipState.submitting) return;
+  if (!getRegularTeams().length || membershipState.submitting) return;
   if (getOutbox().length) {
     showToast('送信待ちの記録を保存してから卒業してください');
     return;
@@ -1433,8 +1835,8 @@ function doLogout() {
 // 画面切り替え
 // ============================================
 function goTo(s) {
-  if (s === 'notes' && isPersonalMode()) {
-    showToast('個人利用ではチームノートは表示されません');
+  if (isGlobalView() && ['form', 'log'].includes(s)) {
+    showToast('稽古ログは「自分」またはチーム表示で利用できます');
     s = 'home';
   }
   document.querySelectorAll('.screen').forEach(x => x.classList.remove('active'));
@@ -1443,6 +1845,7 @@ function goTo(s) {
   if (s === 'form')    updateForm();
   if (s === 'log')     ensureLogsLoaded();
   if (s === 'notes')   updateNotes();
+  syncAudienceUi();
   syncGoodNewsTickerWithView();
 }
 
@@ -1595,16 +1998,6 @@ function cachePracticeData() {
   }
 }
 
-function clearPracticeCache() {
-  const key = getPracticeCacheKey();
-  if (key) localStorage.removeItem(key);
-}
-
-function clearNotesCache() {
-  const key = getNotesCacheKey();
-  if (key) localStorage.removeItem(key);
-}
-
 function getLatestLog() {
   return homeState.latestLog || cachedLogs[0] || null;
 }
@@ -1628,6 +2021,10 @@ function getDateKey() {
 async function loadHome(options = {}) {
   const { background = false } = options;
   if (homeState.loading) return;
+  if (isGlobalView()) {
+    updateHome();
+    return;
+  }
 
   homeState.loading = true;
   const showOverlay = !background && !homeState.loaded;
@@ -1635,12 +2032,10 @@ async function loadHome(options = {}) {
   if (showOverlay) showLoading();
 
   try {
-    const json = isPersonalMode()
-      ? await supabaseRead('get_keiko_home_summary')
-      : await supabaseRead('get_keiko_home_dashboard', {
-          p_team_id: getTeamId(),
-          p_date: getDateKey(),
-        });
+    const json = await supabaseRead('get_keiko_home_dashboard', {
+      p_team_id: getTeamId(),
+      p_date: getDateKey(),
+    });
     homeState.totalCount = Number(json.total_count || 0);
     homeState.latestLog = mapSupabaseLog(json.latest_log);
     homeState.timekeeper = json.timekeeper || null;
@@ -1670,8 +2065,13 @@ function updateHome() {
   document.getElementById('heroDate').textContent = getDateStr();
   renderTimekeeper();
   renderMembershipSettings();
+  renderViewContextSwitcher();
+  renderGlobalParticipation();
+  renderOperatorSettings();
   syncAudienceUi();
-  document.getElementById('headerUserName').textContent = getGroup() ? `${getName()} | ${getGroup()}` : getName();
+  document.getElementById('headerUserName').textContent = isGlobalView()
+    ? `${getName()} | グローバル`
+    : getGroup() ? `${getName()} | ${isPersonalMode() ? '自分' : getGroup()}` : getName();
   const total = homeState.totalCount;
   document.getElementById('practiceDayCount').textContent = total;
 
@@ -1682,7 +2082,7 @@ function updateHome() {
   } else {
     m.textContent = 'まだ記録がありません'; m.className = 'hero-focus-empty';
   }
-  ensureGoodNewsFeed();
+  if (!isGlobalView()) ensureGoodNewsFeed();
 }
 
 function renderTimekeeper() {
@@ -1749,11 +2149,11 @@ function isHomeScreenActive() {
 }
 
 function canRunGoodNewsTicker() {
-  return !isPersonalMode() && isHomeScreenActive() && !document.hidden && hasSession();
+  return !isGlobalView() && !isPersonalMode() && isHomeScreenActive() && !document.hidden && hasSession();
 }
 
 function ensureGoodNewsFeed(force = false) {
-  if (!hasSession() || isPersonalMode()) return;
+  if (!hasSession() || isGlobalView() || isPersonalMode()) return;
   const isStale = Date.now() - goodNewsState.lastFetchedAt > GOOD_NEWS_REFRESH_MS;
   if ((force || !goodNewsState.loaded || isStale) && !goodNewsState.loading) {
     loadGoodNewsFeed({ force, background: goodNewsState.loaded && !force });
@@ -1961,22 +2361,12 @@ function syncGoodNewsTickerWithView() {
 // ============================================
 // フォーム更新
 // ============================================
-function updateForm() {
+async function updateForm() {
   document.getElementById('formDate').textContent = getDateStr();
   renderFormTeamPicker();
   const m = document.getElementById('formMission');
   const note = document.getElementById('achievementNote');
   const hint = document.getElementById('formMissionHint');
-  const latestLog = getLatestLog();
-  if (latestLog?.next) {
-    m.textContent = latestLog.next; m.className = 'mission-text';
-    note.textContent = '達成できたかを選んでから、今日の記録を入力します。';
-    hint.textContent = 'この1選を達成できたかどうかを最初に振り返ります。';
-  } else {
-    m.textContent = '記録なし'; m.className = 'mission-empty';
-    note.textContent = '初回の記録まではこのチェックは不要です。';
-    hint.textContent = '最初の記録なので、今回は下の達成チェックはスキップできます。';
-  }
   selCond = 0;
   selAchievement = '';
   document.querySelectorAll('.cond-btn').forEach(b => b.classList.remove('selected'));
@@ -1988,19 +2378,22 @@ function updateForm() {
   document.getElementById('charWhyMissed').textContent = '0/80';
   document.getElementById('charRetryPlan').textContent = '0/80';
   toggleFailureFields(false);
-  document.getElementById('achievementSection').style.display = latestLog?.next ? 'block' : 'none';
+  document.getElementById('achievementSection').style.display = 'none';
   document.getElementById('submitBtn').disabled = false;
   document.getElementById('submitBtn').textContent = '記録を保存する ✓';
   hydrateLogDraft();
+  await loadFormMission(getSelectedLogTeamId());
 }
 
 function renderFormTeamPicker() {
   const picker = document.getElementById('formTeamPicker');
   const select = document.getElementById('formTeamSelect');
   if (!picker || !select) return;
-  const teams = getMemberships().filter(team => !team.isPersonal);
+  const teams = isPersonalMode()
+    ? getMemberships().filter(team => team.isPersonal)
+    : getRegularTeams();
   const previousValue = select.value;
-  select.innerHTML = teams.map(team => `<option value="${escapeAttr(team.teamId)}">${esc(team.teamName)}</option>`).join('');
+  select.innerHTML = teams.map(team => `<option value="${escapeAttr(team.teamId)}">${team.isPersonal ? '自分' : esc(team.teamName)}</option>`).join('');
   const preferred = teams.find(team => team.teamId === previousValue)
     || teams.find(team => team.teamId === getTeamId())
     || teams[0];
@@ -2010,11 +2403,62 @@ function renderFormTeamPicker() {
 
 function handleFormTeamChange() {
   saveLogDraft();
+  loadFormMission(getSelectedLogTeamId());
 }
 
 function getSelectedLogTeamId() {
   const selected = document.getElementById('formTeamSelect')?.value || '';
   return selected || getTeamId();
+}
+
+function getFormLatestLog() {
+  return formMissionState.teamId === getSelectedLogTeamId() ? formMissionState.latestLog : null;
+}
+
+async function loadFormMission(teamId) {
+  const m = document.getElementById('formMission');
+  const hint = document.getElementById('formMissionHint');
+  if (!teamId) return;
+  const requestId = formMissionState.requestId + 1;
+  formMissionState.requestId = requestId;
+  formMissionState.teamId = teamId;
+  formMissionState.loading = true;
+  if (m) { m.textContent = '読み込み中...'; m.className = 'mission-empty'; }
+  try {
+    if (teamId === getTeamId() && homeState.loaded) {
+      formMissionState.latestLog = homeState.latestLog;
+    } else {
+      const summary = await supabaseRead('get_keiko_log_target_summary', { p_team_id: teamId });
+      if (formMissionState.requestId !== requestId) return;
+      formMissionState.latestLog = mapSupabaseLog(summary.latest_log);
+    }
+  } catch (error) {
+    console.error(error);
+    formMissionState.latestLog = null;
+    if (hint) hint.textContent = '前回の記録を取得できませんでした。';
+  } finally {
+    if (formMissionState.requestId === requestId) {
+      formMissionState.loading = false;
+      renderFormMission();
+    }
+  }
+}
+
+function renderFormMission() {
+  const m = document.getElementById('formMission');
+  const note = document.getElementById('achievementNote');
+  const hint = document.getElementById('formMissionHint');
+  const latestLog = getFormLatestLog();
+  if (latestLog?.next) {
+    m.textContent = latestLog.next; m.className = 'mission-text';
+    note.textContent = '達成できたかを選んでから、今日の記録を入力します。';
+    hint.textContent = 'この1選を達成できたかどうかを最初に振り返ります。';
+  } else {
+    m.textContent = '記録なし'; m.className = 'mission-empty';
+    note.textContent = '初回の記録まではこのチェックは不要です。';
+    hint.textContent = '最初の記録なので、今回は下の達成チェックはスキップできます。';
+  }
+  document.getElementById('achievementSection').style.display = latestLog?.next ? 'block' : 'none';
 }
 
 function selectCond(btn, val) {
@@ -2065,7 +2509,7 @@ function hydrateLogDraft() {
   }
   const condButtons = document.querySelectorAll('.cond-btn');
   if (Number(draft.cond) >= 1 && Number(draft.cond) <= 5) selectCond(condButtons[Number(draft.cond) - 1], Number(draft.cond));
-  if (['done', 'pending'].includes(draft.achievementStatus) && getLatestLog()?.next) selectAchievement(draft.achievementStatus);
+  if (['done', 'pending'].includes(draft.achievementStatus)) selectAchievement(draft.achievementStatus);
   const fields = [
     ['fieldLearning', 'charLearning', 100, draft.learning],
     ['fieldNext', 'charNext', 60, draft.next],
@@ -2086,13 +2530,14 @@ function hydrateLogDraft() {
 // ログ送信
 // ============================================
 async function submitLog() {
+  if (formMissionState.loading) { showToast('前回の記録を確認中です。少し待ってください'); return; }
   if (!selCond)    { showToast('コンディションを選んでください'); return; }
   const learning = document.getElementById('fieldLearning').value.trim();
   const next     = document.getElementById('fieldNext').value.trim();
   const goodNew  = document.getElementById('fieldGoodNew').value.trim();
   const whyMissed = document.getElementById('fieldWhyMissed').value.trim();
   const retryPlan = document.getElementById('fieldRetryPlan').value.trim();
-  const hasPreviousMission = !!getLatestLog()?.next;
+  const hasPreviousMission = !!getFormLatestLog()?.next;
   if (hasPreviousMission && !selAchievement) { showToast('前回の達成チェックを選んでください'); return; }
   if (!learning) { showToast('今日の学びを入力してください'); return; }
   if (!next)     { showToast('次の稽古でやることを入力してください'); return; }
@@ -2136,7 +2581,13 @@ async function submitLog() {
 }
 
 function applySavedLog(json, payload, queued) {
-  const savedLog = mapSupabaseLog(json.log) || {
+  const mappedLog = mapSupabaseLog(json.log);
+  const targetTeam = getMemberships().find(team => team.teamId === payload.p_team_id);
+  const savedLog = mappedLog ? {
+    ...mappedLog,
+    teamId: mappedLog.teamId || payload.p_team_id,
+    group: mappedLog.group || targetTeam?.teamName || '',
+  } : {
     id: json.id || `pending_${payload.p_request_id}`,
     cond: payload.p_condition,
     learning: payload.p_learning,
@@ -2147,18 +2598,24 @@ function applySavedLog(json, payload, queued) {
     achievementStatus: payload.p_achievement_status,
     whyMissed: payload.p_why_missed,
     retryPlan: payload.p_retry_plan,
+    teamId: payload.p_team_id,
+    group: targetTeam?.teamName || '',
     pending: queued,
   };
-  cachedLogs = [savedLog, ...cachedLogs.filter(log => log.id !== savedLog.id)];
-  if (!json.duplicate) {
-    homeState.totalCount += 1;
+  const isActiveTeam = !isGlobalView() && payload.p_team_id === getTeamId();
+  if (isActiveTeam) {
+    cachedLogs = [savedLog, ...cachedLogs.filter(log => log.id !== savedLog.id)];
+    if (!json.duplicate) homeState.totalCount += 1;
+    homeState.latestLog = savedLog;
+    homeState.loaded = true;
+    homeState.lastFetchedAt = Date.now();
+    cachePracticeData();
+  } else {
+    const targetCacheKey = getUserId() ? `${PRACTICE_CACHE_PREFIX}${getUserId()}:${payload.p_team_id}` : '';
+    if (targetCacheKey) localStorage.removeItem(targetCacheKey);
   }
-  homeState.latestLog = savedLog;
-  homeState.loaded = true;
-  homeState.lastFetchedAt = Date.now();
   clearDraft('log');
-  cachePracticeData();
-  if (!queued) {
+  if (!queued && isActiveTeam) {
     loadHome({ background: true });
     loadGoodNewsFeed({ force: true, background: true });
   }
@@ -2235,7 +2692,8 @@ async function loadLogs(options = {}) {
   updateLog();
 
   try {
-    const json = await supabaseRead('get_keiko_logs_page', {
+    const json = await supabaseRead('get_keiko_logs_page_v2', {
+      p_team_id: getTeamId(),
       p_cursor_date: cursor?.date || null,
       p_cursor_created_at: cursor?.createdAt || null,
       p_cursor_id: cursor?.id || null,
@@ -2282,7 +2740,8 @@ function fmtDate(val) {
   return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${'日月火水木金土'[d.getDay()]}）`;
 }
 function updateLog() {
-  document.getElementById('logName').textContent = getGroup() ? `${getName()} さんの記録｜${getGroup()}` : getName() + ' さんの記録';
+  const displayGroup = isPersonalMode() ? '自分' : getGroup();
+  document.getElementById('logName').textContent = displayGroup ? `${getName()} さんの記録｜${displayGroup}` : getName() + ' さんの記録';
   const el = document.getElementById('logContent');
   if (logState.loading && !cachedLogs.length) {
     el.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--ink3)">ログを読み込み中...</div>';
@@ -2340,18 +2799,117 @@ function renderAchievementLog(log) {
 // チームノート
 // ============================================
 function updateNotes() {
-  const groupName = getGroup();
+  initializeNoteScope();
+  renderNoteScopeButtons();
+  const context = getNotesContext();
   const sub = document.getElementById('notesGroupName');
   if (sub) {
-    sub.textContent = groupName ? `${groupName} のメンバー内だけで稽古内容を蓄積できます` : '同じチーム内だけで稽古内容を蓄積できます';
+    sub.textContent = context.scope === 'private'
+      ? '自分だけのノートです'
+      : context.scope === 'global'
+        ? '参加者に公開されたノートです'
+        : `${context.team?.teamName || 'チーム'} 内のノートです`;
   }
   hydrateNoteDraft();
   renderNotes();
   ensureNotesLoaded({ background: true });
 }
 
+function initializeNoteScope() {
+  const validTeam = notesState.scope === 'team' && getRegularTeams().some(team => team.teamId === notesState.teamId);
+  if (notesState.scope === 'private' || validTeam || (notesState.scope === 'global' && isGlobalParticipant())) return;
+  if (isGlobalView() && isGlobalParticipant()) {
+    notesState.scope = 'global';
+    notesState.teamId = getPreferredGlobalAuthorTeamId();
+  } else if (isPersonalMode()) {
+    notesState.scope = 'private';
+    notesState.teamId = getPersonalTeam()?.teamId || getTeamId();
+  } else {
+    notesState.scope = 'team';
+    notesState.teamId = getTeamId();
+  }
+}
+
+function getNotesContext() {
+  initializeNoteScope();
+  return {
+    scope: notesState.scope,
+    teamId: notesState.teamId,
+    team: getMemberships().find(team => team.teamId === notesState.teamId) || null,
+  };
+}
+
+function getPreferredGlobalAuthorTeamId() {
+  const current = getCurrentMembership();
+  if (canTeamPublishGlobal(current)) return current.teamId;
+  const eligible = getMemberships().find(canTeamPublishGlobal);
+  return eligible?.teamId || getPersonalTeam()?.teamId || '';
+}
+
+function renderNoteScopeButtons() {
+  const container = document.getElementById('noteScopeButtons');
+  const hint = document.getElementById('noteScopeHint');
+  const picker = document.getElementById('globalAuthorPicker');
+  const authorSelect = document.getElementById('globalAuthorTeamSelect');
+  if (!container || !hint || !picker || !authorSelect) return;
+  initializeNoteScope();
+  const buttons = [
+    `<button class="note-scope-btn ${notesState.scope === 'private' ? 'active' : ''}" type="button" onclick="selectNoteScope('private')">自分だけ</button>`,
+    ...getRegularTeams().map(team => `<button class="note-scope-btn ${notesState.scope === 'team' && notesState.teamId === team.teamId ? 'active' : ''}" type="button" onclick="selectNoteScope('team','${escapeAttr(team.teamId)}')">${esc(team.teamName)}</button>`),
+  ];
+  if (isGlobalParticipant()) {
+    buttons.push(`<button class="note-scope-btn ${notesState.scope === 'global' ? 'active' : ''}" type="button" onclick="selectNoteScope('global')">グローバル</button>`);
+  }
+  container.innerHTML = buttons.join('');
+
+  const context = getNotesContext();
+  hint.textContent = context.scope === 'private'
+    ? 'ここで投稿した内容は自分だけが見られます。'
+    : context.scope === 'global'
+      ? '投稿者名と選択した所属が、グローバル参加者に表示されます。'
+      : `${context.team?.teamName || '選択チーム'}のメンバーだけが見られます。`;
+
+  const eligibleTeams = getMemberships().filter(canTeamPublishGlobal);
+  authorSelect.innerHTML = eligibleTeams.map(team => `<option value="${escapeAttr(team.teamId)}">${team.isPersonal ? '個人として投稿' : `${esc(team.teamName)}として投稿`}</option>`).join('');
+  if (!eligibleTeams.some(team => team.teamId === notesState.teamId)) notesState.teamId = getPreferredGlobalAuthorTeamId();
+  if (notesState.teamId) authorSelect.value = notesState.teamId;
+  picker.classList.toggle('show', context.scope === 'global');
+  const composeTitle = document.getElementById('noteComposeTitle');
+  if (composeTitle) composeTitle.textContent = context.scope === 'global'
+    ? 'グローバルに稽古の知恵を共有する'
+    : context.scope === 'private' ? '自分用の稽古メモを残す' : 'チームの指導内容・練習内容をまとめる';
+}
+
+function selectNoteScope(scope, teamId = '') {
+  if (scope === 'global' && !isGlobalParticipant()) {
+    showToast('先にグローバルへ参加してください');
+    return;
+  }
+  const nextTeamId = scope === 'private'
+    ? getPersonalTeam()?.teamId || getTeamId()
+    : scope === 'global' ? getPreferredGlobalAuthorTeamId() : teamId;
+  if (notesState.scope === scope && notesState.teamId === nextTeamId) return;
+  saveNoteDraft();
+  clearNoteComposerFields();
+  notesState.scope = scope;
+  notesState.teamId = nextTeamId;
+  Object.assign(notesState, { items: [], loaded: false, loading: false, loadingMore: false, hasMore: false, nextCursor: null, lastFetchedAt: 0 });
+  notesState.expandedNoteIds.clear();
+  hydrateNotesCache();
+  updateNotes();
+}
+
+function handleGlobalAuthorTeamChange() {
+  notesState.teamId = document.getElementById('globalAuthorTeamSelect')?.value || getPreferredGlobalAuthorTeamId();
+  saveNoteDraft();
+  renderNoteScopeButtons();
+}
+
 function getNotesCacheKey() {
-  return scopedStorageKey(NOTES_CACHE_PREFIX);
+  const context = getNotesContext();
+  if (!getUserId()) return '';
+  const scopeId = context.scope === 'team' ? context.teamId : context.scope;
+  return `${NOTES_CACHE_PREFIX}${getUserId()}:${scopeId}`;
 }
 
 function hydrateNotesCache() {
@@ -2383,19 +2941,43 @@ function cacheNotes() {
 }
 
 function saveNoteDraft() {
-  setDraft('note', {
+  const key = getNotesDraftKey();
+  if (!key) return;
+  localStorage.setItem(key, JSON.stringify({
+    scope: notesState.scope,
+    teamId: notesState.teamId,
     title: document.getElementById('noteTitleInput')?.value || '',
     body: document.getElementById('noteBodyInput')?.value || '',
-  });
+  }));
 }
 
 function hydrateNoteDraft() {
-  const draft = getDraft('note');
+  let draft = null;
+  try { draft = JSON.parse(localStorage.getItem(getNotesDraftKey()) || 'null'); } catch (error) { draft = null; }
   if (!draft) return;
   const title = document.getElementById('noteTitleInput');
   const body = document.getElementById('noteBodyInput');
   if (title && !title.value) title.value = draft.title || '';
   if (body && !body.value) body.value = draft.body || '';
+}
+
+function getNotesDraftKey() {
+  const context = getNotesContext();
+  if (!getUserId()) return '';
+  const scopeId = context.scope === 'team' ? context.teamId : `${context.scope}:${context.teamId || 'default'}`;
+  return `${DRAFT_PREFIX}${getUserId()}:notes:${scopeId}`;
+}
+
+function clearNoteDraft() {
+  const key = getNotesDraftKey();
+  if (key) localStorage.removeItem(key);
+}
+
+function clearNoteComposerFields() {
+  const title = document.getElementById('noteTitleInput');
+  const body = document.getElementById('noteBodyInput');
+  if (title) title.value = '';
+  if (body) body.value = '';
 }
 
 function renderNotes() {
@@ -2415,10 +2997,12 @@ function renderNotes() {
   const cards = notesState.items.map((note) => {
     const expanded = notesState.expandedNoteIds.has(note.noteId);
     const count = Number(note.commentCount ?? note.comments?.length ?? 0);
+    const visibilityLabel = note.visibility === 'global' ? 'グローバル' : note.visibility === 'private' ? '自分だけ' : 'チーム内';
     return `
     <article class="note-card">
       <div class="note-title">${esc(note.title)}</div>
-      <div class="note-meta">まとめた人: ${esc(note.authorName || '未設定')} / ${esc(fmtDateTime(note.createdAt))}</div>
+      <div class="note-meta">まとめた人: ${esc(note.authorName || '未設定')}・${esc(note.authorTeamName || '個人')} / ${esc(fmtDateTime(note.createdAt))}<span class="visibility-badge ${escapeAttr(note.visibility || 'team')}">${visibilityLabel}</span></div>
+      ${note.canReport ? `<button class="report-btn" id="report_note_${escapeAttr(note.noteId)}" type="button" onclick="reportContent('note','${escapeAttr(note.noteId)}')" ${notesState.reportingContentIds.has(note.noteId) ? 'disabled' : ''}>${notesState.reportingContentIds.has(note.noteId) ? '通報中...' : 'この投稿を通報'}</button>` : ''}
       <div class="note-body">${esc(note.body)}</div>
       <div class="note-comments">
         ${note.pending ? '<div class="note-meta">送信待ちです。通信復帰後にコメントできます。</div>' : `<button class="note-toggle-btn" type="button" onclick="toggleNoteComments('${escapeAttr(note.noteId)}')" ${note.commentsLoading ? 'disabled' : ''}>${note.commentsLoading ? 'コメントを読み込み中...' : `${expanded ? 'コメントを閉じる' : 'コメントを表示'} (${count})`}</button>`}
@@ -2446,7 +3030,7 @@ function renderNoteComments(comments) {
   return comments.map((comment) => `
     <div class="note-comment">
       <div class="note-comment-head">
-        <div class="note-comment-meta">${esc(comment.authorName || '未設定')} / ${esc(fmtDateTime(comment.createdAt))}${comment.isEdited ? '<span class="note-comment-edited">編集済み</span>' : ''}</div>
+        <div class="note-comment-meta">${esc(comment.authorName || '未設定')}・${esc(comment.authorTeamName || '個人')} / ${esc(fmtDateTime(comment.createdAt))}${comment.isEdited ? '<span class="note-comment-edited">編集済み</span>' : ''}</div>
         ${renderNoteCommentActions(comment)}
       </div>
       ${notesState.editingCommentId === comment.commentId ? renderNoteCommentEditor(comment) : `<div class="note-comment-body">${esc(comment.body)}</div>`}
@@ -2455,7 +3039,7 @@ function renderNoteComments(comments) {
 }
 
 function renderNoteCommentActions(comment) {
-  if (!comment || (!comment.canEdit && !comment.canDelete)) return '';
+  if (!comment || (!comment.canEdit && !comment.canDelete && !comment.canReport)) return '';
   const isUpdating = notesState.updatingCommentIds.has(comment.commentId);
   const isDeleting = notesState.deletingCommentIds.has(comment.commentId);
   const isPending = isUpdating || isDeleting;
@@ -2465,6 +3049,10 @@ function renderNoteCommentActions(comment) {
   }
   if (comment.canDelete) {
     buttons.push(`<button class="note-comment-action danger" id="noteCommentDelete_${escapeAttr(comment.commentId)}" type="button" onclick="deleteNoteComment('${escapeAttr(comment.commentId)}')" ${isPending ? 'disabled' : ''}>${isDeleting ? '削除中...' : '削除'}</button>`);
+  }
+  if (comment.canReport) {
+    const reporting = notesState.reportingContentIds.has(comment.commentId);
+    buttons.push(`<button class="note-comment-action danger" id="report_comment_${escapeAttr(comment.commentId)}" type="button" onclick="reportContent('comment','${escapeAttr(comment.commentId)}')" ${isPending || reporting ? 'disabled' : ''}>${reporting ? '通報中...' : '通報'}</button>`);
   }
   return `<div class="note-comment-actions">${buttons.join('')}</div>`;
 }
@@ -2493,8 +3081,10 @@ async function ensureNotesLoaded(options = {}) {
   if (!background || !notesState.items.length) renderNotes();
 
   try {
-    const json = await supabaseRead('get_keiko_notes_page', {
-      p_team_id: getTeamId(),
+    const context = getNotesContext();
+    const json = await supabaseRead('get_keiko_notes_feed', {
+      p_scope: context.scope,
+      p_team_id: context.scope === 'team' ? context.teamId : null,
       p_cursor_created_at: null,
       p_cursor_id: null,
       p_limit: 20,
@@ -2520,8 +3110,10 @@ async function loadMoreNotes() {
   notesState.loadingMore = true;
   renderNotes();
   try {
-    const json = await supabaseRead('get_keiko_notes_page', {
-      p_team_id: getTeamId(),
+    const context = getNotesContext();
+    const json = await supabaseRead('get_keiko_notes_feed', {
+      p_scope: context.scope,
+      p_team_id: context.scope === 'team' ? context.teamId : null,
       p_cursor_created_at: notesState.nextCursor.createdAt,
       p_cursor_id: notesState.nextCursor.id,
       p_limit: 20,
@@ -2558,8 +3150,7 @@ async function loadNoteComments(noteId, append = false) {
   renderNotes();
   const cursor = append ? note.commentsNextCursor : null;
   try {
-    const json = await supabaseRead('get_keiko_note_comments', {
-      p_team_id: getTeamId(),
+    const json = await supabaseRead('get_keiko_note_comments_v2', {
       p_note_id: noteId,
       p_cursor_created_at: cursor?.createdAt || null,
       p_cursor_id: cursor?.id || null,
@@ -2597,14 +3188,22 @@ async function submitNote() {
   }
 
   try {
-    const payload = { p_team_id: getTeamId(), p_request_id: createRequestId(), p_title: title, p_body: body };
+    const context = getNotesContext();
+    const payload = {
+      p_scope: context.scope,
+      p_team_id: context.teamId || getPersonalTeam()?.teamId || getTeamId(),
+      p_request_id: createRequestId(),
+      p_title: title,
+      p_body: body,
+    };
     let json;
     try {
-      json = await supabaseRead('save_keiko_note', payload);
+      json = await supabaseRead('save_keiko_note_v2', payload);
     } catch (error) {
       if (!isNetworkError(error)) throw error;
-      enqueueOutbox('save_keiko_note', payload, 'note');
-      json = { status: 'ok', note: { noteId: `pending_${payload.p_request_id}`, authorUserId: getUserId(), authorName: getName(), title, body, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), commentCount: 0, comments: [], commentsLoaded: true, pending: true } };
+      enqueueOutbox('save_keiko_note_v2', payload, 'note');
+      const team = getMemberships().find(item => item.teamId === payload.p_team_id);
+      json = { status: 'ok', note: { noteId: `pending_${payload.p_request_id}`, teamId: payload.p_team_id, visibility: payload.p_scope, authorUserId: getUserId(), authorName: getName(), authorTeamName: team?.isPersonal ? '個人' : team?.teamName || '個人', title, body, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), commentCount: 0, comments: [], commentsLoaded: true, pending: true } };
       showToast('通信復帰後に自動で記録します');
     }
 
@@ -2613,7 +3212,7 @@ async function submitNote() {
     notesState.lastFetchedAt = Date.now();
     titleInput.value = '';
     bodyInput.value = '';
-    clearDraft('note');
+    clearNoteDraft();
     cacheNotes();
     renderNotes();
     if (!json.note?.pending) showToast('稽古内容を記録しました');
@@ -2640,18 +3239,22 @@ async function submitNoteComment(noteId) {
   setPendingButton(button, true, '投稿中...', 'アイデアをシェア');
 
   try {
-    const payload = { p_team_id: getTeamId(), p_note_id: noteId, p_request_id: createRequestId(), p_body: body };
+    const note = notesState.items.find(item => item.noteId === noteId);
+    const authorTeamId = note?.visibility === 'team'
+      ? note.teamId
+      : getNotesContext().teamId || getPreferredGlobalAuthorTeamId();
+    const payload = { p_note_id: noteId, p_author_team_id: authorTeamId, p_request_id: createRequestId(), p_body: body };
     let json;
     try {
-      json = await supabaseRead('add_keiko_note_comment', payload);
+      json = await supabaseRead('add_keiko_note_comment_v2', payload);
     } catch (error) {
       if (!isNetworkError(error)) throw error;
-      enqueueOutbox('add_keiko_note_comment', payload, 'comment');
-      json = { status: 'ok', comment: { commentId: `pending_${payload.p_request_id}`, noteId, authorUserId: getUserId(), authorName: getName(), body, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), canEdit: false, canDelete: false, pending: true } };
+      enqueueOutbox('add_keiko_note_comment_v2', payload, 'comment');
+      const team = getMemberships().find(item => item.teamId === authorTeamId);
+      json = { status: 'ok', comment: { commentId: `pending_${payload.p_request_id}`, noteId, teamId: note?.teamId, authorUserId: getUserId(), authorName: getName(), authorTeamName: team?.isPersonal ? '個人' : team?.teamName || '個人', body, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), canEdit: false, canDelete: false, pending: true } };
       showToast('通信復帰後に自動で投稿します');
     }
 
-    const note = notesState.items.find(item => item.noteId === noteId);
     if (note && json.comment && !json.duplicate) {
       note.comments = [...(note.comments || []), json.comment];
       note.commentsLoaded = true;
@@ -2670,6 +3273,35 @@ async function submitNoteComment(noteId) {
   } finally {
     notesState.submittingCommentIds.delete(noteId);
     setPendingButton(document.getElementById(`noteCommentSubmit_${noteId}`), false, '投稿中...', 'アイデアをシェア');
+  }
+}
+
+async function reportContent(contentType, contentId) {
+  if (notesState.reportingContentIds.has(contentId)) return;
+  const reason = prompt('通報理由を入力してください。\n例：個人情報が含まれている、不適切な内容、迷惑行為');
+  if (!reason?.trim()) return;
+  if (reason.trim().length > 1000) {
+    showToast('通報理由は1000文字以内で入力してください');
+    return;
+  }
+  if (!confirm('この内容をKEIKO運営へ通報しますか？')) return;
+
+  notesState.reportingContentIds.add(contentId);
+  renderNotes();
+  try {
+    const result = await authenticatedEdgeRequest('reportContent', {
+      contentType,
+      contentId,
+      reason: reason.trim(),
+    });
+    showToast(result.emailStatus === 'sent' ? '運営へ通報しました' : '通報を受け付けました');
+    if (isOperator()) loadOperatorDashboard(true);
+  } catch (error) {
+    console.error(error);
+    showToast(error?.message || '通報を送信できませんでした');
+  } finally {
+    notesState.reportingContentIds.delete(contentId);
+    renderNotes();
   }
 }
 
@@ -2695,13 +3327,13 @@ async function saveEditedNoteComment(commentId) {
   setPendingButton(button, true, '保存中...', '保存');
 
   try {
-    const payload = { p_team_id: getTeamId(), p_comment_id: commentId, p_body: body };
+    const payload = { p_comment_id: commentId, p_body: body };
     try {
-      const json = await supabaseRead('update_keiko_note_comment', payload);
+      const json = await supabaseRead('update_keiko_note_comment_v2', payload);
       replaceNoteComment(json.comment);
     } catch (error) {
       if (!isNetworkError(error)) throw error;
-      enqueueOutbox('update_keiko_note_comment', payload, 'comment_update');
+      enqueueOutbox('update_keiko_note_comment_v2', payload, 'comment_update');
       const current = findNoteComment(commentId);
       if (current) replaceNoteComment({ ...current, body, updatedAt: new Date().toISOString(), isEdited: true, pending: true });
       showToast('通信復帰後に自動で更新します');
@@ -2731,14 +3363,14 @@ async function deleteNoteComment(commentId) {
   setPendingButton(document.getElementById(`noteCommentDelete_${commentId}`), true, '削除中...', '削除');
 
   try {
-    const payload = { p_team_id: getTeamId(), p_comment_id: commentId };
+    const payload = { p_comment_id: commentId };
     let noteId = '';
     try {
-      const json = await supabaseRead('delete_keiko_note_comment', payload);
+      const json = await supabaseRead('delete_keiko_note_comment_v2', payload);
       noteId = json.noteId || '';
     } catch (error) {
       if (!isNetworkError(error)) throw error;
-      enqueueOutbox('delete_keiko_note_comment', payload, 'comment_delete');
+      enqueueOutbox('delete_keiko_note_comment_v2', payload, 'comment_delete');
       noteId = findNoteComment(commentId)?.noteId || '';
       showToast('通信復帰後に自動で削除します');
     }

@@ -3,6 +3,8 @@ const SERVICE_KEY = requireEnv('SUPABASE_SERVICE_ROLE_KEY');
 const PUBLIC_KEY = Deno.env.get('SUPABASE_ANON_KEY') || requireEnv('KEIKO_PUBLISHABLE_KEY');
 const AUTH_PEPPER = requireEnv('KEIKO_AUTH_PEPPER');
 const REGISTRATION_CODE = requireEnv('KEIKO_REGISTRATION_CODE');
+const REPORT_EMAIL_TO = 'kokongakumeiza@gmail.com';
+const REPORT_EMAIL_SUBJECT = '🚨KEIKO OS からの通報🚨';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,11 +23,15 @@ Deno.serve(async (request) => {
     const action = text(payload.action);
     if (!action) throw userError('invalid_request', '操作が指定されていません。');
 
-    if (action === 'health') return json({ status: 'ok', service: 'keiko-api', version: '2026-09-05-01' });
+    if (action === 'health') return json({ status: 'ok', service: 'keiko-api', version: '2026-09-05-02' });
     if (action === 'getTeams') return json(await getTeams());
     if (action === 'login') return json(await login(payload));
     if (action === 'register') return json(await register(payload));
     if (action === 'manageMembership') return json(await manageMembership(request, payload));
+    if (action === 'getOperatorDashboard') return json(await getOperatorDashboard(request));
+    if (action === 'updateTeamSettings') return json(await updateTeamSettings(request, payload));
+    if (action === 'reportContent') return json(await reportContent(request, payload));
+    if (action === 'moderateReport') return json(await moderateReport(request, payload));
     throw userError('unsupported_action', 'この操作には対応していません。');
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
@@ -40,13 +46,19 @@ Deno.serve(async (request) => {
 
 async function getTeams() {
   const teams = await adminRequest('/rest/v1/teams', {
-    query: { select: 'id,team_name,team_type,category', status: 'eq.active', order: 'team_name.asc' },
+    query: { select: 'id,team_name,team_type,category,global_notes_enabled,global_scope', status: 'eq.active', order: 'team_name.asc' },
   }) as JsonRecord[];
   return {
     status: 'ok',
     teams: teams
       .filter((team) => team.category !== 'personal')
-      .map((team) => ({ teamId: team.id, teamName: team.team_name, teamType: team.team_type || 'general' })),
+      .map((team) => ({
+        teamId: team.id,
+        teamName: team.team_name,
+        teamType: team.team_type || 'general',
+        globalNotesEnabled: Boolean(team.global_notes_enabled),
+        globalScope: team.global_scope || 'disabled',
+      })),
   };
 }
 
@@ -143,6 +155,9 @@ async function register(payload: JsonRecord) {
       ? { user_id: authUserId, school_name: teamName, grade: '', role_label: '', term: '' }
       : { user_id: authUserId, category: teamName, bio: '' };
     await adminRequest(profilePath, { method: 'POST', body: profileBody });
+    await adminRequest('/rest/v1/rpc/keiko_ensure_personal_membership', {
+      method: 'POST', body: { p_user_id: authUserId },
+    });
 
     return buildSessionResponse(await passwordLogin(email, password));
   } catch (error) {
@@ -162,6 +177,8 @@ async function buildSessionResponse(session: JsonRecord) {
     expiresIn: Number(session.expires_in || 3600), expiresAt: Number(session.expires_at || 0),
     userId: context.user_id, name: context.display_name, teamId: context.team_id,
     group: context.team_name, teamType: context.team_type, userType: context.user_type, role: context.team_role,
+    appRole: context.app_role || 'player',
+    globalParticipationEnabled: Boolean(context.global_participation_enabled),
     isPersonal: Boolean(context.is_personal), teams: Array.isArray(context.teams) ? context.teams : [],
   };
 }
@@ -200,9 +217,124 @@ async function manageMembership(request: Request, payload: JsonRecord) {
     teamType: context.team_type,
     userType: context.user_type,
     role: context.team_role,
+    appRole: context.app_role || 'player',
+    globalParticipationEnabled: Boolean(context.global_participation_enabled),
     isPersonal: Boolean(context.is_personal),
     teams: Array.isArray(context.teams) ? context.teams : [],
   };
+}
+
+async function getOperatorDashboard(request: Request) {
+  const userId = await authenticatedUserId(request);
+  const [teams, reports] = await Promise.all([
+    adminRequest('/rest/v1/rpc/get_keiko_operator_teams', {
+      method: 'POST', body: { p_actor_user_id: userId },
+    }) as Promise<JsonRecord>,
+    adminRequest('/rest/v1/rpc/get_keiko_operator_reports', {
+      method: 'POST', body: { p_actor_user_id: userId, p_limit: 20 },
+    }) as Promise<JsonRecord>,
+  ]);
+  return {
+    status: 'ok',
+    teams: Array.isArray(teams.teams) ? teams.teams : [],
+    reports: Array.isArray(reports.reports) ? reports.reports : [],
+  };
+}
+
+async function updateTeamSettings(request: Request, payload: JsonRecord) {
+  const userId = await authenticatedUserId(request);
+  const teamId = requireUuid(payload.teamId, 'チーム');
+  const result = await adminRequest('/rest/v1/rpc/update_keiko_team_global_settings', {
+    method: 'POST',
+    body: { p_actor_user_id: userId, p_team_id: teamId, p_enabled: Boolean(payload.globalNotesEnabled) },
+  }) as JsonRecord;
+  return result;
+}
+
+async function reportContent(request: Request, payload: JsonRecord) {
+  const userId = await authenticatedUserId(request);
+  const contentType = text(payload.contentType);
+  if (!['note', 'comment'].includes(contentType)) throw userError('invalid_request', '通報対象が正しくありません。');
+  const contentId = requireUuid(payload.contentId, '投稿');
+  const reason = requiredText(payload.reason, '通報理由', 1000);
+  const report = await adminRequest('/rest/v1/rpc/create_keiko_content_report', {
+    method: 'POST',
+    body: { p_reporter_user_id: userId, p_content_type: contentType, p_content_id: contentId, p_reason: reason },
+  }) as JsonRecord;
+
+  const email = await sendReportEmail(report, userId);
+  if (email.status !== 'pending') {
+    await adminRequest('/rest/v1/rpc/mark_keiko_report_email', {
+      method: 'POST',
+      body: { p_report_id: report.reportId, p_status: email.status, p_error: email.error || '' },
+    });
+  }
+  return { status: 'ok', reportId: report.reportId, emailStatus: email.status };
+}
+
+async function moderateReport(request: Request, payload: JsonRecord) {
+  const userId = await authenticatedUserId(request);
+  const operation = text(payload.operation);
+  if (!['resolve', 'dismiss', 'hide_content'].includes(operation)) {
+    throw userError('invalid_request', '通報への対応方法が正しくありません。');
+  }
+  return await adminRequest('/rest/v1/rpc/moderate_keiko_report', {
+    method: 'POST',
+    body: {
+      p_actor_user_id: userId,
+      p_report_id: requireUuid(payload.reportId, '通報'),
+      p_action: operation,
+    },
+  }) as JsonRecord;
+}
+
+async function sendReportEmail(report: JsonRecord, reporterUserId: string) {
+  const apiKey = Deno.env.get('RESEND_API_KEY') || '';
+  const from = Deno.env.get('KEIKO_REPORT_FROM_EMAIL') || '';
+  if (!apiKey || !from) {
+    console.warn(`Report ${String(report.reportId)} stored; email provider is not configured.`);
+    return { status: 'pending', error: '' };
+  }
+
+  const body = [
+    'KEIKO OSで投稿の通報を受け付けました。',
+    '',
+    `通報ID: ${String(report.reportId || '')}`,
+    `対象: ${String(report.contentType || '')}`,
+    `投稿者: ${String(report.authorName || '未設定')}`,
+    `所属: ${String(report.teamName || '個人')}`,
+    `通報者ID: ${reporterUserId}`,
+    `通報日時: ${String(report.createdAt || new Date().toISOString())}`,
+    '',
+    '通報理由:',
+    String(report.reason || ''),
+    '',
+    '投稿内容:',
+    String(report.content || ''),
+  ].join('\n');
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from, to: [REPORT_EMAIL_TO], subject: REPORT_EMAIL_SUBJECT, text: body }),
+    });
+    if (!response.ok) {
+      const remote = await response.text();
+      console.error(`Report email failed (${response.status}): ${remote.slice(0, 300)}`);
+      return { status: 'failed', error: `Resend ${response.status}` };
+    }
+    return { status: 'sent', error: '' };
+  } catch (error) {
+    console.error(error);
+    return { status: 'failed', error: error instanceof Error ? error.message : 'email_failed' };
+  }
+}
+
+async function authenticatedUserId(request: Request) {
+  const accessToken = readBearerToken(request);
+  const authUser = await userRequest('/auth/v1/user', accessToken) as JsonRecord;
+  return requireUuid(authUser.id, '利用者');
 }
 
 function readBearerToken(request: Request) {
