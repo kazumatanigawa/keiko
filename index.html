@@ -15,7 +15,7 @@
   --radius:14px;--radius-sm:8px;
 }
 body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;max-width:430px;margin:0 auto}
-.screen{display:none;min-height:100vh;flex-direction:column}
+.screen{--nav-active:var(--red);--nav-active-soft:var(--red-pale);display:none;min-height:100vh;flex-direction:column}
 .screen.active{display:flex}
 .header{background:var(--red);color:#fff;padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .header-title{font-size:16px;font-weight:700;letter-spacing:0.05em}
@@ -24,10 +24,12 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;backgroun
 .header-sub a:hover,.auth-sub a:hover{border-bottom-color:rgba(255,255,255,0.9)}
 .header-right{display:flex;align-items:center;gap:8px}
 .logout-btn{background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:11px;padding:4px 10px;border-radius:20px;cursor:pointer;font-family:inherit}
-.bottom-nav{background:#fff;border-top:1px solid var(--border);display:flex;padding:8px 0 12px;position:sticky;bottom:0;z-index:100}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;cursor:pointer;border:none;background:none;color:var(--ink3);font-size:10px;font-family:inherit}
-.nav-item.active{color:var(--red)}
-.nav-icon{font-size:22px;line-height:1}
+.bottom-nav{background:rgba(255,255,255,.96);border-top:1px solid var(--border);display:flex;gap:4px;padding:7px 8px max(10px,env(safe-area-inset-bottom));position:sticky;bottom:0;z-index:100;box-shadow:0 -8px 22px rgba(23,20,15,.06);backdrop-filter:blur(10px)}
+.nav-item{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px 6px;cursor:pointer;border:none;border-radius:11px;background:transparent;color:var(--ink3);font-size:10px;font-family:inherit;position:relative;transition:color .18s ease,background .18s ease,transform .18s ease}
+.nav-item.active{background:var(--nav-active-soft);color:var(--nav-active);font-weight:900;transform:translateY(-1px)}
+.nav-item.active::before{content:'';position:absolute;top:-7px;left:24%;right:24%;height:3px;border-radius:0 0 4px 4px;background:var(--nav-active)}
+.nav-icon{font-size:22px;line-height:1;transition:transform .18s ease}
+.nav-item.active .nav-icon{transform:scale(1.08)}
 .content{flex:1;overflow-y:auto;padding:16px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
 .card-title{font-size:13px;color:var(--ink3);font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:6px}
@@ -103,17 +105,25 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;backgroun
 .membership-editor.show{display:block}
 .membership-editor-title{font-size:12px;font-weight:800;color:var(--ink);margin-bottom:8px}
 .membership-editor input{margin-top:8px}
+.membership-code-label{display:block;margin-top:12px;font-size:11px;font-weight:900;color:var(--ink2)}
+.membership-code-help{font-size:10px;color:var(--ink3);line-height:1.6;margin-top:6px}
+.membership-code-notice{margin-top:12px;padding:10px 11px;background:var(--red-pale);border-left:3px solid var(--red);border-radius:0 9px 9px 0;color:var(--red);font-size:10px;font-weight:700;line-height:1.65}
 .membership-editor-actions{display:flex;gap:8px;margin-top:10px}
 .membership-editor-actions button{flex:1;border:0;border-radius:9px;padding:10px 8px;font-family:inherit;font-size:11px;font-weight:800;cursor:pointer}
 .membership-editor-submit{background:var(--red);color:#fff}
 .membership-editor-cancel{background:#eee9df;color:var(--ink2)}
 .membership-status{min-height:18px;margin-top:8px;font-size:11px;color:var(--red);line-height:1.6}
-.context-panel{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;box-shadow:0 8px 18px rgba(23,20,15,.04)}
-.context-label{font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--ink3);margin-bottom:8px}
-.context-buttons,.note-scope-buttons{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.context-panel{--context-color:var(--red);--context-soft:var(--red-pale);background:linear-gradient(135deg,var(--context-soft),#fff 82%);border:0;border-bottom:1px solid color-mix(in srgb,var(--context-color) 24%,#fff);padding:12px 16px 13px;box-shadow:0 10px 24px rgba(23,20,15,.09);position:sticky;top:57px;z-index:90;transition:background .25s ease,border-color .25s ease}
+.context-heading,.note-scope-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
+.context-label{font-size:10px;font-weight:900;letter-spacing:.14em;color:var(--ink3)}
+.context-current{display:inline-flex;align-items:center;gap:6px;color:var(--context-color);font-size:11px;font-weight:900}
+.context-current::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--context-color);box-shadow:0 0 0 4px color-mix(in srgb,var(--context-color) 14%,transparent)}
+.context-buttons,.note-scope-buttons{display:flex;gap:8px;overflow-x:auto;padding:2px 0 3px;scrollbar-width:none}
 .context-buttons::-webkit-scrollbar,.note-scope-buttons::-webkit-scrollbar{display:none}
-.context-btn,.note-scope-btn{flex:none;border:1px solid #ddd2bd;background:#faf7f1;color:var(--ink2);border-radius:999px;padding:8px 12px;font-family:inherit;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
-.context-btn.active,.note-scope-btn.active{background:var(--red);border-color:var(--red);color:#fff}
+.context-btn,.note-scope-btn{--tab-color:var(--red);--tab-soft:var(--red-pale);flex:none;border:1px solid color-mix(in srgb,var(--tab-color) 38%,#fff);background:var(--tab-soft);color:var(--tab-color);border-radius:999px;padding:8px 12px;font-family:inherit;font-size:11px;font-weight:900;cursor:pointer;white-space:nowrap;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
+.context-btn.active,.note-scope-btn.active{background:var(--tab-color);border-color:var(--tab-color);color:#fff;box-shadow:0 6px 14px color-mix(in srgb,var(--tab-color) 25%,transparent);transform:translateY(-1px)}
+.context-btn.active::before,.note-scope-btn.active::before{content:'✓';margin-right:5px}
+.context-helper{font-size:9px;color:var(--ink3);line-height:1.5;margin-top:5px}
 .membership-chip{cursor:pointer;font-family:inherit}
 .global-card{display:none;background:linear-gradient(135deg,#162a28 0%,#234d45 100%);color:#fff;border-radius:var(--radius);padding:17px;margin-bottom:12px;position:relative;overflow:hidden}
 .global-card.show{display:block}
@@ -128,8 +138,16 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;backgroun
 .global-home-title{font-size:24px;font-weight:900;margin-top:6px}
 .global-home-copy{font-size:12px;line-height:1.8;color:rgba(255,255,255,.75);margin-top:8px}
 .global-home-btn{margin-top:16px;border:0;border-radius:999px;background:#fff;color:#173b36;padding:11px 18px;font-family:inherit;font-size:12px;font-weight:900;cursor:pointer}
-.note-scope-panel{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:13px;margin-bottom:12px}
-.note-scope-hint{font-size:10px;color:var(--ink3);line-height:1.6;margin-top:7px}
+.notes-content{--note-accent:var(--red);--note-soft:var(--red-pale);background:linear-gradient(180deg,var(--note-soft) 0,#fafaf8 300px);transition:background .25s ease}
+.note-scope-panel{--note-accent:var(--red);--note-soft:var(--red-pale);background:linear-gradient(135deg,var(--note-soft),#fff 82%);border:0;border-bottom:1px solid color-mix(in srgb,var(--note-accent) 24%,#fff);padding:12px 16px 14px;box-shadow:0 10px 24px rgba(23,20,15,.09);position:sticky;top:57px;z-index:90;transition:background .25s ease,border-color .25s ease}
+.note-scope-current{font-size:11px;font-weight:900;color:var(--note-accent)}
+.note-scope-hint{font-size:11px;font-weight:700;color:var(--ink2);line-height:1.65;margin-top:9px;padding:10px 11px;background:rgba(255,255,255,.82);border-left:3px solid var(--note-accent);border-radius:0 9px 9px 0}
+.global-author-picker{margin:10px 0 0;padding:11px;background:rgba(255,255,255,.84);border-color:color-mix(in srgb,var(--note-accent) 42%,#fff);box-shadow:none}
+.global-author-picker .form-team-picker-label{color:var(--note-accent)}
+.note-destination-banner{display:flex;align-items:flex-start;gap:10px;padding:12px;margin-bottom:14px;background:var(--note-soft);border:1px solid color-mix(in srgb,var(--note-accent) 28%,#fff);border-radius:11px}
+.note-destination-icon{flex:none;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--note-accent);color:#fff;font-size:15px}
+.note-destination-title{font-size:12px;font-weight:900;color:var(--note-accent);line-height:1.45}
+.note-destination-copy{font-size:10px;color:var(--ink2);line-height:1.6;margin-top:2px}
 .visibility-badge{display:inline-flex;align-items:center;padding:3px 7px;border-radius:999px;background:#f1eee7;color:var(--ink3);font-size:9px;font-weight:800;margin-left:5px}
 .visibility-badge.global{background:#e4f2ef;color:#176659}
 .visibility-badge.private{background:#eef1f5;color:#4c596c}
@@ -210,10 +228,10 @@ textarea:focus,input:focus{border-color:var(--red)}
 .note-comment-edit-box textarea{min-height:88px}
 .note-comment-edited{display:inline-block;margin-left:4px;color:var(--ink3)}
 .note-empty{font-size:13px;color:var(--ink3);text-align:center;padding:32px 0}
-.note-compose{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.note-compose{--note-accent:var(--red);--note-soft:var(--red-pale);background:#fff;border:1px solid color-mix(in srgb,var(--note-accent) 22%,var(--border));border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:0 10px 24px rgba(23,20,15,.04)}
 .note-compose-title{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:12px}
 .note-compose-actions{display:flex;justify-content:flex-end;margin-top:12px}
-.note-submit-btn{border:none;background:var(--red);color:#fff;border-radius:999px;padding:10px 18px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer}
+.note-submit-btn{border:none;background:var(--note-accent);color:#fff;border-radius:999px;padding:11px 18px;font-size:13px;font-weight:900;font-family:inherit;cursor:pointer;box-shadow:0 7px 16px color-mix(in srgb,var(--note-accent) 24%,transparent)}
 .note-submit-btn:disabled{opacity:.5;cursor:not-allowed}
 .note-comment-box{margin-top:10px}
 .note-comment-box textarea{min-height:88px}
@@ -390,11 +408,15 @@ textarea:focus,input:focus{border-color:var(--red)}
       <button class="logout-btn" onclick="doLogout()">ログアウト</button>
     </div>
   </div>
-  <div class="content">
-    <div class="context-panel" id="viewContextPanel">
-      <div class="context-label">現在の表示先</div>
-      <div class="context-buttons" id="viewContextButtons"></div>
+  <div class="context-panel" id="viewContextPanel">
+    <div class="context-heading">
+      <div class="context-label">今いる場所を切り替える</div>
+      <div class="context-current" id="viewContextCurrent">表示先を確認中</div>
     </div>
+    <div class="context-buttons" id="viewContextButtons"></div>
+    <div class="context-helper">稽古ログとホームの内容は、選んだ場所のものに切り替わります。</div>
+  </div>
+  <div class="content">
     <div class="goodnews-card" id="goodNewsCard">
       <div class="goodnews-header">
       <div class="goodnews-title">みんなの Good&amp;New</div>
@@ -440,6 +462,7 @@ textarea:focus,input:focus{border-color:var(--red)}
         <div class="help-step"><span class="help-step-number">1</span><div class="help-step-copy">稽古前に「今回意識すること」とタイムキーパーを確認します。</div></div>
         <div class="help-step"><span class="help-step-number">2</span><div class="help-step-copy">稽古後に、コンディション・一番の学び・次回やることを記録します。</div></div>
         <div class="help-step"><span class="help-step-number">3</span><div class="help-step-copy">過去ログやチームノートを見返し、次の稽古へつなげます。</div></div>
+        <div class="help-step"><span class="help-step-number">4</span><div class="help-step-copy">チームの掛け持ち・移籍に必要な登録コードは、KEIKO運営または参加先チームの責任者から受け取ります。アプリ内には表示されません。</div></div>
       </div>
     </div>
     <div class="settings-card" id="personalSettings">
@@ -454,13 +477,16 @@ textarea:focus,input:focus{border-color:var(--red)}
       <div class="membership-editor" id="membershipEditor">
         <div class="membership-editor-title" id="membershipEditorTitle">参加するチームを選択</div>
         <select id="membershipTeamSelect"></select>
-        <input type="password" id="membershipRegistrationCode" autocomplete="off" maxlength="64" placeholder="登録コード">
+        <label class="membership-code-label" for="membershipRegistrationCode">登録コード</label>
+        <input type="password" id="membershipRegistrationCode" autocomplete="off" maxlength="64" placeholder="運営から受け取った登録コード">
+        <div class="membership-code-help">KEIKO運営または参加先チームの責任者から共有されたコードを入力してください。</div>
         <div class="membership-editor-actions">
           <button class="membership-editor-cancel" type="button" onclick="closeMembershipEditor()">キャンセル</button>
           <button class="membership-editor-submit" id="membershipSubmitBtn" type="button" onclick="submitMembershipChange()">変更する</button>
         </div>
       </div>
       <div class="membership-status" id="membershipStatus"></div>
+      <div class="membership-code-notice">登録コードはアプリ内には表示されません。掛け持ち・移籍の前に、KEIKO運営または参加先チームの責任者へ確認してください。</div>
     </div>
     <div class="operator-card" id="operatorSettings">
       <div class="operator-badge">KEIKO 運営</div>
@@ -472,7 +498,7 @@ textarea:focus,input:focus{border-color:var(--red)}
     </div>
   </div>
   <div class="bottom-nav">
-    <button class="nav-item active" onclick="goTo('home')"><span class="nav-icon">🏠</span>ホーム</button>
+    <button class="nav-item active" aria-current="page" onclick="goTo('home')"><span class="nav-icon">🏠</span>ホーム</button>
     <button class="nav-item" onclick="goTo('form')"><span class="nav-icon">✏️</span>記録</button>
     <button class="nav-item" onclick="goTo('log')"><span class="nav-icon">📖</span>ログ</button>
     <button class="nav-item" onclick="goTo('notes')"><span class="nav-icon">🗒️</span>ノート</button>
@@ -548,7 +574,7 @@ textarea:focus,input:focus{border-color:var(--red)}
   </div>
   <div class="bottom-nav">
     <button class="nav-item" onclick="goTo('home')"><span class="nav-icon">🏠</span>ホーム</button>
-    <button class="nav-item active" onclick="goTo('form')"><span class="nav-icon">✏️</span>記録</button>
+    <button class="nav-item active" aria-current="page" onclick="goTo('form')"><span class="nav-icon">✏️</span>記録</button>
     <button class="nav-item" onclick="goTo('log')"><span class="nav-icon">📖</span>ログ</button>
     <button class="nav-item" onclick="goTo('notes')"><span class="nav-icon">🗒️</span>ノート</button>
     <button class="nav-item" onclick="goTo('library')"><span class="nav-icon">🎁</span>ライブラリ</button>
@@ -563,7 +589,7 @@ textarea:focus,input:focus{border-color:var(--red)}
   <div class="bottom-nav">
     <button class="nav-item" onclick="goTo('home')"><span class="nav-icon">🏠</span>ホーム</button>
     <button class="nav-item" onclick="goTo('form')"><span class="nav-icon">✏️</span>記録</button>
-    <button class="nav-item active" onclick="goTo('log')"><span class="nav-icon">📖</span>ログ</button>
+    <button class="nav-item active" aria-current="page" onclick="goTo('log')"><span class="nav-icon">📖</span>ログ</button>
     <button class="nav-item" onclick="goTo('notes')"><span class="nav-icon">🗒️</span>ノート</button>
     <button class="nav-item" onclick="goTo('library')"><span class="nav-icon">🎁</span>ライブラリ</button>
   </div>
@@ -573,17 +599,22 @@ textarea:focus,input:focus{border-color:var(--red)}
 
 <div class="screen" id="screen-notes">
   <div class="header"><div><div class="header-title">🗒️ 稽古ノート</div><div class="header-sub" id="notesGroupName">公開範囲を選んで稽古内容を積み上げます</div></div></div>
-  <div class="content">
-    <div class="note-scope-panel">
-      <div class="context-label">表示・投稿先</div>
-      <div class="note-scope-buttons" id="noteScopeButtons"></div>
-      <div class="note-scope-hint" id="noteScopeHint">自分だけ、チーム内、グローバルから選べます。</div>
-      <div class="form-team-picker" id="globalAuthorPicker" style="margin:10px 0 0;padding:10px">
-        <div class="form-team-picker-label">投稿者の所属表示</div>
-        <select id="globalAuthorTeamSelect" onchange="handleGlobalAuthorTeamChange()"></select>
-      </div>
+  <div class="note-scope-panel" id="noteScopePanel">
+    <div class="note-scope-heading">
+      <div class="context-label">読む・書くノートを選ぶ</div>
+      <div class="note-scope-current" id="noteScopeCurrent">公開先を確認中</div>
     </div>
+    <div class="note-scope-buttons" id="noteScopeButtons"></div>
+    <div class="note-scope-hint" id="noteScopeHint">自分だけ、チーム内、グローバルから選べます。</div>
+    <div class="form-team-picker global-author-picker" id="globalAuthorPicker">
+      <div class="form-team-picker-label">公開時に表示する所属</div>
+      <select id="globalAuthorTeamSelect" onchange="handleGlobalAuthorTeamChange()"></select>
+      <div class="form-team-picker-hint">投稿者名と、ここで選んだ所属名が全参加者に表示されます。</div>
+    </div>
+  </div>
+  <div class="content notes-content" id="notesContentArea">
     <div class="note-compose">
+      <div class="note-destination-banner" id="noteDestinationBanner"></div>
       <div class="note-compose-title" id="noteComposeTitle">指導内容・練習内容をまとめる</div>
       <div class="form-section" style="margin-bottom:12px">
         <label class="form-label">タイトル</label>
@@ -603,7 +634,7 @@ textarea:focus,input:focus{border-color:var(--red)}
     <button class="nav-item" onclick="goTo('home')"><span class="nav-icon">🏠</span>ホーム</button>
     <button class="nav-item" onclick="goTo('form')"><span class="nav-icon">✏️</span>記録</button>
     <button class="nav-item" onclick="goTo('log')"><span class="nav-icon">📖</span>ログ</button>
-    <button class="nav-item active" onclick="goTo('notes')"><span class="nav-icon">🗒️</span>ノート</button>
+    <button class="nav-item active" aria-current="page" onclick="goTo('notes')"><span class="nav-icon">🗒️</span>ノート</button>
     <button class="nav-item" onclick="goTo('library')"><span class="nav-icon">🎁</span>ライブラリ</button>
   </div>
 </div>
@@ -629,7 +660,7 @@ textarea:focus,input:focus{border-color:var(--red)}
     <button class="nav-item" onclick="goTo('form')"><span class="nav-icon">✏️</span>記録</button>
     <button class="nav-item" onclick="goTo('log')"><span class="nav-icon">📖</span>ログ</button>
     <button class="nav-item" onclick="goTo('notes')"><span class="nav-icon">🗒️</span>ノート</button>
-    <button class="nav-item active" onclick="goTo('library')"><span class="nav-icon">🎁</span>ライブラリ</button>
+    <button class="nav-item active" aria-current="page" onclick="goTo('library')"><span class="nav-icon">🎁</span>ライブラリ</button>
   </div>
 </div>
 
@@ -644,7 +675,7 @@ const GOOD_NEWS_ROTATE_MS = 3000;
 const GOOD_NEWS_REFRESH_MS = 60000;
 const GOOD_NEWS_RECENT_LIMIT = 4;
 const NOTES_REFRESH_MS = 45000;
-const APP_VERSION = '2026-09-05-02';
+const APP_VERSION = '2026-09-08-01';
 const APP_VERSION_KEY = 'taiko_app_version';
 const VIEW_KIND_KEY = 'taiko_view_kind';
 const APP_ROLE_KEY = 'taiko_app_role';
@@ -660,6 +691,15 @@ const TOKEN_EXPIRES_AT_KEY = 'taiko_token_expires_at';
 const NOTES_CACHE_PREFIX = 'taiko_notes_cache_v1:';
 const DRAFT_PREFIX = 'taiko_draft_v1:';
 const OUTBOX_PREFIX = 'taiko_outbox_v1:';
+const CONTEXT_THEMES = Object.freeze([
+  { color: '#8B1A1A', soft: '#FDF0F0' },
+  { color: '#8A6414', soft: '#FFF7E3' },
+  { color: '#2E6079', soft: '#EDF6FA' },
+  { color: '#3D6C4E', soft: '#EDF7F0' },
+  { color: '#A65325', soft: '#FFF1E9' },
+]);
+const PERSONAL_CONTEXT_THEME = Object.freeze({ color: '#4C596C', soft: '#EEF1F5' });
+const GLOBAL_CONTEXT_THEME = Object.freeze({ color: '#176659', soft: '#E8F5F2', header: '#173B36' });
 
 const COND_EMOJI = ['','☠️','💦','😃','💪','🔥'];
 let selCond = 0;
@@ -1416,17 +1456,52 @@ function canTeamPublishGlobal(team) {
   return !!team && (team.isPersonal || (team.teamType !== 'student' && team.globalNotesEnabled && team.globalScope === 'global'));
 }
 
+function getContextTheme(team) {
+  if (!team) return GLOBAL_CONTEXT_THEME;
+  if (team.isPersonal) return PERSONAL_CONTEXT_THEME;
+  const index = Math.max(0, getRegularTeams().findIndex(item => item.teamId === team.teamId));
+  return CONTEXT_THEMES[index % CONTEXT_THEMES.length];
+}
+
+function contextThemeStyle(theme) {
+  return `--tab-color:${theme.color};--tab-soft:${theme.soft}`;
+}
+
+function applyScreenNavTheme(screen, theme) {
+  if (!screen || !theme) return;
+  screen.style.setProperty('--nav-active', theme.color);
+  screen.style.setProperty('--nav-active-soft', theme.soft);
+}
+
 function renderViewContextSwitcher() {
   const container = document.getElementById('viewContextButtons');
   if (!container) return;
-  const teamButtons = getMemberships().map(team => `
-    <button class="context-btn ${!isGlobalView() && team.teamId === getTeamId() ? 'active' : ''}" type="button" onclick="switchViewContext('team','${escapeAttr(team.teamId)}')">
+  const teamButtons = getMemberships().map(team => {
+    const active = !isGlobalView() && team.teamId === getTeamId();
+    const theme = getContextTheme(team);
+    return `
+    <button class="context-btn ${active ? 'active' : ''}" style="${contextThemeStyle(theme)}" type="button" aria-pressed="${active}" onclick="switchViewContext('team','${escapeAttr(team.teamId)}')">
       ${team.isPersonal ? '自分' : esc(team.teamName)}
-    </button>`);
+    </button>`;
+  });
   if (isGlobalParticipant()) {
-    teamButtons.push(`<button class="context-btn ${isGlobalView() ? 'active' : ''}" type="button" onclick="switchViewContext('global')">グローバル</button>`);
+    const active = isGlobalView();
+    teamButtons.push(`<button class="context-btn ${active ? 'active' : ''}" style="${contextThemeStyle(GLOBAL_CONTEXT_THEME)}" type="button" aria-pressed="${active}" onclick="switchViewContext('global')">グローバル</button>`);
   }
   container.innerHTML = teamButtons.join('');
+
+  const currentTeam = isGlobalView() ? null : getCurrentMembership();
+  const theme = getContextTheme(currentTeam);
+  const panel = document.getElementById('viewContextPanel');
+  if (panel) {
+    panel.style.setProperty('--context-color', theme.color);
+    panel.style.setProperty('--context-soft', theme.soft);
+  }
+  applyScreenNavTheme(document.getElementById('screen-home'), theme);
+  const current = document.getElementById('viewContextCurrent');
+  if (current) current.textContent = isGlobalView()
+    ? 'グローバルを表示中'
+    : currentTeam?.isPersonal ? '自分を表示中' : `${currentTeam?.teamName || '表示先'}を表示中`;
 }
 
 async function switchViewContext(kind, teamId = '') {
@@ -1840,7 +1915,9 @@ function goTo(s) {
     s = 'home';
   }
   document.querySelectorAll('.screen').forEach(x => x.classList.remove('active'));
-  document.getElementById('screen-' + s).classList.add('active');
+  const activeScreen = document.getElementById('screen-' + s);
+  activeScreen.classList.add('active');
+  applyScreenNavTheme(activeScreen, isGlobalView() ? GLOBAL_CONTEXT_THEME : getContextTheme(getCurrentMembership()));
   if (s === 'home')    updateHome();
   if (s === 'form')    updateForm();
   if (s === 'log')     ensureLogsLoaded();
@@ -2801,15 +2878,6 @@ function renderAchievementLog(log) {
 function updateNotes() {
   initializeNoteScope();
   renderNoteScopeButtons();
-  const context = getNotesContext();
-  const sub = document.getElementById('notesGroupName');
-  if (sub) {
-    sub.textContent = context.scope === 'private'
-      ? '自分だけのノートです'
-      : context.scope === 'global'
-        ? '参加者に公開されたノートです'
-        : `${context.team?.teamName || 'チーム'} 内のノートです`;
-  }
   hydrateNoteDraft();
   renderNotes();
   ensureNotesLoaded({ background: true });
@@ -2846,38 +2914,119 @@ function getPreferredGlobalAuthorTeamId() {
   return eligible?.teamId || getPersonalTeam()?.teamId || '';
 }
 
+function getNotePresentation(context) {
+  if (context.scope === 'private') {
+    return {
+      theme: PERSONAL_CONTEXT_THEME,
+      icon: '🔒',
+      currentLabel: '自分だけ',
+      headerSub: '自分だけが見られるノート',
+      hint: 'このタブで表示・保存する内容は自分だけが見られます。現在の表示先がグローバルでも、外部には公開されません。',
+      bannerTitle: '自分だけに保存されます',
+      bannerCopy: 'チームやグローバルには表示されない、自分専用の稽古メモです。',
+      composeTitle: '自分用の稽古メモを残す',
+      submitLabel: '自分だけに保存',
+      pendingLabel: '保存中...',
+      successMessage: '自分だけのノートに保存しました',
+    };
+  }
+
+  if (context.scope === 'global') {
+    const authorTeamName = context.team?.isPersonal ? '個人' : context.team?.teamName || '個人';
+    return {
+      theme: GLOBAL_CONTEXT_THEME,
+      icon: '🌏',
+      currentLabel: 'グローバル',
+      headerSub: '参加者全員に公開されるノート',
+      hint: 'このタブでは全参加者の公開ノートを表示します。ここから書いた内容も、全参加者へ公開されます。',
+      bannerTitle: 'グローバルに公開されます',
+      bannerCopy: `${getName() || 'あなた'}・${authorTeamName}として、グローバル参加者全員に表示されます。`,
+      composeTitle: '稽古の知恵をグローバルに共有する',
+      submitLabel: 'グローバルに公開',
+      pendingLabel: '公開中...',
+      successMessage: 'グローバルノートに公開しました',
+      confirmation: `この内容を「${authorTeamName}」としてグローバルに公開します。よろしいですか？`,
+    };
+  }
+
+  const teamName = context.team?.teamName || '選択チーム';
+  return {
+    theme: getContextTheme(context.team),
+    icon: '👥',
+    currentLabel: teamName,
+    headerSub: `${teamName}のメンバー限定ノート`,
+    hint: `このタブで表示・保存する内容は、${teamName}のメンバーだけが見られます。グローバルには公開されません。`,
+    bannerTitle: `${teamName}に共有されます`,
+    bannerCopy: `このチームに所属するメンバーだけが読める稽古ノートです。`,
+    composeTitle: `${teamName}の指導内容・練習内容をまとめる`,
+    submitLabel: `${teamName}に共有`,
+    pendingLabel: '共有中...',
+    successMessage: `${teamName}のノートに共有しました`,
+  };
+}
+
+function renderNoteScopePresentation(context) {
+  const presentation = getNotePresentation(context);
+  const { theme } = presentation;
+  const screen = document.getElementById('screen-notes');
+  const header = screen?.querySelector('.header');
+  const panel = document.getElementById('noteScopePanel');
+  const content = document.getElementById('notesContentArea');
+  const compose = screen?.querySelector('.note-compose');
+  [panel, content, compose].forEach(element => {
+    element?.style.setProperty('--note-accent', theme.color);
+    element?.style.setProperty('--note-soft', theme.soft);
+  });
+  applyScreenNavTheme(screen, theme);
+  if (header) header.style.background = theme.header || theme.color;
+
+  const current = document.getElementById('noteScopeCurrent');
+  if (current) current.textContent = `${presentation.icon} ${presentation.currentLabel}`;
+  const sub = document.getElementById('notesGroupName');
+  if (sub) sub.textContent = presentation.headerSub;
+  const hint = document.getElementById('noteScopeHint');
+  if (hint) hint.textContent = presentation.hint;
+  const composeTitle = document.getElementById('noteComposeTitle');
+  if (composeTitle) composeTitle.textContent = presentation.composeTitle;
+  const banner = document.getElementById('noteDestinationBanner');
+  if (banner) banner.innerHTML = `
+    <div class="note-destination-icon">${presentation.icon}</div>
+    <div>
+      <div class="note-destination-title">${esc(presentation.bannerTitle)}</div>
+      <div class="note-destination-copy">${esc(presentation.bannerCopy)}</div>
+    </div>`;
+  const submit = document.getElementById('noteSubmitBtn');
+  if (submit && !notesState.submitting) submit.textContent = presentation.submitLabel;
+  return presentation;
+}
+
 function renderNoteScopeButtons() {
   const container = document.getElementById('noteScopeButtons');
-  const hint = document.getElementById('noteScopeHint');
   const picker = document.getElementById('globalAuthorPicker');
   const authorSelect = document.getElementById('globalAuthorTeamSelect');
-  if (!container || !hint || !picker || !authorSelect) return;
+  if (!container || !picker || !authorSelect) return;
   initializeNoteScope();
+  const eligibleTeams = getMemberships().filter(canTeamPublishGlobal);
+  if (notesState.scope === 'global' && !eligibleTeams.some(team => team.teamId === notesState.teamId)) {
+    notesState.teamId = getPreferredGlobalAuthorTeamId();
+  }
   const buttons = [
-    `<button class="note-scope-btn ${notesState.scope === 'private' ? 'active' : ''}" type="button" onclick="selectNoteScope('private')">自分だけ</button>`,
-    ...getRegularTeams().map(team => `<button class="note-scope-btn ${notesState.scope === 'team' && notesState.teamId === team.teamId ? 'active' : ''}" type="button" onclick="selectNoteScope('team','${escapeAttr(team.teamId)}')">${esc(team.teamName)}</button>`),
+    `<button class="note-scope-btn ${notesState.scope === 'private' ? 'active' : ''}" style="${contextThemeStyle(PERSONAL_CONTEXT_THEME)}" type="button" aria-pressed="${notesState.scope === 'private'}" onclick="selectNoteScope('private')">🔒 自分だけ</button>`,
+    ...getRegularTeams().map(team => {
+      const active = notesState.scope === 'team' && notesState.teamId === team.teamId;
+      return `<button class="note-scope-btn ${active ? 'active' : ''}" style="${contextThemeStyle(getContextTheme(team))}" type="button" aria-pressed="${active}" onclick="selectNoteScope('team','${escapeAttr(team.teamId)}')">👥 ${esc(team.teamName)}</button>`;
+    }),
   ];
   if (isGlobalParticipant()) {
-    buttons.push(`<button class="note-scope-btn ${notesState.scope === 'global' ? 'active' : ''}" type="button" onclick="selectNoteScope('global')">グローバル</button>`);
+    buttons.push(`<button class="note-scope-btn ${notesState.scope === 'global' ? 'active' : ''}" style="${contextThemeStyle(GLOBAL_CONTEXT_THEME)}" type="button" aria-pressed="${notesState.scope === 'global'}" onclick="selectNoteScope('global')">🌏 グローバル</button>`);
   }
   container.innerHTML = buttons.join('');
 
   const context = getNotesContext();
-  hint.textContent = context.scope === 'private'
-    ? 'ここで投稿した内容は自分だけが見られます。'
-    : context.scope === 'global'
-      ? '投稿者名と選択した所属が、グローバル参加者に表示されます。'
-      : `${context.team?.teamName || '選択チーム'}のメンバーだけが見られます。`;
-
-  const eligibleTeams = getMemberships().filter(canTeamPublishGlobal);
   authorSelect.innerHTML = eligibleTeams.map(team => `<option value="${escapeAttr(team.teamId)}">${team.isPersonal ? '個人として投稿' : `${esc(team.teamName)}として投稿`}</option>`).join('');
-  if (!eligibleTeams.some(team => team.teamId === notesState.teamId)) notesState.teamId = getPreferredGlobalAuthorTeamId();
   if (notesState.teamId) authorSelect.value = notesState.teamId;
   picker.classList.toggle('show', context.scope === 'global');
-  const composeTitle = document.getElementById('noteComposeTitle');
-  if (composeTitle) composeTitle.textContent = context.scope === 'global'
-    ? 'グローバルに稽古の知恵を共有する'
-    : context.scope === 'private' ? '自分用の稽古メモを残す' : 'チームの指導内容・練習内容をまとめる';
+  renderNoteScopePresentation(context);
 }
 
 function selectNoteScope(scope, teamId = '') {
@@ -3180,15 +3329,17 @@ async function submitNote() {
   if (!title) { showToast('タイトルを入力してください'); return; }
   if (!body) { showToast('内容を入力してください'); return; }
   if (notesState.submitting) return;
+  const context = getNotesContext();
+  const presentation = getNotePresentation(context);
+  if (presentation.confirmation && !confirm(presentation.confirmation)) return;
 
   notesState.submitting = true;
   if (button) {
     button.disabled = true;
-    button.textContent = '記録中...';
+    button.textContent = presentation.pendingLabel;
   }
 
   try {
-    const context = getNotesContext();
     const payload = {
       p_scope: context.scope,
       p_team_id: context.teamId || getPersonalTeam()?.teamId || getTeamId(),
@@ -3215,7 +3366,7 @@ async function submitNote() {
     clearNoteDraft();
     cacheNotes();
     renderNotes();
-    if (!json.note?.pending) showToast('稽古内容を記録しました');
+    if (!json.note?.pending) showToast(presentation.successMessage);
   } catch (error) {
     console.error(error);
     showToast('ノートの記録に失敗しました');
@@ -3223,7 +3374,7 @@ async function submitNote() {
     notesState.submitting = false;
     if (button) {
       button.disabled = false;
-      button.textContent = '記録';
+      button.textContent = presentation.submitLabel;
     }
   }
 }

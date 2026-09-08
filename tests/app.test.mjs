@@ -129,6 +129,10 @@ test('home settings and log form support multiple teams without cluttering singl
   assert.match(html, /openMembershipEditor\('join'\)/);
   assert.match(html, /openMembershipEditor\('transfer'\)/);
   assert.match(html, /graduateFromTeams\(\)/);
+  assert.match(html, /登録コードはアプリ内には表示されません/);
+  assert.match(html, /KEIKO運営または参加先チームの責任者/);
+  assert.match(html, /class="nav-item active" aria-current="page"/);
+  assert.match(html, /\.nav-item\.active\{background:var\(--nav-active-soft\)/);
   assert.doesNotMatch(html, /個人利用ではチームノートは表示されません/);
 });
 
@@ -156,8 +160,13 @@ test('global notes are opt-in, explicitly scoped, and operator moderated', async
   assert.match(sql, /unique \(reporter_user_id, content_type, content_id\)/);
 
   assert.match(html, /id="viewContextButtons"/);
+  assert.match(html, /id="viewContextPanel"[\s\S]*id="viewContextCurrent"[\s\S]*<div class="content">/);
   assert.match(html, /id="globalParticipationBtn"/);
   assert.match(html, /id="noteScopeButtons"/);
+  assert.match(html, /id="noteDestinationBanner"/);
+  assert.match(html, /現在の表示先がグローバルでも、外部には公開されません/);
+  assert.match(html, /グローバルに公開されます/);
+  assert.match(html, /presentation\.confirmation/);
   assert.match(html, /selectNoteScope\('private'\)/);
   assert.match(html, /selectNoteScope\('global'\)/);
   assert.match(html, /id="operatorSettings"/);
