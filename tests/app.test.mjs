@@ -13,6 +13,19 @@ test('inline application JavaScript parses', async () => {
   assert.doesNotThrow(() => new vm.Script(scripts[0]));
 });
 
+test('admin OS parses and never contains privileged keys', async () => {
+  const html = await read('admin.html');
+  const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((match) => match[1]);
+  assert.equal(scripts.length, 1);
+  assert.doesNotThrow(() => new vm.Script(scripts[0]));
+  assert.match(html, /KEIKO Admin OS/);
+  assert.match(html, /getAdminOverview/);
+  assert.match(html, /searchAdminUsers/);
+  assert.match(html, /getAdminUserDetail/);
+  assert.doesNotMatch(html, /sb_secret_/);
+  assert.doesNotMatch(html, /service_role/);
+});
+
 test('browser bundle contains no retired backend or privileged keys', async () => {
   const html = await read('index.html');
   assert.doesNotMatch(html, /script\.google\.com\/macros/);
@@ -54,10 +67,25 @@ test('Edge API has a deliberately small public action surface', async () => {
   for (const action of ['getOperatorDashboard', 'updateTeamSettings', 'reportContent', 'moderateReport']) {
     assert.match(source, new RegExp(`action === '${action}'`));
   }
+  for (const action of ['getAdminOverview', 'searchAdminUsers', 'getAdminUserDetail']) {
+    assert.match(source, new RegExp(`action === '${action}'`));
+  }
   assert.match(source, /readBearerToken\(request\)/);
   assert.match(source, /constantTimeEquals\(text\(payload\.registrationCode\), REGISTRATION_CODE\)/);
   const config = await read('supabase/config.toml');
   assert.match(config, /\[functions\.keiko-api\][\s\S]*verify_jwt\s*=\s*false/);
+});
+
+test('admin OS database functions are operator-only and audited', async () => {
+  const sql = await read('supabase/migrations/2026091001_operator_admin_os.sql');
+  for (const name of ['get_keiko_admin_overview', 'get_keiko_admin_users', 'get_keiko_admin_user_detail']) {
+    assert.match(sql, new RegExp(`create or replace function public\.${name}\\b`));
+    assert.match(sql, new RegExp(`revoke all on function public\.${name}[\\s\\S]*?from public, anon, authenticated`));
+    assert.match(sql, new RegExp(`grant execute on function public\.${name}[\\s\\S]*?to service_role`));
+  }
+  assert.match(sql, /app_role = 'operator'/);
+  assert.match(sql, /'view_user_detail', 'user'/);
+  assert.match(sql, /least\(coalesce\(p_limit, 100\), 200\)/);
 });
 
 test('all application collections use bounded reads', async () => {

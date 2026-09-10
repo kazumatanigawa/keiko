@@ -17,6 +17,7 @@ Japanese drum practice logging app.
 - View contexts: switch between personal, each team, and the opt-in global feed
 - Note visibility: private, team, or global with explicit team and user opt-in
 - Moderation: operator-only team settings, report review, and content hiding
+- `admin.html`: operator-only overview of all users, memberships, logs, notes, and comments
 
 Authenticated reads and writes go directly from the browser to Supabase with the
 publishable key and the user's short-lived access token. The browser never
@@ -37,3 +38,8 @@ node scripts/migrate-team-notes-to-supabase.mjs
 ```
 
 Database and Edge Function deployment steps are in `supabase/README.md`.
+
+The operator console is available at `admin.html` after the latest database
+migration and Edge Function are deployed. Only active profiles with
+`app_role = 'operator'` can load its data. User-detail views are recorded in
+`keiko_operator_events`.

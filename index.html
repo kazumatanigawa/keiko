@@ -168,6 +168,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;backgroun
 .operator-report-actions{display:flex;gap:6px;margin-top:8px}
 .operator-report-actions button{flex:1;border:1px solid var(--border);background:#fff;border-radius:8px;padding:8px 5px;font-family:inherit;font-size:10px;font-weight:800;cursor:pointer}
 .operator-report-actions .hide{border-color:var(--red);color:var(--red)}
+.operator-os-link{display:flex;align-items:center;justify-content:center;margin:10px 0 16px;padding:11px;border-radius:10px;background:#202d2b;color:#fff;text-decoration:none;font-size:11px;font-weight:900;letter-spacing:.04em}
 .form-section{margin-bottom:16px}
 .form-label{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px;display:block}
 .form-hint{font-size:11px;color:var(--ink3);margin-bottom:6px}
@@ -490,6 +491,7 @@ textarea:focus,input:focus{border-color:var(--red)}
     </div>
     <div class="operator-card" id="operatorSettings">
       <div class="operator-badge">KEIKO 運営</div>
+      <a class="operator-os-link" href="./admin.html">KEIKO Admin OSを開く →</a>
       <div class="settings-title">⚙ チーム設定</div>
       <div class="settings-lead">学校以外のチームについて、グローバルノートへの投稿を許可できます。</div>
       <div id="operatorTeams"><div class="note-empty">管理情報を読み込み中...</div></div>

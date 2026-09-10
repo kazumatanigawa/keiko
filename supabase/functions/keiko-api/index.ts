@@ -23,12 +23,15 @@ Deno.serve(async (request) => {
     const action = text(payload.action);
     if (!action) throw userError('invalid_request', '操作が指定されていません。');
 
-    if (action === 'health') return json({ status: 'ok', service: 'keiko-api', version: '2026-09-05-02' });
+    if (action === 'health') return json({ status: 'ok', service: 'keiko-api', version: '2026-09-10-01' });
     if (action === 'getTeams') return json(await getTeams());
     if (action === 'login') return json(await login(payload));
     if (action === 'register') return json(await register(payload));
     if (action === 'manageMembership') return json(await manageMembership(request, payload));
     if (action === 'getOperatorDashboard') return json(await getOperatorDashboard(request));
+    if (action === 'getAdminOverview') return json(await getAdminOverview(request));
+    if (action === 'searchAdminUsers') return json(await searchAdminUsers(request, payload));
+    if (action === 'getAdminUserDetail') return json(await getAdminUserDetail(request, payload));
     if (action === 'updateTeamSettings') return json(await updateTeamSettings(request, payload));
     if (action === 'reportContent') return json(await reportContent(request, payload));
     if (action === 'moderateReport') return json(await moderateReport(request, payload));
@@ -241,6 +244,52 @@ async function getOperatorDashboard(request: Request) {
   };
 }
 
+async function getAdminOverview(request: Request) {
+  const userId = await authenticatedUserId(request);
+  const result = await adminRequest('/rest/v1/rpc/get_keiko_admin_overview', {
+    method: 'POST', body: { p_actor_user_id: userId },
+  }) as JsonRecord;
+  return { status: 'ok', ...result };
+}
+
+async function searchAdminUsers(request: Request, payload: JsonRecord) {
+  const userId = await authenticatedUserId(request);
+  const query = text(payload.query).slice(0, 100);
+  const teamId = text(payload.teamId) ? requireUuid(payload.teamId, 'チーム') : null;
+  const status = text(payload.status);
+  if (status && !['active', 'inactive', 'suspended'].includes(status)) {
+    throw userError('invalid_request', 'ユーザー状態の指定が正しくありません。');
+  }
+  const limit = boundedInteger(payload.limit, 1, 100, 50);
+  const offset = boundedInteger(payload.offset, 0, 100000, 0);
+  const result = await adminRequest('/rest/v1/rpc/get_keiko_admin_users', {
+    method: 'POST',
+    body: {
+      p_actor_user_id: userId,
+      p_query: query,
+      p_team_id: teamId,
+      p_status: status,
+      p_limit: limit,
+      p_offset: offset,
+    },
+  }) as JsonRecord;
+  return { status: 'ok', ...result };
+}
+
+async function getAdminUserDetail(request: Request, payload: JsonRecord) {
+  const userId = await authenticatedUserId(request);
+  const targetUserId = requireUuid(payload.userId, 'ユーザー');
+  const result = await adminRequest('/rest/v1/rpc/get_keiko_admin_user_detail', {
+    method: 'POST',
+    body: {
+      p_actor_user_id: userId,
+      p_user_id: targetUserId,
+      p_limit: boundedInteger(payload.limit, 1, 200, 100),
+    },
+  }) as JsonRecord;
+  return { status: 'ok', ...result };
+}
+
 async function updateTeamSettings(request: Request, payload: JsonRecord) {
   const userId = await authenticatedUserId(request);
   const teamId = requireUuid(payload.teamId, 'チーム');
@@ -405,6 +454,7 @@ function validatePin(value: unknown) { const pin = text(value); if (!/^\d{4}$/.t
 function requireUuid(value: unknown, label: string) { const valueText = text(value); if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(valueText)) throw userError('invalid_request', `${label}の指定が正しくありません。`); return valueText; }
 function requiredKatakana(value: unknown, label: string) { const valueText = requiredText(value, label, 40); if (!/^[ァ-ヶー\s\u3000]+$/.test(valueText)) throw userError('invalid_request', `${label}はカタカナで入力してください。`); return valueText.replace(/[\s\u3000]+/g, ''); }
 function requiredText(value: unknown, label: string, max: number) { const valueText = text(value); if (!valueText) throw userError('invalid_request', `${label}を入力してください。`); if (valueText.length > max) throw userError('invalid_request', `${label}は${max}文字以内で入力してください。`); return valueText; }
+function boundedInteger(value: unknown, min: number, max: number, fallback: number) { const parsed = Number(value); return Number.isInteger(parsed) ? Math.max(min, Math.min(max, parsed)) : fallback; }
 function text(value: unknown) { return value === null || value === undefined ? '' : String(value).trim(); }
 function generateLegacyId(prefix: string) { return `${prefix}_${crypto.randomUUID().replaceAll('-', '')}`; }
 function constantTimeEquals(left: string, right: string) { let difference = left.length ^ right.length; const max = Math.max(left.length, right.length); for (let index = 0; index < max; index += 1) difference |= (left.charCodeAt(index) || 0) ^ (right.charCodeAt(index) || 0); return difference === 0; }

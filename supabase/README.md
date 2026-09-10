@@ -4,6 +4,8 @@ Apply SQL files in `migrations` in filename order. The current release includes
 direct authenticated writes, paged reads, rotating timekeepers, and audited
 multi-team membership changes. Global notes are opt-in, school teams are blocked
 from global publishing, and operator-only moderation is stored in Postgres.
+The `2026091001_operator_admin_os.sql` migration adds the operator-only user,
+activity, log, and note read models used by `admin.html`.
 
 Deploy `functions/keiko-api` with JWT verification disabled because login and
 registration do not have a user JWT yet. The function still validates every
