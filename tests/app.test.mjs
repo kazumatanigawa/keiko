@@ -22,6 +22,9 @@ test('admin OS parses and never contains privileged keys', async () => {
   assert.match(html, /getAdminOverview/);
   assert.match(html, /searchAdminUsers/);
   assert.match(html, /getAdminUserDetail/);
+  assert.match(html, /data-user-notes-id/);
+  assert.match(html, /openUser\(button\.dataset\.userNotesId,'notes'\)/);
+  assert.match(html, /private:'個人のみ',team:'チーム内',global:'グローバル'/);
   assert.doesNotMatch(html, /sb_secret_/);
   assert.doesNotMatch(html, /service_role/);
 });

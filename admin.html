@@ -60,6 +60,8 @@ tbody tr{transition:background .15s}
 tbody tr:hover{background:#fff8eb}
 .user-button{border:0;background:none;color:var(--ink);font-weight:900;text-align:left}
 .user-button:hover{color:var(--red)}
+.count-button{border:0;background:none;color:var(--red);font-size:11px;font-weight:900;text-align:left;text-decoration:underline;text-underline-offset:3px}
+.count-button:hover,.count-button:focus-visible{color:var(--ink)}
 .kana{font-size:9px;color:var(--ink-soft);margin-top:3px}
 .pill{display:inline-flex;padding:4px 7px;border-radius:999px;background:#ece9df;color:var(--ink-soft);font-size:9px;font-weight:800;margin:2px 3px 2px 0}
 .pill.student{background:#e6f1f5;color:#245b71}
@@ -244,16 +246,17 @@ function renderOverview(){
 function regularTeams(user){return(Array.isArray(user.teams)?user.teams:[]).filter(team=>!team.isPersonal)}
 function renderUsers(){
   $('userCount').textContent=`条件に一致するユーザー ${number(state.total)}人`;
-  $('userRows').innerHTML=state.users.map(user=>{const teams=regularTeams(user);return`<tr><td><button class="user-button" data-user-id="${esc(user.userId)}">${esc(user.displayName||'名前未設定')}</button><div class="kana">${esc(`${user.lastNameKana||''} ${user.firstNameKana||''}`.trim())}</div></td><td><span class="pill ${esc(user.userType)}">${user.userType==='student'?'Student':'General'}</span>${user.appRole==='operator'?'<span class="pill operator">運営者</span>':''}</td><td>${teams.length?teams.map(team=>`<span class="pill">${esc(team.teamName)}</span>`).join(''):'<span class="kana">個人利用</span>'}</td><td>${number(user.practiceLogCount)}</td><td>${number(user.noteCount)}<div class="kana">コメント ${number(user.commentCount)}</div></td><td>${esc(formatDateTime(user.latestActivityAt))}</td><td><span class="status-dot ${esc(user.status)}">${user.status==='active'?'利用中':esc(user.status)}</span></td></tr>`}).join('');
+  $('userRows').innerHTML=state.users.map(user=>{const teams=regularTeams(user);return`<tr><td><button class="user-button" data-user-id="${esc(user.userId)}">${esc(user.displayName||'名前未設定')}</button><div class="kana">${esc(`${user.lastNameKana||''} ${user.firstNameKana||''}`.trim())}</div></td><td><span class="pill ${esc(user.userType)}">${user.userType==='student'?'Student':'General'}</span>${user.appRole==='operator'?'<span class="pill operator">運営者</span>':''}</td><td>${teams.length?teams.map(team=>`<span class="pill">${esc(team.teamName)}</span>`).join(''):'<span class="kana">個人利用</span>'}</td><td>${number(user.practiceLogCount)}</td><td><button class="count-button" data-user-notes-id="${esc(user.userId)}" aria-label="${esc(user.displayName||'このユーザー')}のノートを見る">${number(user.noteCount)}件を見る</button><div class="kana">コメント ${number(user.commentCount)}</div></td><td>${esc(formatDateTime(user.latestActivityAt))}</td><td><span class="status-dot ${esc(user.status)}">${user.status==='active'?'利用中':esc(user.status)}</span></td></tr>`}).join('');
   if(!state.users.length)$('userRows').innerHTML='<tr><td colspan="7"><div class="empty">条件に一致するユーザーはいません</div></td></tr>';
   $('pageInfo').textContent=`${state.total?state.offset+1:0}〜${Math.min(state.offset+PAGE_SIZE,state.total)} / ${number(state.total)}件`;
   $('prevButton').disabled=state.offset===0;$('nextButton').disabled=state.offset+PAGE_SIZE>=state.total;
   document.querySelectorAll('[data-user-id]').forEach(button=>button.addEventListener('click',()=>openUser(button.dataset.userId)));
+  document.querySelectorAll('[data-user-notes-id]').forEach(button=>button.addEventListener('click',()=>openUser(button.dataset.userNotesId,'notes')));
 }
 
-async function openUser(userId){
+async function openUser(userId,initialTab='logs'){
   $('drawerBackdrop').classList.add('show');$('drawerBackdrop').setAttribute('aria-hidden','false');$('drawerBody').innerHTML='<div class="loading">ユーザー情報を読み込んでいます...</div>';
-  try{const detail=await request('getAdminUserDetail',{userId,limit:100});state.activeDetail=detail;state.activeTab='logs';renderDetail()}
+  try{const detail=await request('getAdminUserDetail',{userId,limit:100});state.activeDetail=detail;state.activeTab=initialTab;renderDetail()}
   catch(error){$('drawerBody').innerHTML=`<div class="empty">${esc(error.message)}</div>`}
 }
 
@@ -261,7 +264,7 @@ function renderDetail(){
   const detail=state.activeDetail,profile=detail.profile||{},student=detail.studentProfile||{},general=detail.generalProfile||{},teams=Array.isArray(detail.teams)?detail.teams:[];
   $('drawerTitle').textContent=profile.displayName||'ユーザー詳細';
   const info=[['氏名',`${profile.lastName||''} ${profile.firstName||''}`.trim()||profile.displayName||'—'],['読み',`${profile.lastNameKana||''} ${profile.firstNameKana||''}`.trim()||'—'],['ユーザー区分',profile.userType==='student'?'Student':'General'],['状態',profile.status||''],['所属',teams.filter(team=>!team.isPersonal).map(team=>team.teamName).join(' / ')||'個人利用'],['学校',student.schoolName||'—'],['学年',student.grade||'—'],['期',student.term||'—'],['役職',student.roleLabel||'—'],['カテゴリー',general.category||'—'],['自己紹介',general.bio||'—'],['登録日',formatDate(profile.createdAt)],['ユーザーID',profile.userId||'']];
-  $('drawerBody').innerHTML=`<div class="profile-grid">${info.map(([key,value])=>`<div class="profile-item"><div class="profile-key">${esc(key)}</div><div class="profile-value">${esc(value)}</div></div>`).join('')}</div><div class="tabs"><button class="tab active" data-tab="logs">稽古ログ ${number(detail.logs?.length)}</button><button class="tab" data-tab="notes">ノート ${number(detail.notes?.length)}</button><button class="tab" data-tab="comments">コメント ${number(detail.comments?.length)}</button></div><div id="detailTimeline"></div>`;
+  $('drawerBody').innerHTML=`<div class="profile-grid">${info.map(([key,value])=>`<div class="profile-item"><div class="profile-key">${esc(key)}</div><div class="profile-value">${esc(value)}</div></div>`).join('')}</div><div class="tabs"><button class="tab ${state.activeTab==='logs'?'active':''}" data-tab="logs">稽古ログ ${number(detail.logs?.length)}</button><button class="tab ${state.activeTab==='notes'?'active':''}" data-tab="notes">ノート ${number(detail.notes?.length)}</button><button class="tab ${state.activeTab==='comments'?'active':''}" data-tab="comments">コメント ${number(detail.comments?.length)}</button></div><div id="detailTimeline"></div>`;
   document.querySelectorAll('[data-tab]').forEach(button=>button.addEventListener('click',()=>{state.activeTab=button.dataset.tab;document.querySelectorAll('[data-tab]').forEach(item=>item.classList.toggle('active',item===button));renderTimeline()}));
   renderTimeline();
 }
@@ -271,9 +274,11 @@ function renderTimeline(){
   const items=Array.isArray(state.activeDetail?.[state.activeTab])?state.activeDetail[state.activeTab]:[];
   if(!items.length){target.innerHTML='<div class="empty">記録はありません</div>';return}
   if(state.activeTab==='logs')target.innerHTML=`<div class="timeline">${items.map(item=>`<article class="entry"><div class="entry-top"><span>${esc(formatDate(item.practiceDate))}・${esc(item.teamName)}</span><span>Condition ${number(item.condition)}/5</span></div><div class="log-columns"><div class="log-box"><b>学び</b><br>${esc(item.learning)}</div><div class="log-box"><b>次の行動</b><br>${esc(item.nextAction)}</div></div><div class="entry-body"><b>Good & New</b><br>${esc(item.goodNew)}</div></article>`).join('')}</div>`;
-  else if(state.activeTab==='notes')target.innerHTML=`<div class="timeline">${items.map(item=>`<article class="entry"><div class="entry-top"><span>${esc(item.teamName)}・${esc(item.visibility)}</span><span>${esc(formatDateTime(item.createdAt))}</span></div><div class="entry-title">${esc(item.title)}</div><div class="entry-body">${esc(item.body)}</div><div class="kana">状態: ${esc(item.status)}</div></article>`).join('')}</div>`;
+  else if(state.activeTab==='notes')target.innerHTML=`<div class="timeline">${items.map(item=>`<article class="entry"><div class="entry-top"><span>${esc(item.teamName)} <span class="pill">${esc(visibilityLabel(item.visibility))}</span></span><span>${esc(formatDateTime(item.createdAt))}</span></div><div class="entry-title">${esc(item.title)}</div><div class="entry-body">${esc(item.body)}</div><div class="kana">状態: ${esc(item.status)}</div></article>`).join('')}</div>`;
   else target.innerHTML=`<div class="timeline">${items.map(item=>`<article class="entry"><div class="entry-top"><span>${esc(item.teamName)}</span><span>${esc(formatDateTime(item.createdAt))}</span></div><div class="entry-body">${esc(item.body)}</div><div class="kana">状態: ${esc(item.status)}</div></article>`).join('')}</div>`;
 }
+
+function visibilityLabel(value){return({private:'個人のみ',team:'チーム内',global:'グローバル'})[value]||value||'未設定'}
 
 function closeDrawer(){$('drawerBackdrop').classList.remove('show');$('drawerBackdrop').setAttribute('aria-hidden','true');state.activeDetail=null}
 function showView(name){$('usersView').classList.toggle('hidden',name!=='users');$('teamsView').classList.toggle('hidden',name!=='teams');document.querySelectorAll('[data-view]').forEach(button=>button.classList.toggle('active',button.dataset.view===name));$('pageTitle').textContent=name==='users'?'全体を、ひとつの視界に。':'チームの動きを俯瞰する。'}
