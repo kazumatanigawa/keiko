@@ -6,6 +6,8 @@ multi-team membership changes. Global notes are opt-in, school teams are blocked
 from global publishing, and operator-only moderation is stored in Postgres.
 The `2026091001_operator_admin_os.sql` migration adds the operator-only user,
 activity, log, and note read models used by `admin.html`.
+The `2026091101_operator_team_detail.sql` migration adds paged, date-sorted team
+logs, notes, and member details for the same operator console.
 
 Deploy `functions/keiko-api` with JWT verification disabled because login and
 registration do not have a user JWT yet. The function still validates every

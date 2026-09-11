@@ -17,7 +17,7 @@ Japanese drum practice logging app.
 - View contexts: switch between personal, each team, and the opt-in global feed
 - Note visibility: private, team, or global with explicit team and user opt-in
 - Moderation: operator-only team settings, report review, and content hiding
-- `admin.html`: operator-only overview of all users, memberships, logs, notes, and comments
+- `admin.html`: operator-only overview of users plus paged, date-sorted team logs, notes, members, and comments
 
 Authenticated reads and writes go directly from the browser to Supabase with the
 publishable key and the user's short-lived access token. The browser never

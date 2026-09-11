@@ -23,7 +23,7 @@ Deno.serve(async (request) => {
     const action = text(payload.action);
     if (!action) throw userError('invalid_request', '操作が指定されていません。');
 
-    if (action === 'health') return json({ status: 'ok', service: 'keiko-api', version: '2026-09-10-01' });
+    if (action === 'health') return json({ status: 'ok', service: 'keiko-api', version: '2026-09-11-01' });
     if (action === 'getTeams') return json(await getTeams());
     if (action === 'login') return json(await login(payload));
     if (action === 'register') return json(await register(payload));
@@ -32,6 +32,7 @@ Deno.serve(async (request) => {
     if (action === 'getAdminOverview') return json(await getAdminOverview(request));
     if (action === 'searchAdminUsers') return json(await searchAdminUsers(request, payload));
     if (action === 'getAdminUserDetail') return json(await getAdminUserDetail(request, payload));
+    if (action === 'getAdminTeamDetail') return json(await getAdminTeamDetail(request, payload));
     if (action === 'updateTeamSettings') return json(await updateTeamSettings(request, payload));
     if (action === 'reportContent') return json(await reportContent(request, payload));
     if (action === 'moderateReport') return json(await moderateReport(request, payload));
@@ -285,6 +286,25 @@ async function getAdminUserDetail(request: Request, payload: JsonRecord) {
       p_actor_user_id: userId,
       p_user_id: targetUserId,
       p_limit: boundedInteger(payload.limit, 1, 200, 100),
+    },
+  }) as JsonRecord;
+  return { status: 'ok', ...result };
+}
+
+async function getAdminTeamDetail(request: Request, payload: JsonRecord) {
+  const userId = await authenticatedUserId(request);
+  const section = text(payload.section) || 'logs';
+  if (!['logs', 'notes', 'members'].includes(section)) {
+    throw userError('invalid_request', '表示内容の指定が正しくありません。');
+  }
+  const result = await adminRequest('/rest/v1/rpc/get_keiko_admin_team_detail', {
+    method: 'POST',
+    body: {
+      p_actor_user_id: userId,
+      p_team_id: requireUuid(payload.teamId, 'チーム'),
+      p_section: section,
+      p_limit: boundedInteger(payload.limit, 1, 100, 50),
+      p_offset: boundedInteger(payload.offset, 0, 100000, 0),
     },
   }) as JsonRecord;
   return { status: 'ok', ...result };

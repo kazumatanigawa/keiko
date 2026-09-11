@@ -22,6 +22,10 @@ test('admin OS parses and never contains privileged keys', async () => {
   assert.match(html, /getAdminOverview/);
   assert.match(html, /searchAdminUsers/);
   assert.match(html, /getAdminUserDetail/);
+  assert.match(html, /getAdminTeamDetail/);
+  assert.match(html, /data-team-id/);
+  assert.match(html, /稽古日が新しい順/);
+  assert.match(html, /投稿日が新しい順/);
   assert.match(html, /data-user-notes-id/);
   assert.match(html, /openUser\(button\.dataset\.userNotesId,'notes'\)/);
   assert.match(html, /private:'個人のみ',team:'チーム内',global:'グローバル'/);
@@ -70,7 +74,7 @@ test('Edge API has a deliberately small public action surface', async () => {
   for (const action of ['getOperatorDashboard', 'updateTeamSettings', 'reportContent', 'moderateReport']) {
     assert.match(source, new RegExp(`action === '${action}'`));
   }
-  for (const action of ['getAdminOverview', 'searchAdminUsers', 'getAdminUserDetail']) {
+  for (const action of ['getAdminOverview', 'searchAdminUsers', 'getAdminUserDetail', 'getAdminTeamDetail']) {
     assert.match(source, new RegExp(`action === '${action}'`));
   }
   assert.match(source, /readBearerToken\(request\)/);
@@ -89,6 +93,19 @@ test('admin OS database functions are operator-only and audited', async () => {
   assert.match(sql, /app_role = 'operator'/);
   assert.match(sql, /'view_user_detail', 'user'/);
   assert.match(sql, /least\(coalesce\(p_limit, 100\), 200\)/);
+});
+
+test('admin team detail is scoped, paged, sorted, and audited', async () => {
+  const sql = await read('supabase/migrations/2026091101_operator_team_detail.sql');
+  assert.match(sql, /create or replace function public\.get_keiko_admin_team_detail\b/);
+  assert.match(sql, /app_role = 'operator'/);
+  assert.match(sql, /where pl\.team_id = p_team_id[\s\S]*order by pl\.practice_date desc, pl\.created_at desc/);
+  assert.match(sql, /where n\.team_id = p_team_id[\s\S]*order by n\.created_at desc, n\.id desc/);
+  assert.match(sql, /least\(coalesce\(p_limit, 50\), 100\)/);
+  assert.match(sql, /limit v_limit offset v_offset/);
+  assert.match(sql, /'view_team_detail',[\s\S]*'team'/);
+  assert.match(sql, /revoke all on function public\.get_keiko_admin_team_detail[\s\S]*from public, anon, authenticated/);
+  assert.match(sql, /grant execute on function public\.get_keiko_admin_team_detail[\s\S]*to service_role/);
 });
 
 test('all application collections use bounded reads', async () => {

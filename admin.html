@@ -75,9 +75,11 @@ tbody tr:hover{background:#fff8eb}
 .pagination button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 11px}
 .pagination button:disabled{opacity:.4}
 .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;padding:20px 22px}
-.team-card{border:1px solid var(--line);border-radius:14px;padding:15px;background:#fff}
+.team-card{width:100%;border:1px solid var(--line);border-radius:14px;padding:15px;background:#fff;color:var(--ink);text-align:left;transition:transform .16s,border-color .16s,box-shadow .16s}
+.team-card:hover,.team-card:focus-visible{transform:translateY(-2px);border-color:var(--gold);box-shadow:0 12px 25px rgba(23,32,31,.09);outline:none}
 .team-name{font-size:13px;font-weight:900}
 .team-stats{display:flex;gap:14px;margin-top:11px;font-size:10px;color:var(--ink-soft)}
+.team-open{margin-top:13px;color:var(--red);font-size:10px;font-weight:900}
 .drawer-backdrop{position:fixed;inset:0;z-index:60;background:rgba(23,32,31,.5);opacity:0;pointer-events:none;transition:opacity .2s}
 .drawer-backdrop.show{opacity:1;pointer-events:auto}
 .drawer{position:absolute;right:0;top:0;width:min(720px,94vw);height:100%;overflow:auto;background:var(--paper);box-shadow:-20px 0 60px rgba(0,0,0,.2);transform:translateX(100%);transition:transform .25s}
@@ -90,6 +92,9 @@ tbody tr:hover{background:#fff8eb}
 .profile-item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
 .profile-key{font-size:9px;letter-spacing:.08em;color:var(--ink-soft);font-weight:800}
 .profile-value{font-size:12px;font-weight:800;margin-top:5px;overflow-wrap:anywhere}
+.detail-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.detail-metric{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.detail-metric b{display:block;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:23px;margin-top:4px}
 .tabs{display:flex;gap:6px;margin-top:20px;border-bottom:1px solid var(--line)}
 .tab{border:0;background:none;padding:11px 12px;color:var(--ink-soft);font-size:11px;font-weight:800;border-bottom:2px solid transparent}
 .tab.active{color:var(--red);border-bottom-color:var(--red)}
@@ -100,10 +105,16 @@ tbody tr:hover{background:#fff8eb}
 .entry-body{font-size:12px;line-height:1.8;white-space:pre-wrap;margin-top:7px;overflow-wrap:anywhere}
 .log-columns{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
 .log-box{padding:10px;background:#f7f4ec;border-radius:9px;font-size:11px;line-height:1.7}
+.entry-author{border:0;background:none;color:var(--red);font-weight:900;text-align:left}
+.entry-author:hover{text-decoration:underline}
+.section-order{margin-top:12px;color:var(--ink-soft);font-size:10px;font-weight:700}
+.detail-pagination{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px;padding:12px 2px;color:var(--ink-soft);font-size:10px}
+.detail-pagination button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 11px}
+.detail-pagination button:disabled{opacity:.4}
 .toast{position:fixed;left:50%;bottom:24px;z-index:100;transform:translate(-50%,20px);opacity:0;background:var(--ink);color:#fff;border-radius:999px;padding:11px 17px;font-size:11px;transition:.2s;pointer-events:none}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 @media(max-width:1050px){.metric-grid{grid-template-columns:repeat(3,1fr)}.toolbar{grid-template-columns:1fr 1fr}.app-shell{grid-template-columns:210px minmax(0,1fr)}}
-@media(max-width:720px){.app-shell{display:block}.sidebar{position:relative;height:auto;padding:18px}.nav{display:none}.sidebar-footer{display:flex;align-items:center;justify-content:space-between;margin-top:16px}.main{padding:22px 14px 45px}.topbar{align-items:flex-start}.metric-grid{grid-template-columns:1fr 1fr}.toolbar{grid-template-columns:1fr}.workspace-head{align-items:flex-start}.profile-grid{grid-template-columns:1fr 1fr}.log-columns{grid-template-columns:1fr}.drawer{width:100%}}
+@media(max-width:720px){.app-shell{display:block}.sidebar{position:relative;height:auto;padding:18px}.nav{display:flex;margin-top:14px;overflow:auto}.nav-button{white-space:nowrap}.sidebar-footer{display:flex;align-items:center;justify-content:space-between;margin-top:16px}.main{padding:22px 14px 45px}.topbar{align-items:flex-start}.metric-grid{grid-template-columns:1fr 1fr}.toolbar{grid-template-columns:1fr}.workspace-head{align-items:flex-start}.profile-grid,.detail-metrics{grid-template-columns:1fr 1fr}.log-columns{grid-template-columns:1fr}.drawer{width:100%}}
 </style>
 </head>
 <body>
@@ -143,7 +154,7 @@ tbody tr:hover{background:#fff8eb}
   </main>
 </div>
 
-<div class="drawer-backdrop" id="drawerBackdrop" aria-hidden="true"><aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle"><div class="drawer-head"><div><div class="eyebrow">USER DETAIL</div><h2 id="drawerTitle">ユーザー詳細</h2></div><button class="close-button" id="closeDrawer" aria-label="閉じる">×</button></div><div class="drawer-body" id="drawerBody"><div class="loading">読み込み中...</div></div></aside></div>
+<div class="drawer-backdrop" id="drawerBackdrop" aria-hidden="true"><aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle"><div class="drawer-head"><div><div class="eyebrow" id="drawerEyebrow">USER DETAIL</div><h2 id="drawerTitle">ユーザー詳細</h2></div><button class="close-button" id="closeDrawer" aria-label="閉じる">×</button></div><div class="drawer-body" id="drawerBody"><div class="loading">読み込み中...</div></div></aside></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -154,7 +165,8 @@ const ACCESS_TOKEN_KEY='taiko_access_token';
 const REFRESH_TOKEN_KEY='taiko_refresh_token';
 const TOKEN_EXPIRES_AT_KEY='taiko_token_expires_at';
 const PAGE_SIZE=50;
-const state={overview:null,users:[],total:0,offset:0,loading:false,activeDetail:null,activeTab:'logs'};
+const TEAM_PAGE_SIZE=50;
+const state={overview:null,users:[],total:0,offset:0,loading:false,detailMode:'user',activeDetail:null,activeTab:'logs',activeTeamId:'',teamSection:'logs',teamOffset:0,teamDetail:null};
 let refreshPromise=null;
 let searchTimer=null;
 
@@ -240,7 +252,8 @@ function renderOverview(){
   $('metrics').innerHTML=cards.map(([label,value,note])=>`<article class="metric"><div class="metric-label">${esc(label)}</div><div class="metric-value">${number(value)}</div><div class="metric-note">${esc(note)}</div></article>`).join('');
   const teams=Array.isArray(state.overview?.teams)?state.overview.teams:[];
   $('teamFilter').innerHTML='<option value="">すべてのチーム</option>'+teams.map(team=>`<option value="${esc(team.teamId)}">${esc(team.teamName)}</option>`).join('');
-  $('teamGrid').innerHTML=teams.length?teams.map(team=>`<article class="team-card"><div class="team-name">${esc(team.teamName)}</div><div><span class="pill ${esc(team.teamType)}">${team.teamType==='student'?'学校の部活':'一般'}</span></div><div class="team-stats"><span>メンバー ${number(team.memberCount)}</span><span>ログ ${number(team.logCount)}</span><span>ノート ${number(team.noteCount)}</span></div><div class="kana">最終活動 ${esc(formatDateTime(team.latestActivityAt))}</div></article>`).join(''):'<div class="empty">チームがありません</div>';
+  $('teamGrid').innerHTML=teams.length?teams.map(team=>`<button class="team-card" data-team-id="${esc(team.teamId)}" aria-label="${esc(team.teamName)}の稽古ログとノートを見る"><div class="team-name">${esc(team.teamName)}</div><div><span class="pill ${esc(team.teamType)}">${team.teamType==='student'?'学校の部活':'一般'}</span></div><div class="team-stats"><span>メンバー ${number(team.memberCount)}</span><span>ログ ${number(team.logCount)}</span><span>ノート ${number(team.noteCount)}</span></div><div class="kana">最終活動 ${esc(formatDateTime(team.latestActivityAt))}</div><div class="team-open">稽古ログ・ノートを見る →</div></button>`).join(''):'<div class="empty">チームがありません</div>';
+  document.querySelectorAll('[data-team-id]').forEach(button=>button.addEventListener('click',()=>openTeam(button.dataset.teamId)));
 }
 
 function regularTeams(user){return(Array.isArray(user.teams)?user.teams:[]).filter(team=>!team.isPersonal)}
@@ -255,6 +268,7 @@ function renderUsers(){
 }
 
 async function openUser(userId,initialTab='logs'){
+  state.detailMode='user';$('drawerEyebrow').textContent='USER DETAIL';
   $('drawerBackdrop').classList.add('show');$('drawerBackdrop').setAttribute('aria-hidden','false');$('drawerBody').innerHTML='<div class="loading">ユーザー情報を読み込んでいます...</div>';
   try{const detail=await request('getAdminUserDetail',{userId,limit:100});state.activeDetail=detail;state.activeTab=initialTab;renderDetail()}
   catch(error){$('drawerBody').innerHTML=`<div class="empty">${esc(error.message)}</div>`}
@@ -279,9 +293,47 @@ function renderTimeline(){
 }
 
 function visibilityLabel(value){return({private:'個人のみ',team:'チーム内',global:'グローバル'})[value]||value||'未設定'}
+function noteStatusLabel(value){return({active:'公開中',deleted:'削除済み',hidden_by_operator:'運営により非表示'})[value]||value||'未設定'}
+function userStatusLabel(value){return({active:'利用中',inactive:'停止',suspended:'保留'})[value]||value||'未設定'}
 
-function closeDrawer(){$('drawerBackdrop').classList.remove('show');$('drawerBackdrop').setAttribute('aria-hidden','true');state.activeDetail=null}
-function showView(name){$('usersView').classList.toggle('hidden',name!=='users');$('teamsView').classList.toggle('hidden',name!=='teams');document.querySelectorAll('[data-view]').forEach(button=>button.classList.toggle('active',button.dataset.view===name));$('pageTitle').textContent=name==='users'?'全体を、ひとつの視界に。':'チームの動きを俯瞰する。'}
+async function openTeam(teamId,initialSection='logs'){
+  state.detailMode='team';state.activeTeamId=teamId;state.teamSection=initialSection;state.teamOffset=0;
+  $('drawerEyebrow').textContent='TEAM DETAIL';$('drawerTitle').textContent='チーム詳細';
+  $('drawerBackdrop').classList.add('show');$('drawerBackdrop').setAttribute('aria-hidden','false');
+  await loadTeamDetail();
+}
+
+async function loadTeamDetail(){
+  const teamId=state.activeTeamId,section=state.teamSection,offset=state.teamOffset;
+  $('drawerBody').innerHTML='<div class="loading">チームの記録を読み込んでいます...</div>';
+  try{
+    const detail=await request('getAdminTeamDetail',{teamId,section,limit:TEAM_PAGE_SIZE,offset});
+    if(state.activeTeamId!==teamId||state.teamSection!==section||state.teamOffset!==offset)return;
+    state.teamDetail=detail;renderTeamDetail();
+  }catch(error){$('drawerBody').innerHTML=`<div class="empty">${esc(error.message)}</div>`}
+}
+
+function renderTeamDetail(){
+  const detail=state.teamDetail,team=detail.team||{},summary=detail.summary||{},total=Number(detail.total||0),offset=Number(detail.offset||0),items=Array.isArray(detail.items)?detail.items:[];
+  $('drawerTitle').textContent=team.teamName||'チーム詳細';
+  const labels={logs:'稽古ログ',notes:'ノート',members:'メンバー'};
+  $('drawerBody').innerHTML=`<div class="detail-metrics"><div class="detail-metric"><span class="profile-key">メンバー</span><b>${number(summary.memberCount)}</b></div><div class="detail-metric"><span class="profile-key">稽古ログ</span><b>${number(summary.logCount)}</b></div><div class="detail-metric"><span class="profile-key">ノート</span><b>${number(summary.noteCount)}</b></div><div class="detail-metric"><span class="profile-key">コメント</span><b>${number(summary.commentCount)}</b></div></div><div class="tabs"><button class="tab ${state.teamSection==='logs'?'active':''}" data-team-tab="logs">稽古ログ</button><button class="tab ${state.teamSection==='notes'?'active':''}" data-team-tab="notes">ノート</button><button class="tab ${state.teamSection==='members'?'active':''}" data-team-tab="members">メンバー</button></div><div class="section-order">${state.teamSection==='logs'?'稽古日が新しい順':state.teamSection==='notes'?'投稿日が新しい順':'氏名順'}・全${number(total)}件</div><div id="teamTimeline">${renderTeamItems(items)}</div><div class="detail-pagination"><span>${total?offset+1:0}〜${Math.min(offset+TEAM_PAGE_SIZE,total)} / ${number(total)}件</span><div><button id="teamPrevButton" ${offset===0?'disabled':''}>前へ</button> <button id="teamNextButton" ${offset+TEAM_PAGE_SIZE>=total?'disabled':''}>次へ</button></div></div>`;
+  document.querySelectorAll('[data-team-tab]').forEach(button=>button.addEventListener('click',()=>{state.teamSection=button.dataset.teamTab;state.teamOffset=0;loadTeamDetail()}));
+  document.querySelectorAll('[data-team-user-id]').forEach(button=>button.addEventListener('click',()=>openUser(button.dataset.teamUserId)));
+  $('teamPrevButton').addEventListener('click',()=>{state.teamOffset=Math.max(0,state.teamOffset-TEAM_PAGE_SIZE);loadTeamDetail()});
+  $('teamNextButton').addEventListener('click',()=>{state.teamOffset+=TEAM_PAGE_SIZE;loadTeamDetail()});
+  $('drawerEyebrow').textContent=`${team.teamType==='student'?'SCHOOL TEAM':'GENERAL TEAM'} / ${labels[state.teamSection]}`;
+}
+
+function renderTeamItems(items){
+  if(!items.length)return '<div class="empty">記録はありません</div>';
+  if(state.teamSection==='logs')return`<div class="timeline">${items.map(item=>`<article class="entry"><div class="entry-top"><span>${esc(formatDate(item.practiceDate))}</span><span>${item.condition?`Condition ${number(item.condition)}/5`:'Condition —'}</span></div><div class="entry-title"><button class="entry-author" data-team-user-id="${esc(item.userId)}">${esc(item.displayName)}</button></div><div class="log-columns"><div class="log-box"><b>学び</b><br>${esc(item.learning)}</div><div class="log-box"><b>次の行動</b><br>${esc(item.nextAction)}</div></div><div class="entry-body"><b>Good & New</b><br>${esc(item.goodNew)}</div>${item.memo?`<div class="entry-body"><b>メモ</b><br>${esc(item.memo)}</div>`:''}</article>`).join('')}</div>`;
+  if(state.teamSection==='notes')return`<div class="timeline">${items.map(item=>`<article class="entry"><div class="entry-top"><span><button class="entry-author" data-team-user-id="${esc(item.authorUserId)}">${esc(item.authorName)}</button> <span class="pill">${esc(visibilityLabel(item.visibility))}</span></span><span>${esc(formatDateTime(item.createdAt))}</span></div><div class="entry-title">${esc(item.title)}</div><div class="entry-body">${esc(item.body)}</div><div class="kana">${esc(noteStatusLabel(item.status))}・コメント ${number(item.commentCount)}件</div></article>`).join('')}</div>`;
+  return`<div class="timeline">${items.map(item=>`<article class="entry"><div class="entry-top"><span>${esc(item.userType==='student'?'Student':'General')}・${esc(userStatusLabel(item.status))}</span><span>参加 ${esc(formatDate(item.joinedAt))}</span></div><div class="entry-title"><button class="entry-author" data-team-user-id="${esc(item.userId)}">${esc(item.displayName)}</button></div><div class="entry-body">${item.grade?`学年 ${esc(item.grade)}　`:''}${item.term?`期 ${esc(item.term)}　`:''}${item.roleLabel?`役職 ${esc(item.roleLabel)}`:''}</div><div class="kana">稽古ログ ${number(item.practiceLogCount)}件・ノート ${number(item.noteCount)}件</div></article>`).join('')}</div>`;
+}
+
+function closeDrawer(){$('drawerBackdrop').classList.remove('show');$('drawerBackdrop').setAttribute('aria-hidden','true');state.activeDetail=null;state.teamDetail=null;state.activeTeamId=''}
+function showView(name){$('usersView').classList.toggle('hidden',name!=='users');$('teamsView').classList.toggle('hidden',name!=='teams');document.querySelectorAll('[data-view]').forEach(button=>button.classList.toggle('active',button.dataset.view===name));$('pageTitle').textContent=name==='users'?'全体を、ひとつの視界に。':'チームの記録を、時系列で。';$('pageDescription').textContent=name==='users'?'ユーザーの成長記録とチームの動きを横断して確認します。':'チームごとの稽古ログ、ノート、所属メンバーを確認します。'}
 function toast(message){$('toast').textContent=message;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2200)}
 
 $('loginForm').addEventListener('submit',login);
