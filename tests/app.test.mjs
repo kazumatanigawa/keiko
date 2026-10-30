@@ -184,6 +184,14 @@ test('home settings and log form support multiple teams without cluttering singl
   assert.doesNotMatch(html, /個人利用ではチームノートは表示されません/);
 });
 
+test('registration always refreshes the active team directory', async () => {
+  const html = await read('index.html');
+  assert.match(html, /id="teamRefreshButton"[\s\S]*?loadTeamOptions\(true\)/);
+  assert.match(html, /function initializeAuthUi\(\)[\s\S]*?loadTeamOptions\(true\)/);
+  assert.match(html, /if \(tab === 'register'\) loadTeamOptions\(true\)/);
+  assert.match(html, /KEIKO管理者が登録した正式なチーム名/);
+});
+
 test('global notes are opt-in, explicitly scoped, and operator moderated', async () => {
   const sql = await read('supabase/migrations/2026090502_context_global_moderation.sql');
   const html = await read('index.html');

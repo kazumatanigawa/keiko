@@ -281,6 +281,10 @@ textarea:focus,input:focus{border-color:var(--red)}
 .auth-suggestion-btn.primary{background:var(--red);border-color:var(--red);color:#fff}
 .auth-team-meta{font-size:11px;color:var(--ink3);line-height:1.6;margin-top:6px}
 .auth-team-loading{font-size:11px;color:var(--ink3);margin-top:8px}
+.auth-team-tools{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
+.auth-team-tools .auth-team-loading{margin-top:0;flex:1}
+.auth-team-refresh{flex:0 0 auto;border:1px solid var(--border);border-radius:999px;background:#fff;color:var(--red);padding:6px 10px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer}
+.auth-team-refresh:disabled{opacity:.55;cursor:wait}
 .auth-btn{width:100%;padding:14px;margin-top:16px;background:var(--red);color:#fff;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:0.05em}
 .auth-hint{font-size:11px;color:var(--ink3);text-align:center;margin-top:8px;line-height:1.6}
 .auth-err{font-size:12px;color:var(--red);text-align:center;margin-top:8px;min-height:18px}
@@ -345,7 +349,11 @@ textarea:focus,input:focus{border-color:var(--red)}
   <select class="auth-select" id="regTeamSelect">
     <option value="">所属チームを選択してください</option>
   </select>
-  <div class="auth-team-loading" id="teamLoadingText">所属チームを読み込み中...</div>
+  <div class="auth-team-tools">
+    <div class="auth-team-loading" id="teamLoadingText" aria-live="polite">所属チームを読み込み中...</div>
+    <button class="auth-team-refresh" id="teamRefreshButton" type="button" onclick="loadTeamOptions(true)">一覧を更新</button>
+  </div>
+  <div class="auth-team-meta">KEIKO管理者が登録した正式なチーム名を選んでください。新しい学校が見つからない場合は「一覧を更新」を押してください。</div>
   <label class="auth-inline-toggle">
     <input id="launchTeamToggle" type="checkbox" onchange="toggleTeamLaunchMode()">
     <span>自分のチームを新しく登録する</span>
@@ -677,7 +685,7 @@ const GOOD_NEWS_ROTATE_MS = 3000;
 const GOOD_NEWS_REFRESH_MS = 60000;
 const GOOD_NEWS_RECENT_LIMIT = 4;
 const NOTES_REFRESH_MS = 45000;
-const APP_VERSION = '2026-09-08-01';
+const APP_VERSION = '2026-10-31-01';
 const APP_VERSION_KEY = 'taiko_app_version';
 const VIEW_KIND_KEY = 'taiko_view_kind';
 const APP_ROLE_KEY = 'taiko_app_role';
@@ -807,6 +815,7 @@ function initializeAuthUi() {
   hydrateMembershipCache();
   renderTeamOptions();
   toggleTeamLaunchMode(false);
+  loadTeamOptions(true);
   const launchInput = document.getElementById('launchTeamName');
   if (launchInput) {
     launchInput.addEventListener('input', handleLaunchTeamNameInput);
@@ -851,7 +860,7 @@ function switchAuthTab(tab) {
   document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
   document.querySelector(`.auth-tab[onclick*="${tab}"]`).classList.add('active');
   document.getElementById('auth-' + tab).classList.add('active');
-  if (tab === 'register') loadTeamOptions();
+  if (tab === 'register') loadTeamOptions(true);
 }
 
 // PINの自動フォーカス移動
@@ -1037,6 +1046,8 @@ async function loadTeamOptions(force = false) {
   if (!force && teamState.loaded && teamState.items.length) return;
 
   teamState.loading = true;
+  const refreshButton = document.getElementById('teamRefreshButton');
+  if (refreshButton) refreshButton.disabled = true;
   updateTeamLoadingMessage('所属チームを読み込み中...');
 
   try {
@@ -1064,6 +1075,7 @@ async function loadTeamOptions(force = false) {
     updateTeamLoadingMessage(teamState.items.length ? '最新の所属チーム取得に失敗したため、前回の一覧を表示しています。' : '所属チーム一覧を取得できませんでした。ローンチ登録は可能です。');
   } finally {
     teamState.loading = false;
+    if (refreshButton) refreshButton.disabled = false;
   }
 }
 

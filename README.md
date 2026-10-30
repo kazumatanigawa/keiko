@@ -43,3 +43,17 @@ The operator console is available at `admin.html` after the latest database
 migration and Edge Function are deployed. Only active profiles with
 `app_role = 'operator'` can load its data. User-detail views are recorded in
 `keiko_operator_events`.
+
+## New team onboarding
+
+School and partner teams are provisioned before members register:
+
+1. The KEIKO operator creates the team with its official name and an initial
+   administrator account named `<official team name>管理者`.
+2. Students and other members open `はじめて登録`, refresh the team directory
+   if needed, and select the existing official team name.
+3. Members must not launch a second team when the intended team already exists.
+
+The registration screen refreshes the active team directory when the app starts
+and whenever the registration tab opens. It also includes a manual refresh
+button so newly provisioned teams appear without clearing browser data.
