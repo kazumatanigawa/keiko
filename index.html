@@ -268,6 +268,7 @@ textarea:focus,input:focus{border-color:var(--red)}
 .auth-input:focus{border-color:var(--red)}
 .auth-select{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:15px;font-family:inherit;outline:none;background:#fff;color:var(--ink)}
 .auth-select:focus{border-color:var(--red)}
+.auth-select:disabled{opacity:.6;cursor:wait;background:#f7f4ef}
 .auth-inline-toggle{display:flex;align-items:center;gap:8px;margin-top:12px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:#fff;font-size:12px;color:var(--ink2)}
 .auth-inline-toggle input{accent-color:var(--red)}
 .auth-extra-box{display:none;margin-top:12px;padding:12px;border-radius:var(--radius-sm);background:#faf6ee;border:1px solid #ead7b7}
@@ -685,7 +686,7 @@ const GOOD_NEWS_ROTATE_MS = 3000;
 const GOOD_NEWS_REFRESH_MS = 60000;
 const GOOD_NEWS_RECENT_LIMIT = 4;
 const NOTES_REFRESH_MS = 45000;
-const APP_VERSION = '2026-10-31-01';
+const APP_VERSION = '2026-10-31-02';
 const APP_VERSION_KEY = 'taiko_app_version';
 const VIEW_KIND_KEY = 'taiko_view_kind';
 const APP_ROLE_KEY = 'taiko_app_role';
@@ -737,6 +738,7 @@ const teamState = {
   items: [],
   loaded: false,
   loading: false,
+  refreshRequested: false,
   suggestedTeamIds: [],
   ignoredSuggestionKey: ''
 };
@@ -1042,12 +1044,14 @@ function cacheTeamOptions() {
 }
 
 async function loadTeamOptions(force = false) {
-  if (teamState.loading) return;
+  if (teamState.loading) {
+    if (force) teamState.refreshRequested = true;
+    return;
+  }
   if (!force && teamState.loaded && teamState.items.length) return;
 
   teamState.loading = true;
-  const refreshButton = document.getElementById('teamRefreshButton');
-  if (refreshButton) refreshButton.disabled = true;
+  setTeamDirectoryLoading(true);
   updateTeamLoadingMessage('所属チームを読み込み中...');
 
   try {
@@ -1075,8 +1079,20 @@ async function loadTeamOptions(force = false) {
     updateTeamLoadingMessage(teamState.items.length ? '最新の所属チーム取得に失敗したため、前回の一覧を表示しています。' : '所属チーム一覧を取得できませんでした。ローンチ登録は可能です。');
   } finally {
     teamState.loading = false;
-    if (refreshButton) refreshButton.disabled = false;
+    setTeamDirectoryLoading(false);
+    if (teamState.refreshRequested) {
+      teamState.refreshRequested = false;
+      loadTeamOptions(true);
+    }
   }
+}
+
+function setTeamDirectoryLoading(isLoading) {
+  const refreshButton = document.getElementById('teamRefreshButton');
+  const select = document.getElementById('regTeamSelect');
+  const isLaunchMode = !!document.getElementById('launchTeamToggle')?.checked;
+  if (refreshButton) refreshButton.disabled = isLoading;
+  if (select) select.disabled = isLoading || isLaunchMode;
 }
 
 function renderTeamOptions() {
@@ -1115,7 +1131,7 @@ function toggleTeamLaunchMode(forceValue) {
 
   const isLaunchMode = !!toggle.checked;
   box.classList.toggle('show', isLaunchMode);
-  select.disabled = isLaunchMode;
+  select.disabled = isLaunchMode || teamState.loading;
   if (isLaunchMode) {
     select.value = '';
   } else {

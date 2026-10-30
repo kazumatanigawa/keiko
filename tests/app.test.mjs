@@ -189,6 +189,8 @@ test('registration always refreshes the active team directory', async () => {
   assert.match(html, /id="teamRefreshButton"[\s\S]*?loadTeamOptions\(true\)/);
   assert.match(html, /function initializeAuthUi\(\)[\s\S]*?loadTeamOptions\(true\)/);
   assert.match(html, /if \(tab === 'register'\) loadTeamOptions\(true\)/);
+  assert.match(html, /if \(teamState\.loading\)[\s\S]*?teamState\.refreshRequested = true/);
+  assert.match(html, /function setTeamDirectoryLoading\(isLoading\)[\s\S]*?select\.disabled = isLoading \|\| isLaunchMode/);
   assert.match(html, /KEIKO管理者が登録した正式なチーム名/);
 });
 
