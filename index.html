@@ -341,7 +341,7 @@ textarea:focus,input:focus{border-color:var(--red)}
 .resource-link{display:inline-flex;align-items:center;margin-top:12px;color:var(--red);font-size:10px;font-weight:900;text-decoration:none;border:0;background:none;padding:0;font-family:inherit;cursor:pointer}
 .resource-card.has-image .resource-link{color:#fff}
 .resource-link:disabled{color:var(--ink3);cursor:default}
-.resource-link.is-disabled{color:var(--ink3);cursor:default}
+.resource-link.is-disabled{align-self:flex-start;color:var(--ink2);cursor:default;font-size:14px;padding:8px 12px;border-radius:999px;background:#f1eee8;letter-spacing:.04em}
 .resource-card.gakumeiza-youtube{position:relative;isolation:isolate;overflow:hidden;min-height:198px;border:1px solid rgba(201,168,76,.58);background:linear-gradient(145deg,#5f1114 0%,var(--red) 58%,#2b1715 100%);color:#fff;box-shadow:0 14px 28px rgba(91,17,20,.2)}
 .resource-card.gakumeiza-youtube::before{content:'古今樂明座';position:absolute;right:-5px;bottom:10px;z-index:-1;color:rgba(255,255,255,.075);font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:38px;font-weight:900;white-space:nowrap;transform:rotate(-4deg)}
 .resource-card.gakumeiza-youtube::after{content:'▶';position:absolute;right:15px;top:15px;width:42px;height:42px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.45);border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:14px;box-shadow:0 8px 18px rgba(43,23,21,.22)}
@@ -570,8 +570,6 @@ textarea:focus,input:focus{border-color:var(--red)}
       <div class="practice-day-kicker">KEIKO HISTORY</div>
       <div class="practice-day-text">稽古<span class="practice-day-number" id="practiceDayCount">0</span>日目！</div>
     </div>
-    <button class="quick-btn btn-primary" id="homeRecordBtn" onclick="goTo('form')">📝 稽古ログを記録する</button>
-    <button class="quick-btn btn-secondary" id="homeLogsBtn" onclick="goTo('log')">📖 過去のログを見る</button>
     <details class="help-card" id="helpSection">
       <summary class="help-summary">
         <span class="help-summary-copy">
@@ -872,7 +870,7 @@ textarea:focus,input:focus{border-color:var(--red)}
 
 <div class="keiko-modal" id="coachingDialog" role="dialog" aria-modal="true" aria-labelledby="coachingDialogTitle">
   <div class="keiko-modal-card">
-    <div class="keiko-modal-head"><h2 id="coachingDialogTitle">谷川に指導を依頼する</h2><button class="keiko-modal-close" type="button" onclick="closeCoachingDialog()" aria-label="閉じる">×</button></div>
+    <div class="keiko-modal-head"><h2 id="coachingDialogTitle">古今樂明座に指導を依頼する</h2><button class="keiko-modal-close" type="button" onclick="closeCoachingDialog()" aria-label="閉じる">×</button></div>
     <div class="keiko-modal-body">
       <form class="coaching-form" id="coachingForm" onsubmit="submitCoachingRequest(event)">
         <div class="coaching-grid">
@@ -903,7 +901,7 @@ const GOOD_NEWS_ROTATE_MS = 3000;
 const GOOD_NEWS_REFRESH_MS = 60000;
 const GOOD_NEWS_RECENT_LIMIT = 4;
 const NOTES_REFRESH_MS = 45000;
-const APP_VERSION = '2026-11-03-15';
+const APP_VERSION = '2026-11-03-16';
 const APP_VERSION_KEY = 'taiko_app_version';
 const VIEW_KIND_KEY = 'taiko_view_kind';
 const APP_ROLE_KEY = 'taiko_app_role';
@@ -1016,7 +1014,7 @@ const FALLBACK_HOME_RESOURCES = [
   { resourceId: 'gakumeiza-radio', resourceType: 'radio', title: '樂明座ラジオ', description: '古今樂明座の考え方や稽古の知見を、YouTubeの再生リストで聴けます。', imageUrl: 'https://i.ytimg.com/vi/awLvvl1AvhU/hqdefault.jpg', destinationUrl: 'https://m.youtube.com/watch?v=awLvvl1AvhU&list=PLmk028LkL7RF9l2NIJBfL07O0b1-pBrRJ', sortOrder: 60 },
   { resourceId: 'custom-bachi-order', resourceType: 'order', title: 'カスタムバチを注文する', description: '木材・長さ・太さ・数量から概算と納期を確認できます。', imageUrl: '', destinationUrl: 'keiko://bachi', sortOrder: 70 },
   { resourceId: 'discord-study', resourceType: 'community', title: 'Discordの勉強会に参加', description: '指導と稽古について学ぶコミュニティです。', imageUrl: '', destinationUrl: '', sortOrder: 80, generalOnly: true },
-  { resourceId: 'coaching-request', resourceType: 'coaching', title: '谷川に指導を依頼する', description: '場所と指導時間だけで概算を確認し、日程は返信メールで調整できます。', imageUrl: '', destinationUrl: 'keiko://coaching', sortOrder: 90, generalOnly: true },
+  { resourceId: 'coaching-request', resourceType: 'coaching', title: '古今樂明座に指導を依頼する', description: '場所と指導時間だけで概算を確認し、日程は返信メールで調整できます。', imageUrl: '', destinationUrl: 'keiko://coaching', sortOrder: 90, generalOnly: true },
 ];
 const homeHubState = { announcements: [], resources: [], loaded: false, loading: false, lastFetchedAt: 0 };
 const FALLBACK_YOUTUBE_VIDEOS = [
@@ -1263,7 +1261,7 @@ function renderHomeHub() {
   renderAnnouncementCard();
   const resources = homeHubState.resources.length ? homeHubState.resources : visibleFallbackResources();
   renderResourceRow('learningResourceRow', selectHomeLearningResources(resources));
-  renderResourceRow('connectionResourceRow', resources.filter(item => ['radio', 'community'].includes(item.resourceType)));
+  renderResourceRow('connectionResourceRow', selectHomeConnectionResources(resources));
   renderResourceRow('serviceResourceRow', resources.filter(item => ['order', 'coaching'].includes(item.resourceType)));
   renderLibraryResources(resources);
 }
@@ -1272,6 +1270,12 @@ function selectHomeLearningResources(resources) {
   const fallbacks = visibleFallbackResources();
   const findResource = predicate => resources.find(predicate) || fallbacks.find(predicate);
   return [findResource(isGakumeizaScoreResource)].filter(Boolean);
+}
+
+function selectHomeConnectionResources(resources) {
+  const fallbacks = visibleFallbackResources();
+  const discord = resources.find(isDiscordStudyResource) || fallbacks.find(isDiscordStudyResource);
+  return discord ? [discord] : [];
 }
 
 function renderAnnouncementCard() {
@@ -1307,6 +1311,11 @@ function resourceTypeLabel(type) {
 function isGakumeizaRadioResource(item) {
   return String(item?.resourceId || '') === 'gakumeiza-radio'
     || String(item?.title || '').includes('樂明座ラジオ');
+}
+
+function isDiscordStudyResource(item) {
+  return String(item?.resourceId || '') === 'discord-study'
+    || String(item?.title || '').includes('Discord');
 }
 
 function isGakumeizaYoutubeResource(item) {

@@ -144,8 +144,13 @@ test('timekeeper rotation is server-managed and available on the home dashboard'
 
 test('home emphasizes practice day count without redundant condition summary', async () => {
   const html = await read('index.html');
+  const practiceDayPosition = html.indexOf('id="practiceDayCard"');
+  const helpPosition = html.indexOf('id="helpSection"');
   assert.match(html, /id="practiceDayCount"/);
   assert.match(html, /稽古<span class="practice-day-number"/);
+  assert.ok(practiceDayPosition > 0 && helpPosition > practiceDayPosition);
+  assert.doesNotMatch(html, /id="homeRecordBtn"/);
+  assert.doesNotMatch(html, /id="homeLogsBtn"/);
   assert.doesNotMatch(html, /id="totalCount"/);
   assert.doesNotMatch(html, /id="statAvgCond"/);
   assert.doesNotMatch(html, /平均コンディション/);
@@ -277,6 +282,7 @@ test('home hub exposes one help entry, vertical resources, announcements, and in
   const mediaMigration = await read('supabase/migrations/2026110102_keiko_media_links.sql');
   const requestMigration = await read('supabase/migrations/2026110103_interactive_service_requests.sql');
   const woodChoicesMigration = await read('supabase/migrations/2026110301_bachi_wood_choices.sql');
+  const resourceCleanupMigration = await read('supabase/migrations/2026110302_home_resource_cleanup.sql');
   assert.match(html, /id="announcementCard"/);
   assert.doesNotMatch(html, /id="tutorialHomeCard"/);
   assert.match(html, /id="helpSection"/);
@@ -284,6 +290,9 @@ test('home hub exposes one help entry, vertical resources, announcements, and in
   assert.match(html, /id="learningResourceRow"/);
   assert.match(html, /class="home-library-action"[^>]*>ライブラリを見る →</);
   assert.match(html, /renderResourceRow\('learningResourceRow', selectHomeLearningResources\(resources\)\)/);
+  assert.match(html, /renderResourceRow\('connectionResourceRow', selectHomeConnectionResources\(resources\)\)/);
+  assert.match(html, /const discord = resources\.find\(isDiscordStudyResource\) \|\| fallbacks\.find\(isDiscordStudyResource\)/);
+  assert.match(html, /String\(item\?\.resourceId \|\| ''\) === 'discord-study'/);
   assert.match(html, /return \[findResource\(isGakumeizaScoreResource\)\]\.filter\(Boolean\)/);
   assert.match(html, /if \(isGakumeizaYoutubeResource\(item\)\) return '';/);
   assert.match(html, /id="libraryResourceList"/);
@@ -297,6 +306,8 @@ test('home hub exposes one help entry, vertical resources, announcements, and in
   assert.match(html, /gakumeiza-score/);
   assert.match(html, /古今樂明座の楽譜・音源/);
   assert.match(html, /id="coachingDialog"/);
+  assert.match(html, /古今樂明座に指導を依頼する/);
+  assert.doesNotMatch(html, /谷川に指導を依頼する/);
   assert.match(html, /id="bachiDialog"/);
   assert.match(html, /keiko:\/\/bachi/);
   assert.match(html, /scheduleBachiEstimate/);
@@ -310,6 +321,7 @@ test('home hub exposes one help entry, vertical resources, announcements, and in
   assert.match(html, /card\.addEventListener\('click'/);
   assert.match(html, /card\.addEventListener\('keydown'/);
   assert.doesNotMatch(html, /<button class="resource-link"/);
+  assert.match(html, /\.resource-link\.is-disabled\{[^}]*font-size:14px/);
   assert.match(html, /function formatRequestDate/);
   assert.match(html, /function requestEmailStatusText/);
   assert.match(html, /id="coachingDuration"/);
@@ -363,6 +375,9 @@ test('home hub exposes one help entry, vertical resources, announcements, and in
   assert.match(woodChoicesMigration, /\('hou', 'ホオ', 1600/);
   assert.match(woodChoicesMigration, /\('maple', 'カエデ', 1600/);
   assert.match(woodChoicesMigration, /on conflict \(wood_code\) do update/);
+  assert.match(resourceCleanupMigration, /set status = 'inactive'/);
+  assert.match(resourceCleanupMigration, /where source_key = 'gakumeiza-radio'/);
+  assert.match(resourceCleanupMigration, /set title = '古今樂明座に指導を依頼する'/);
   assert.match(requestMigration, /\('half_day', '半日（4時間）', 24000/);
   assert.match(requestMigration, /alter column requested_date drop not null/);
   assert.match(requestMigration, /alter column start_time drop not null/);
