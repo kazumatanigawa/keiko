@@ -111,6 +111,22 @@ tbody tr:hover{background:#fff8eb}
 .detail-pagination{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px;padding:12px 2px;color:var(--ink-soft);font-size:10px}
 .detail-pagination button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 11px}
 .detail-pagination button:disabled{opacity:.4}
+.role-editor{display:flex;gap:7px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.role-editor select{flex:1;border:1px solid var(--line);border-radius:8px;background:#fff;padding:8px;font-size:10px}
+.role-editor button{border:0;border-radius:8px;background:var(--ink);color:#fff;padding:8px 10px;font-size:10px;font-weight:800}
+.announcement-editor{display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:20px 22px;border-bottom:1px solid var(--line);background:#f9f6ef}
+.announcement-editor .field{margin:0}
+.announcement-editor .full{grid-column:1/-1}
+.announcement-audience{grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid rgba(148,31,34,.2);border-radius:12px;background:#fff7f2}
+.announcement-audience-label{flex:0 0 auto;padding:5px 8px;border-radius:999px;background:var(--red);color:#fff;font-size:9px;font-weight:900;letter-spacing:.06em}
+.announcement-audience strong{display:block;font-size:13px}
+.announcement-audience small{display:block;margin-top:3px;color:var(--ink-soft);font-size:10px;line-height:1.5}
+.announcement-editor textarea{width:100%;min-height:110px;resize:vertical;border:1px solid var(--line);background:#fff;border-radius:11px;padding:12px 13px;font:inherit;font-size:12px}
+.announcement-list{display:grid;gap:10px;padding:20px 22px}
+.announcement-item{border:1px solid var(--line);border-radius:13px;background:#fff;padding:14px}
+.announcement-item-head{display:flex;justify-content:space-between;gap:12px;font-size:10px;color:var(--ink-soft)}
+.announcement-item h3{font-size:14px;margin-top:8px}
+.announcement-item p{font-size:11px;line-height:1.7;color:var(--ink-soft);margin-top:5px;white-space:pre-wrap}
 .toast{position:fixed;left:50%;bottom:24px;z-index:100;transform:translate(-50%,20px);opacity:0;background:var(--ink);color:#fff;border-radius:999px;padding:11px 17px;font-size:11px;transition:.2s;pointer-events:none}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 @media(max-width:1050px){.metric-grid{grid-template-columns:repeat(3,1fr)}.toolbar{grid-template-columns:1fr 1fr}.app-shell{grid-template-columns:210px minmax(0,1fr)}}
@@ -120,9 +136,9 @@ tbody tr:hover{background:#fff8eb}
 <body>
 <section class="login-screen" id="loginScreen">
   <form class="login-card" id="loginForm">
-    <div class="eyebrow">Operator access only</div>
+    <div class="eyebrow">Operator / team administrator</div>
     <h1>KEIKO Admin OS</h1>
-    <p class="login-copy">KEIKO全体のユーザー、稽古ログ、ノートを確認する運営者専用画面です。</p>
+    <p class="login-copy">KEIKO運営者は全体を、指導員・チーム管理者は担当チームの稽古ログとノートを確認できます。</p>
     <div class="field"><label for="loginName">管理者名</label><input id="loginName" autocomplete="username" required placeholder="登録している名前"></div>
     <div class="field"><label for="loginPin">4桁PIN</label><input id="loginPin" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="current-password" required placeholder="••••"></div>
     <button class="login-button" id="loginButton" type="submit">管理画面へログイン</button>
@@ -134,10 +150,11 @@ tbody tr:hover{background:#fff8eb}
 <div class="app-shell hidden" id="appShell">
   <aside class="sidebar">
     <div class="brand">KEIKO™︎</div><div class="brand-sub">ADMINISTRATION OS</div>
-    <div class="admin-mark">● OPERATOR MODE</div>
+    <div class="admin-mark" id="adminModeMark">● ACCESS CHECK</div>
     <nav class="nav">
-      <button class="nav-button active" data-view="users">ユーザー管理</button>
+      <button class="nav-button active" data-view="users" id="usersNavButton">ユーザー管理</button>
       <button class="nav-button" data-view="teams">チーム一覧</button>
+      <button class="nav-button operator-only-nav" data-view="announcements">運営からのお知らせ</button>
     </nav>
     <div class="sidebar-footer"><div class="operator-name" id="operatorName">運営者</div><button class="ghost-button" id="logoutButton">ログアウト</button></div>
   </aside>
@@ -151,6 +168,22 @@ tbody tr:hover{background:#fff8eb}
       <div class="pagination"><span id="pageInfo">0件</span><div><button id="prevButton">前へ</button> <button id="nextButton">次へ</button></div></div>
     </section>
     <section class="workspace hidden" id="teamsView"><div class="workspace-head"><div><div class="workspace-title">チーム一覧</div><div class="workspace-sub">所属人数と活動量</div></div></div><div class="team-grid" id="teamGrid"></div></section>
+    <section class="workspace hidden" id="announcementsView">
+      <div class="workspace-head"><div><div class="workspace-title">運営からのお知らせ</div><div class="workspace-sub">公開すると、所属やユーザー区分を問わず全員のKEIKOホームへ配信されます。</div></div></div>
+      <form class="announcement-editor" id="announcementForm">
+        <div class="announcement-audience"><span class="announcement-audience-label">配信対象</span><div><strong>全KEIKOユーザー</strong><small>Student・General・すべての所属チームに表示します。チーム管理者からは配信できません。</small></div></div>
+        <div class="field full"><label for="announcementTitle">タイトル</label><input id="announcementTitle" required maxlength="120"></div>
+        <div class="field full"><label for="announcementBody">本文</label><textarea id="announcementBody" required maxlength="3000"></textarea></div>
+        <div class="field"><label for="announcementPriority">重要度</label><select id="announcementPriority"><option value="normal">通常</option><option value="important">重要</option><option value="urgent">緊急</option></select></div>
+        <div class="field"><label for="announcementStatus">状態</label><select id="announcementStatus"><option value="published">公開</option><option value="draft">下書き</option><option value="archived">終了</option></select></div>
+        <div class="field"><label for="announcementStartsAt">公開開始</label><input id="announcementStartsAt" type="datetime-local"></div>
+        <div class="field"><label for="announcementExpiresAt">公開終了（任意）</label><input id="announcementExpiresAt" type="datetime-local"></div>
+        <div class="field"><label for="announcementActionLabel">リンク名（任意）</label><input id="announcementActionLabel" maxlength="40" placeholder="詳しく見る"></div>
+        <div class="field"><label for="announcementActionUrl">リンクURL（任意）</label><input id="announcementActionUrl" type="url" maxlength="1000"></div>
+        <button class="primary-button full" id="announcementSubmitButton" type="submit">全ユーザーへ公開</button>
+      </form>
+      <div class="announcement-list" id="announcementList"><div class="loading">お知らせを読み込んでいます...</div></div>
+    </section>
   </main>
 </div>
 
@@ -166,7 +199,7 @@ const REFRESH_TOKEN_KEY='taiko_refresh_token';
 const TOKEN_EXPIRES_AT_KEY='taiko_token_expires_at';
 const PAGE_SIZE=50;
 const TEAM_PAGE_SIZE=50;
-const state={overview:null,users:[],total:0,offset:0,loading:false,detailMode:'user',activeDetail:null,activeTab:'logs',activeTeamId:'',teamSection:'logs',teamOffset:0,teamDetail:null};
+const state={access:null,overview:null,users:[],total:0,offset:0,loading:false,detailMode:'user',activeDetail:null,activeTab:'logs',activeTeamId:'',teamSection:'logs',teamOffset:0,teamDetail:null,announcements:[]};
 let refreshPromise=null;
 let searchTimer=null;
 
@@ -215,12 +248,15 @@ function clearAdminSession(){[ACCESS_TOKEN_KEY,REFRESH_TOKEN_KEY,TOKEN_EXPIRES_A
 
 async function startAdmin(){
   $('syncState').textContent='Supabaseに接続中...';
+  state.access=await request('getAdminAccess');
+  applyAdminAccess();
   const [overview]=await Promise.all([request('getAdminOverview'),loadUsers()]);
   state.overview=overview;
   renderOverview();
-  $('operatorName').textContent=localStorage.getItem('taiko_name')||'KEIKO運営者';
+  $('operatorName').textContent=localStorage.getItem('taiko_name')||(isOperatorMode()?'KEIKO運営者':'チーム管理者');
   $('loginScreen').classList.add('hidden');$('appShell').classList.remove('hidden');
   $('syncState').textContent=`最終更新 ${new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}`;
+  if(!isOperatorMode())showView('teams');
 }
 
 async function login(event){
@@ -230,10 +266,19 @@ async function login(event){
   $('loginButton').disabled=true;$('loginError').textContent='権限を確認しています...';
   try{
     const session=await request('login',{name,pin},false);
-    if(session.appRole!=='operator')throw new Error('このアカウントには運営者権限がありません');
     saveTokens(session);$('loginPin').value='';await startAdmin();
   }catch(error){clearAdminSession();$('loginError').textContent=error.message}
   finally{$('loginButton').disabled=false}
+}
+
+function isOperatorMode(){return state.access?.accessMode==='operator'}
+function applyAdminAccess(){
+  const operator=isOperatorMode();
+  $('adminModeMark').textContent=operator?'● OPERATOR MODE':'● TEAM ADMIN MODE';
+  $('usersNavButton').textContent=operator?'ユーザー管理':'チームメンバー';
+  document.querySelectorAll('.operator-only-nav').forEach(element=>element.classList.toggle('hidden',!operator));
+  const teams=Array.isArray(state.access?.teams)?state.access.teams:[];
+  if(!operator&&teams.length)$('pageDescription').textContent=`${teams.map(team=>team.teamName).join(' / ')}の公開ログとノートを確認します。`;
 }
 
 async function loadUsers(reset=false){
@@ -248,7 +293,9 @@ async function loadUsers(reset=false){
 
 function renderOverview(){
   const summary=state.overview?.summary||{};
-  const cards=[['利用中ユーザー',summary.activeUsers,'登録済み'],['チーム',summary.activeTeams,'個人チームを除く'],['稽古ログ',summary.practiceLogs,'累計'],['ノート',summary.activeNotes,'公開中'],['直近7日の記録',summary.logsLast7Days,'新しい活動']];
+  const cards=isOperatorMode()
+    ?[['利用中ユーザー',summary.activeUsers,'登録済み'],['チーム',summary.activeTeams,'個人チームを除く'],['稽古ログ',summary.practiceLogs,'累計'],['ノート',summary.activeNotes,'公開中'],['直近7日の記録',summary.logsLast7Days,'新しい活動']]
+    :[['担当メンバー',summary.activeUsers,'担当チーム内'],['担当チーム',summary.activeTeams,'割り当て済み'],['稽古ログ',summary.practiceLogs,'チーム公開のみ'],['ノート',summary.activeNotes,'チーム公開のみ'],['直近7日の記録',summary.logsLast7Days,'新しい活動']];
   $('metrics').innerHTML=cards.map(([label,value,note])=>`<article class="metric"><div class="metric-label">${esc(label)}</div><div class="metric-value">${number(value)}</div><div class="metric-note">${esc(note)}</div></article>`).join('');
   const teams=Array.isArray(state.overview?.teams)?state.overview.teams:[];
   $('teamFilter').innerHTML='<option value="">すべてのチーム</option>'+teams.map(team=>`<option value="${esc(team.teamId)}">${esc(team.teamName)}</option>`).join('');
@@ -329,14 +376,92 @@ function renderTeamItems(items){
   if(!items.length)return '<div class="empty">記録はありません</div>';
   if(state.teamSection==='logs')return`<div class="timeline">${items.map(item=>`<article class="entry"><div class="entry-top"><span>${esc(formatDate(item.practiceDate))}</span><span>${item.condition?`Condition ${number(item.condition)}/5`:'Condition —'}</span></div><div class="entry-title"><button class="entry-author" data-team-user-id="${esc(item.userId)}">${esc(item.displayName)}</button></div><div class="log-columns"><div class="log-box"><b>学び</b><br>${esc(item.learning)}</div><div class="log-box"><b>次の行動</b><br>${esc(item.nextAction)}</div></div><div class="entry-body"><b>Good & New</b><br>${esc(item.goodNew)}</div>${item.memo?`<div class="entry-body"><b>メモ</b><br>${esc(item.memo)}</div>`:''}</article>`).join('')}</div>`;
   if(state.teamSection==='notes')return`<div class="timeline">${items.map(item=>`<article class="entry"><div class="entry-top"><span><button class="entry-author" data-team-user-id="${esc(item.authorUserId)}">${esc(item.authorName)}</button> <span class="pill">${esc(visibilityLabel(item.visibility))}</span></span><span>${esc(formatDateTime(item.createdAt))}</span></div><div class="entry-title">${esc(item.title)}</div><div class="entry-body">${esc(item.body)}</div><div class="kana">${esc(noteStatusLabel(item.status))}・コメント ${number(item.commentCount)}件</div></article>`).join('')}</div>`;
-  return`<div class="timeline">${items.map(item=>`<article class="entry"><div class="entry-top"><span>${esc(item.userType==='student'?'Student':'General')}・${esc(userStatusLabel(item.status))}</span><span>参加 ${esc(formatDate(item.joinedAt))}</span></div><div class="entry-title"><button class="entry-author" data-team-user-id="${esc(item.userId)}">${esc(item.displayName)}</button></div><div class="entry-body">${item.grade?`学年 ${esc(item.grade)}　`:''}${item.term?`期 ${esc(item.term)}　`:''}${item.roleLabel?`役職 ${esc(item.roleLabel)}`:''}</div><div class="kana">稽古ログ ${number(item.practiceLogCount)}件・ノート ${number(item.noteCount)}件</div></article>`).join('')}</div>`;
+  return`<div class="timeline">${items.map(item=>`<article class="entry"><div class="entry-top"><span>${esc(item.userType==='student'?'Student':'General')}・${esc(userStatusLabel(item.status))}</span><span>参加 ${esc(formatDate(item.joinedAt))}</span></div><div class="entry-title"><button class="entry-author" data-team-user-id="${esc(item.userId)}">${esc(item.displayName)}</button></div><div class="entry-body">${item.grade?`学年 ${esc(item.grade)}　`:''}${item.term?`期 ${esc(item.term)}　`:''}${item.roleLabel?`役職 ${esc(item.roleLabel)}`:''}</div><div class="kana">稽古ログ ${number(item.practiceLogCount)}件・ノート ${number(item.noteCount)}件・管理権限 ${esc(teamRoleLabel(item.teamRole))}</div>${renderRoleEditor(item)}</article>`).join('')}</div>`;
+}
+
+function teamRoleLabel(value){return({member:'メンバー',owner_admin:'設立管理者',owner:'オーナー',manager:'管理者',coach:'指導者',advisor:'アドバイザー'})[value]||value||'メンバー'}
+function renderRoleEditor(item){
+  if(!isOperatorMode())return'';
+  const roles=['member','owner_admin','owner','manager','coach','advisor'];
+  return`<div class="role-editor"><select id="role_${esc(item.userId)}" aria-label="${esc(item.displayName)}の管理権限">${roles.map(role=>`<option value="${role}" ${item.teamRole===role?'selected':''}>${esc(teamRoleLabel(role))}</option>`).join('')}</select><button type="button" onclick="saveTeamRole('${esc(item.userId)}')">権限を保存</button></div>`;
+}
+async function saveTeamRole(userId){
+  if(!isOperatorMode()||!state.activeTeamId)return;
+  const select=$(`role_${userId}`);if(!select)return;
+  try{
+    await request('setTeamStaffRole',{teamId:state.activeTeamId,userId,role:select.value});
+    const item=state.teamDetail?.items?.find(member=>member.userId===userId);if(item)item.teamRole=select.value;
+    toast('チーム管理権限を更新しました');
+  }catch(error){toast(error.message||'権限を更新できませんでした')}
+}
+
+async function loadAnnouncements(){
+  if(!isOperatorMode())return;
+  $('announcementList').innerHTML='<div class="loading">お知らせを読み込んでいます...</div>';
+  try{
+    const result=await request('getAdminAnnouncements');
+    state.announcements=Array.isArray(result.announcements)?result.announcements:[];
+    renderAnnouncements();
+  }catch(error){$('announcementList').innerHTML=`<div class="empty">${esc(error.message)}</div>`}
+}
+
+function renderAnnouncements(){
+  if(!state.announcements.length){$('announcementList').innerHTML='<div class="empty">お知らせはまだありません</div>';return}
+  const scopeLabels={all:'全ユーザー',student:'Student',general:'General',team_admin:'チーム管理者',team:'指定チーム'};
+  const statusLabels={draft:'下書き',published:'公開中',archived:'終了'};
+  $('announcementList').innerHTML=state.announcements.map(item=>`<article class="announcement-item"><div class="announcement-item-head"><span>${esc(scopeLabels[item.scope]||item.scope)}${item.teamName?`・${esc(item.teamName)}`:''}</span><span>${esc(statusLabels[item.status]||item.status)}・${esc(formatDateTime(item.startsAt))}</span></div><h3>${esc(item.title)}</h3><p>${esc(item.body)}</p></article>`).join('');
+}
+
+async function submitAnnouncement(event){
+  event.preventDefault();
+  if(!isOperatorMode())return;
+  const status=$('announcementStatus').value;
+  if(status==='published'&&!window.confirm('全てのKEIKOユーザーのホームへ公開します。よろしいですか？'))return;
+  const button=$('announcementSubmitButton');button.disabled=true;button.textContent=status==='published'?'全ユーザーへ公開中...':'保存中...';
+  try{
+    await request('saveAdminAnnouncement',{
+      scope:'all',
+      teamId:'',
+      title:$('announcementTitle').value.trim(),
+      body:$('announcementBody').value.trim(),
+      priority:$('announcementPriority').value,
+      status:$('announcementStatus').value,
+      startsAt:$('announcementStartsAt').value?new Date($('announcementStartsAt').value).toISOString():'',
+      expiresAt:$('announcementExpiresAt').value?new Date($('announcementExpiresAt').value).toISOString():'',
+      actionLabel:$('announcementActionLabel').value.trim(),
+      actionUrl:$('announcementActionUrl').value.trim(),
+    });
+    $('announcementForm').reset();
+    $('announcementPriority').value='normal';
+    $('announcementStatus').value='published';
+    toast(status==='published'?'全KEIKOユーザーへお知らせを公開しました':'お知らせを下書き保存しました');
+    await loadAnnouncements();
+  }catch(error){toast(error.message||'お知らせを保存できませんでした')}
+  finally{button.disabled=false;updateAnnouncementSubmitLabel()}
+}
+
+function updateAnnouncementSubmitLabel(){
+  const status=$('announcementStatus').value;
+  $('announcementSubmitButton').textContent=status==='published'?'全ユーザーへ公開':status==='draft'?'下書きを保存':'終了状態で保存';
 }
 
 function closeDrawer(){$('drawerBackdrop').classList.remove('show');$('drawerBackdrop').setAttribute('aria-hidden','true');state.activeDetail=null;state.teamDetail=null;state.activeTeamId=''}
-function showView(name){$('usersView').classList.toggle('hidden',name!=='users');$('teamsView').classList.toggle('hidden',name!=='teams');document.querySelectorAll('[data-view]').forEach(button=>button.classList.toggle('active',button.dataset.view===name));$('pageTitle').textContent=name==='users'?'全体を、ひとつの視界に。':'チームの記録を、時系列で。';$('pageDescription').textContent=name==='users'?'ユーザーの成長記録とチームの動きを横断して確認します。':'チームごとの稽古ログ、ノート、所属メンバーを確認します。'}
+function showView(name){
+  if(name==='announcements'&&!isOperatorMode())name='teams';
+  $('usersView').classList.toggle('hidden',name!=='users');
+  $('teamsView').classList.toggle('hidden',name!=='teams');
+  $('announcementsView').classList.toggle('hidden',name!=='announcements');
+  document.querySelectorAll('[data-view]').forEach(button=>button.classList.toggle('active',button.dataset.view===name));
+  const titles={users:isOperatorMode()?'全体を、ひとつの視界に。':'メンバーの成長を、チームの力に。',teams:'チームの記録を、時系列で。',announcements:'必要な情報を、必要な人へ。'};
+  const descriptions={users:isOperatorMode()?'ユーザーの成長記録とチームの動きを横断して確認します。':'担当チームのメンバーとチーム公開記録だけを確認します。',teams:'チームごとの稽古ログ、ノート、所属メンバーを確認します。',announcements:'KEIKOホームへ運営からのお知らせを配信します。'};
+  $('pageTitle').textContent=titles[name];$('pageDescription').textContent=descriptions[name];
+  if(name==='announcements')loadAnnouncements();
+}
 function toast(message){$('toast').textContent=message;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2200)}
 
 $('loginForm').addEventListener('submit',login);
+$('announcementForm').addEventListener('submit',submitAnnouncement);
+$('announcementStatus').addEventListener('change',updateAnnouncementSubmitLabel);
 $('logoutButton').addEventListener('click',()=>{clearAdminSession();location.reload()});
 $('refreshButton').addEventListener('click',async()=>{try{state.overview=await request('getAdminOverview');renderOverview();await loadUsers(true);toast('最新情報に更新しました')}catch(error){toast(error.message)}});
 $('searchButton').addEventListener('click',()=>loadUsers(true).catch(error=>toast(error.message)));
@@ -352,7 +477,7 @@ document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener
 
 (async()=>{
   if(!localStorage.getItem(REFRESH_TOKEN_KEY))return;
-  try{await startAdmin()}catch(error){clearAdminSession();$('loginError').textContent=error.code==='operator_required'?'このアカウントには運営者権限がありません':'ログインし直してください'}
+  try{await startAdmin()}catch(error){clearAdminSession();$('loginError').textContent=['operator_required','admin_required'].includes(error.code)?'このアカウントにはチーム管理権限がありません':'ログインし直してください'}
 })();
 </script>
 </body>

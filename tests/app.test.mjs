@@ -168,20 +168,43 @@ test('multi-team membership changes are audited and restricted to the server', a
 test('home settings and log form support multiple teams without cluttering single-team users', async () => {
   const html = await read('index.html');
   const helpPosition = html.indexOf('id="helpSection"');
+  const learningPosition = html.indexOf('id="learningHubSection"');
   const settingsPosition = html.indexOf('id="personalSettings"');
-  assert.ok(helpPosition > 0 && settingsPosition > helpPosition);
+  assert.ok(helpPosition > 0 && learningPosition > helpPosition && settingsPosition > learningPosition);
   assert.match(html, /id="formTeamPicker"/);
   assert.match(html, /picker\.classList\.toggle\('show', teams\.length > 1\)/);
+  assert.match(html, /const preferred = teams\.find\(team => team\.teamId === getTeamId\(\)\)/);
   assert.match(html, /p_team_id: getSelectedLogTeamId\(\)/);
   assert.match(html, /get_keiko_log_target_summary/);
   assert.match(html, /openMembershipEditor\('join'\)/);
   assert.match(html, /openMembershipEditor\('transfer'\)/);
   assert.match(html, /graduateFromTeams\(\)/);
-  assert.match(html, /登録コードはアプリ内には表示されません/);
+  assert.doesNotMatch(html, /登録コードはアプリ内には表示されません/);
+  assert.match(html, /<details class="help-card" id="helpSection">/);
+  assert.match(html, /class="help-summary"/);
+  assert.doesNotMatch(html, /<details class="help-card" id="helpSection" open/);
+  assert.match(html, /<details class="settings-card" id="personalSettings">/);
+  assert.match(html, /class="settings-summary"/);
+  assert.match(html, /class="settings-summary-sub">チームの移籍・掛け持ち</);
+  assert.doesNotMatch(html, /<details class="settings-card" id="personalSettings" open/);
   assert.match(html, /KEIKO運営または参加先チームの責任者/);
   assert.match(html, /class="nav-item active" aria-current="page"/);
   assert.match(html, /\.nav-item\.active\{background:var\(--nav-active-soft\)/);
   assert.doesNotMatch(html, /個人利用ではチームノートは表示されません/);
+});
+
+test('home context only switches between regular teams while notes keep every audience', async () => {
+  const html = await read('index.html');
+  const switcherStart = html.indexOf('function renderViewContextSwitcher()');
+  const switcherEnd = html.indexOf('async function switchViewContext', switcherStart);
+  const switcher = html.slice(switcherStart, switcherEnd);
+  assert.match(html, /稽古するチームを選ぶ/);
+  assert.match(html, /掛け持ちしている場合、今回どのチームで稽古するかを選びます/);
+  assert.match(switcher, /const regularTeams = getRegularTeams\(\)/);
+  assert.match(switcher, /regularTeams\.map/);
+  assert.doesNotMatch(switcher, /getMemberships\(\)\.map/);
+  assert.doesNotMatch(switcher, /グローバル|自分/);
+  assert.match(html, /function renderNoteScopeButtons\(\)[\s\S]*?自分だけ[\s\S]*?getRegularTeams\(\)\.map[\s\S]*?グローバル/);
 });
 
 test('registration always refreshes the active team directory', async () => {
@@ -227,10 +250,179 @@ test('global notes are opt-in, explicitly scoped, and operator moderated', async
   assert.match(html, /presentation\.confirmation/);
   assert.match(html, /selectNoteScope\('private'\)/);
   assert.match(html, /selectNoteScope\('global'\)/);
-  assert.match(html, /id="operatorSettings"/);
+  assert.match(html, /const regularTeams = getRegularTeams\(\);[\s\S]*panel\.style\.display = regularTeams\.length > 1/);
+  assert.doesNotMatch(html, /switchViewContext\('global'\)/);
+  assert.doesNotMatch(html, /id="globalHomeCard"/);
+  assert.match(html, /ノート画面上部の「グローバル」/);
+  const homeStart = html.indexOf('<div class="screen" id="screen-home">');
+  const notesStart = html.indexOf('<div class="screen" id="screen-notes">');
+  const libraryStart = html.indexOf('<div class="screen" id="screen-library">');
+  const homeMarkup = html.slice(homeStart, notesStart);
+  const notesMarkup = html.slice(notesStart, libraryStart);
+  assert.doesNotMatch(homeMarkup, /id="globalParticipationCard"/);
+  assert.match(notesMarkup, /id="globalParticipationCard"/);
+  assert.match(html, /card\.classList\.toggle\('show', canUseGlobal\)/);
+  assert.match(html, /function updateNotes\(\) \{\s*renderGlobalParticipation\(\)/);
+  assert.doesNotMatch(html, /id="operatorSettings"/);
   assert.match(html, /reportContent\('note'/);
 
   assert.match(edge, /🚨KEIKO OS からの通報🚨/);
   assert.match(edge, /kokongakumeiza@gmail\.com/);
   assert.match(edge, /RESEND_API_KEY/);
+});
+
+test('home hub exposes one help entry, vertical resources, announcements, and interactive requests', async () => {
+  const html = await read('index.html');
+  const edge = await read('supabase/functions/keiko-api/index.ts');
+  const mediaMigration = await read('supabase/migrations/2026110102_keiko_media_links.sql');
+  const requestMigration = await read('supabase/migrations/2026110103_interactive_service_requests.sql');
+  const woodChoicesMigration = await read('supabase/migrations/2026110301_bachi_wood_choices.sql');
+  assert.match(html, /id="announcementCard"/);
+  assert.doesNotMatch(html, /id="tutorialHomeCard"/);
+  assert.match(html, /id="helpSection"/);
+  assert.match(html, /class="help-primary-action"[^>]*>使い方を見る</);
+  assert.match(html, /id="learningResourceRow"/);
+  assert.match(html, /class="home-library-action"[^>]*>ライブラリを見る →</);
+  assert.match(html, /renderResourceRow\('learningResourceRow', selectHomeLearningResources\(resources\)\)/);
+  assert.match(html, /return \[findResource\(isGakumeizaScoreResource\)\]\.filter\(Boolean\)/);
+  assert.match(html, /if \(isGakumeizaYoutubeResource\(item\)\) return '';/);
+  assert.match(html, /id="libraryResourceList"/);
+  assert.match(html, /id="libraryYoutubeChannelList"/);
+  assert.match(html, /古今樂明座 Official YouTube/);
+  assert.doesNotMatch(html, /id="libraryResourceCarousel"/);
+  assert.doesNotMatch(html, /指導スライドをチェック/);
+  assert.doesNotMatch(html, /drive\.google\.com\/drive\/folders\/1a9iaxd2OKBywSuRZvPib1gyGciL22HpM/);
+  assert.doesNotMatch(html, /class="brand-support-card"/);
+  assert.match(html, /\.resource-row,\.library-resource-list\{display:grid;grid-template-columns:1fr/);
+  assert.match(html, /gakumeiza-score/);
+  assert.match(html, /古今樂明座の楽譜・音源/);
+  assert.match(html, /id="coachingDialog"/);
+  assert.match(html, /id="bachiDialog"/);
+  assert.match(html, /keiko:\/\/bachi/);
+  assert.match(html, /scheduleBachiEstimate/);
+  assert.match(html, /scheduleCoachingEstimate/);
+  assert.match(html, /const BACHI_WOOD_CHOICES = \[/);
+  assert.match(html, /\{ woodCode: 'hinoki', displayName: 'ヒノキ' \}/);
+  assert.match(html, /\{ woodCode: 'hou', displayName: 'ホオ' \}/);
+  assert.match(html, /\{ woodCode: 'maple', displayName: 'カエデ' \}/);
+  assert.match(html, /requestCatalogState\.woods = BACHI_WOOD_CHOICES/);
+  assert.match(html, /role="button" tabindex="0" data-resource-id/);
+  assert.match(html, /card\.addEventListener\('click'/);
+  assert.match(html, /card\.addEventListener\('keydown'/);
+  assert.doesNotMatch(html, /<button class="resource-link"/);
+  assert.match(html, /function formatRequestDate/);
+  assert.match(html, /function requestEmailStatusText/);
+  assert.match(html, /id="coachingDuration"/);
+  for (const removedField of ['coachingPhone', 'coachingDate', 'coachingParticipants', 'coachingStart', 'coachingEnd', 'coachingNotes']) {
+    assert.doesNotMatch(html, new RegExp(`id="${removedField}"`));
+  }
+  assert.match(html, /\[60, 90, 120, 150, 180\]/);
+  assert.match(html, /durationMinutes/);
+  assert.match(html, /estimateCoachingRequest/);
+  assert.match(html, /createCoachingRequest/);
+  assert.match(html, /safeDestinationUrl/);
+  assert.match(html, /supported by 古今樂明座<\/div><\/a>/);
+  assert.doesNotMatch(html, /supported by 古今樂明座　公式サイトへ/);
+  assert.match(html, /https:\/\/m\.youtube\.com\/watch\?v=awLvvl1AvhU&list=PLmk028LkL7RF9l2NIJBfL07O0b1-pBrRJ/);
+  assert.match(html, /gakumeiza-youtube/);
+  assert.match(html, /古今樂明座 Official YouTubeチャンネル/);
+  assert.match(html, /id="youtubeVideoList"/);
+  assert.match(html, /FALLBACK_YOUTUBE_VIDEOS/);
+  assert.match(html, /getYoutubeVideos/);
+  assert.match(html, /youtube-video-card/);
+  assert.match(mediaMigration, /where source_key = 'gakumeiza-radio'/);
+  assert.match(mediaMigration, /m\.youtube\.com\/watch\?v=awLvvl1AvhU&list=PLmk028LkL7RF9l2NIJBfL07O0b1-pBrRJ/);
+  assert.match(edge, /action === 'estimateCoachingRequest'/);
+  assert.match(edge, /action === 'createCoachingRequest'/);
+  assert.match(edge, /action === 'getRequestCatalogs'/);
+  assert.match(edge, /action === 'estimateBachiOrder'/);
+  assert.match(edge, /action === 'createBachiOrder'/);
+  assert.match(edge, /action === 'getYoutubeVideos'/);
+  assert.match(edge, /youtube\.com\/feeds\/videos\.xml\?channel_id=/);
+  assert.match(edge, /YOUTUBE_FEED_CACHE_MS/);
+  assert.match(edge, /coaching_rate_options/);
+  assert.match(edge, /bachi_wood_price_options/);
+  assert.match(edge, /sendBachiEmails/);
+  assert.match(edge, /sendCoachingEmails/);
+  assert.match(edge, /customer_email_status/);
+  assert.match(edge, /GOOGLE_MAPS_ROUTES_API_KEY/);
+  assert.match(edge, /routes\.googleapis\.com\/directions\/v2:computeRoutes/);
+  assert.match(edge, /routes\.travelAdvisory\.transitFare/);
+  assert.match(edge, /KEIKO_COACHING_ORIGIN/);
+  assert.match(edge, /requiredInteger\(payload\.durationMinutes, '指導時間'/);
+  assert.doesNotMatch(edge, /requiredDate\(payload\.requestedDate/);
+  assert.doesNotMatch(html, /GOOGLE_MAPS_DIRECTIONS_API_KEY/);
+  for (const table of ['bachi_wood_price_options', 'bachi_quantity_price_tiers', 'bachi_order_settings', 'bachi_order_requests', 'coaching_rate_options']) {
+    assert.match(requestMigration, new RegExp(`create table if not exists public\\.${table}\\b`));
+  }
+  assert.match(requestMigration, /\('hinoki', 'ヒノキ', 1800, 42, 24, 1, 10\)/);
+  assert.match(requestMigration, /\('hou', 'ホオ', 1600, 42, 24, 1, 20\)/);
+  assert.match(requestMigration, /\('maple', 'カエデ', 1600, 42, 24, 1, 30\)/);
+  assert.match(woodChoicesMigration, /where wood_code not in \('hinoki', 'hou', 'maple'\)/);
+  assert.match(woodChoicesMigration, /\('hinoki', 'ヒノキ', 1800/);
+  assert.match(woodChoicesMigration, /\('hou', 'ホオ', 1600/);
+  assert.match(woodChoicesMigration, /\('maple', 'カエデ', 1600/);
+  assert.match(woodChoicesMigration, /on conflict \(wood_code\) do update/);
+  assert.match(requestMigration, /\('half_day', '半日（4時間）', 24000/);
+  assert.match(requestMigration, /alter column requested_date drop not null/);
+  assert.match(requestMigration, /alter column start_time drop not null/);
+  assert.match(requestMigration, /alter column end_time drop not null/);
+  assert.match(requestMigration, /destination_url = 'keiko:\/\/bachi'/);
+});
+
+test('team admin SaaS migration scopes staff to assigned team-visible data', async () => {
+  const sql = await read('supabase/migrations/2026110101_home_hub_team_admin_saas.sql');
+  for (const table of [
+    'home_resources',
+    'announcements',
+    'announcement_reads',
+    'coaching_requests',
+    'team_subscriptions',
+    'team_entitlements',
+    'team_admin_audit_events',
+  ]) assert.match(sql, new RegExp(`create table if not exists public\\.${table}\\b`));
+
+  for (const name of [
+    'get_keiko_home_hub',
+    'mark_keiko_announcement_read',
+    'get_keiko_admin_access',
+    'get_keiko_scoped_admin_overview',
+    'get_keiko_scoped_admin_users',
+    'get_keiko_scoped_admin_user_detail',
+    'get_keiko_scoped_admin_team_detail',
+    'set_keiko_team_staff_role',
+  ]) assert.match(sql, new RegExp(`create or replace function public\\.${name}\\b`));
+
+  assert.match(sql, /team_role in \('owner_admin', 'owner', 'manager', 'coach', 'advisor'\)/);
+  assert.match(sql, /pl\.visibility = 'team'/);
+  assert.match(sql, /n\.visibility = 'team'/);
+  assert.match(sql, /team_forbidden/);
+  assert.match(sql, /team_admin_audit_events/);
+  assert.match(sql, /a\.scope = 'all'/);
+  assert.match(sql, /grant execute on function public\.get_keiko_home_hub\(uuid\) to authenticated/);
+  assert.match(sql, /grant execute on function public\.get_keiko_scoped_admin_team_detail[\s\S]*to service_role/);
+});
+
+test('Admin OS accepts scoped team administrators without exposing operator tools', async () => {
+  const html = await read('admin.html');
+  const edge = await read('supabase/functions/keiko-api/index.ts');
+  assert.match(html, /getAdminAccess/);
+  assert.match(html, /TEAM ADMIN MODE/);
+  assert.match(html, /operator-only-nav/);
+  assert.match(html, /setTeamStaffRole/);
+  assert.match(html, /saveAdminAnnouncement/);
+  assert.match(html, /全KEIKOユーザー/);
+  assert.match(html, /scope:'all'/);
+  assert.match(html, /全てのKEIKOユーザーのホームへ公開します/);
+  assert.match(html, /チーム管理者からは配信できません/);
+  assert.doesNotMatch(html, /id="announcementScope"/);
+  assert.doesNotMatch(html, /id="announcementTeam"/);
+  const app = await read('index.html');
+  assert.match(app, /loadHomeHub\(\{ force: true \}\)/);
+  assert.match(app, /visibilitychange[\s\S]*?homeScreen\?\.classList\.contains\('active'\)/);
+  assert.doesNotMatch(html, /session\.appRole!=='operator'/);
+  assert.match(edge, /get_keiko_scoped_admin_overview/);
+  assert.match(edge, /get_keiko_scoped_admin_users/);
+  assert.match(edge, /get_keiko_scoped_admin_user_detail/);
+  assert.match(edge, /get_keiko_scoped_admin_team_detail/);
 });

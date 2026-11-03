@@ -17,7 +17,11 @@ Japanese drum practice logging app.
 - View contexts: switch between personal, each team, and the opt-in global feed
 - Note visibility: private, team, or global with explicit team and user opt-in
 - Moderation: operator-only team settings, report review, and content hiding
-- `admin.html`: operator-only overview of users plus paged, date-sorted team logs, notes, members, and comments
+- `admin.html`: role-aware overview of users plus paged, date-sorted team logs, notes, members, and comments
+- Home hub: operator announcements, first-log tutorial, official resources, community links, and coaching requests
+- Team Admin OS: team-scoped log, note, member, and role views for approved owners, managers, coaches, and advisors
+- Coaching intake: duration-and-location estimate at 6,000 JPY/hour plus best-effort round-trip public transport fare from Fuchu; dates are arranged by reply email
+- Custom bachi intake: configurable wood, dimensions, quantity pricing, one-month delivery estimate, and email receipts
 
 Authenticated reads and writes go directly from the browser to Supabase with the
 publishable key and the user's short-lived access token. The browser never
@@ -39,10 +43,12 @@ node scripts/migrate-team-notes-to-supabase.mjs
 
 Database and Edge Function deployment steps are in `supabase/README.md`.
 
-The operator console is available at `admin.html` after the latest database
-migration and Edge Function are deployed. Only active profiles with
-`app_role = 'operator'` can load its data. User-detail views are recorded in
-`keiko_operator_events`.
+The Admin OS is available at `admin.html` after the latest database migration
+and Edge Function are deployed. Active profiles with `app_role = 'operator'`
+can load the full console. Approved memberships with `team_role` set to
+`owner_admin`, `owner`, `manager`, `coach`, or `advisor` can load only assigned
+teams and only team-visible logs and notes. Operator and team-admin detail views
+are audited separately.
 
 ## New team onboarding
 

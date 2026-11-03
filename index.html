@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>稽古ノート</title>
+<title>KEIKO™︎</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -22,6 +22,8 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;backgroun
 .header-sub{font-size:11px;opacity:0.8;margin-top:2px}
 .header-sub a,.auth-sub a{color:inherit;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.45)}
 .header-sub a:hover,.auth-sub a:hover{border-bottom-color:rgba(255,255,255,0.9)}
+.brand-home-link{display:block;color:inherit;text-decoration:none;border-radius:9px;padding:3px 6px;margin:-3px -6px;transition:background .18s ease}
+.brand-home-link:hover,.brand-home-link:focus-visible{background:rgba(255,255,255,.12);outline:none}
 .header-right{display:flex;align-items:center;gap:8px}
 .logout-btn{background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:11px;padding:4px 10px;border-radius:20px;cursor:pointer;font-family:inherit}
 .bottom-nav{background:rgba(255,255,255,.96);border-top:1px solid var(--border);display:flex;gap:4px;padding:7px 8px max(10px,env(safe-area-inset-bottom));position:sticky;bottom:0;z-index:100;box-shadow:0 -8px 22px rgba(23,20,15,.06);backdrop-filter:blur(10px)}
@@ -86,14 +88,28 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;backgroun
 .form-team-picker-label{font-size:11px;font-weight:800;letter-spacing:.08em;color:#8b6813;margin-bottom:7px}
 .form-team-picker select,.membership-editor select{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 12px;background:#fff;color:var(--ink);font-size:14px;font-family:inherit}
 .form-team-picker-hint{font-size:10px;color:var(--ink3);line-height:1.5;margin-top:6px}
-.help-card{background:linear-gradient(135deg,#fff 0%,#fffaf0 100%);border:1px solid #ead9b6;border-radius:var(--radius);padding:17px;margin-bottom:12px}
+.help-card{background:linear-gradient(135deg,#fff 0%,#fffaf0 100%);border:1px solid #ead9b6;border-radius:var(--radius);padding:0;margin:18px 0 12px;overflow:hidden}
 .help-title,.settings-title{font-size:15px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:8px}
 .help-lead,.settings-lead{font-size:12px;color:var(--ink3);line-height:1.7;margin-top:6px}
+.help-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px;cursor:pointer;list-style:none}
+.help-summary::-webkit-details-marker{display:none}
+.help-summary-copy,.settings-summary-copy{display:grid;gap:3px}
+.help-summary-sub,.settings-summary-sub{font-size:10px;color:var(--ink3);font-weight:700;line-height:1.5}
+.help-summary-icon{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#f7ecd5;color:#8b6813;font-size:16px;font-weight:900;transition:transform .18s ease}
+.help-card[open] .help-summary-icon{transform:rotate(180deg)}
+.help-accordion-body{padding:0 17px 17px;border-top:1px solid #ead9b6}
+.help-accordion-body .help-lead{margin-top:14px}
 .help-steps{display:grid;gap:8px;margin-top:13px}
 .help-step{display:flex;align-items:flex-start;gap:10px;padding:10px 11px;background:rgba(255,255,255,.8);border:1px solid #f0e5ce;border-radius:10px}
 .help-step-number{flex:none;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--red);color:#fff;font-size:11px;font-weight:800}
 .help-step-copy{font-size:12px;color:var(--ink2);line-height:1.6}
-.settings-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:17px;margin-bottom:4px}
+.settings-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:0;margin-bottom:4px;overflow:hidden}
+.settings-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px;cursor:pointer;list-style:none}
+.settings-summary::-webkit-details-marker{display:none}
+.settings-summary-icon{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--red-pale);color:var(--red);font-size:16px;font-weight:900;transition:transform .18s ease}
+.settings-card[open] .settings-summary-icon{transform:rotate(180deg)}
+.settings-accordion-body{padding:0 17px 17px;border-top:1px solid var(--border)}
+.settings-accordion-body .settings-lead{margin-top:14px}
 .membership-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
 .membership-chip{display:inline-flex;align-items:center;gap:5px;background:#f7f2e8;border:1px solid #e8dcc5;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:700;color:var(--ink2)}
 .membership-chip.current{background:var(--red-pale);border-color:#e4baba;color:var(--red)}
@@ -107,7 +123,6 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;backgroun
 .membership-editor input{margin-top:8px}
 .membership-code-label{display:block;margin-top:12px;font-size:11px;font-weight:900;color:var(--ink2)}
 .membership-code-help{font-size:10px;color:var(--ink3);line-height:1.6;margin-top:6px}
-.membership-code-notice{margin-top:12px;padding:10px 11px;background:var(--red-pale);border-left:3px solid var(--red);border-radius:0 9px 9px 0;color:var(--red);font-size:10px;font-weight:700;line-height:1.65}
 .membership-editor-actions{display:flex;gap:8px;margin-top:10px}
 .membership-editor-actions button{flex:1;border:0;border-radius:9px;padding:10px 8px;font-family:inherit;font-size:11px;font-weight:800;cursor:pointer}
 .membership-editor-submit{background:var(--red);color:#fff}
@@ -153,22 +168,6 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;backgroun
 .visibility-badge.private{background:#eef1f5;color:#4c596c}
 .report-btn{border:0;background:transparent;color:#a34a4a;font-family:inherit;font-size:10px;font-weight:700;cursor:pointer;padding:5px 0}
 .report-btn:disabled{opacity:.45;cursor:not-allowed}
-.operator-card{display:none;background:#fff;border:2px solid #202d2b;border-radius:var(--radius);padding:17px;margin:12px 0 4px}
-.operator-card.show{display:block}
-.operator-badge{display:inline-flex;padding:4px 8px;border-radius:999px;background:#202d2b;color:#fff;font-size:9px;font-weight:900;letter-spacing:.1em;margin-bottom:8px}
-.operator-team-row,.operator-report{padding:12px 0;border-top:1px solid var(--border)}
-.operator-team-row:first-child,.operator-report:first-child{border-top:0}
-.operator-team-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.operator-team-name{font-size:12px;font-weight:800;color:var(--ink)}
-.operator-team-meta,.operator-report-meta{font-size:10px;color:var(--ink3);line-height:1.6;margin-top:3px}
-.operator-toggle{border:1px solid var(--red);background:#fff;color:var(--red);border-radius:999px;padding:7px 10px;font-family:inherit;font-size:10px;font-weight:800;cursor:pointer}
-.operator-toggle.enabled{background:var(--red);color:#fff}
-.operator-toggle:disabled{opacity:.45;cursor:not-allowed}
-.operator-report-body{font-size:11px;color:var(--ink2);line-height:1.7;margin-top:7px;white-space:pre-wrap}
-.operator-report-actions{display:flex;gap:6px;margin-top:8px}
-.operator-report-actions button{flex:1;border:1px solid var(--border);background:#fff;border-radius:8px;padding:8px 5px;font-family:inherit;font-size:10px;font-weight:800;cursor:pointer}
-.operator-report-actions .hide{border-color:var(--red);color:var(--red)}
-.operator-os-link{display:flex;align-items:center;justify-content:center;margin:10px 0 16px;padding:11px;border-radius:10px;background:#202d2b;color:#fff;text-decoration:none;font-size:11px;font-weight:900;letter-spacing:.04em}
 .form-section{margin-bottom:16px}
 .form-label{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px;display:block}
 .form-hint{font-size:11px;color:var(--ink3);margin-bottom:6px}
@@ -301,6 +300,124 @@ textarea:focus,input:focus{border-color:var(--red)}
 .library-actions{margin-top:18px}
 .library-actions-stack{display:flex;flex-direction:column;gap:10px}
 .library-folder-link{display:flex;align-items:center;justify-content:center;width:100%;padding:12px;border-radius:14px;border:2px solid var(--red);background:#fff;color:var(--red);text-decoration:none;font-size:13px;font-weight:700}
+
+/* ===== Home hub, tutorial, and coaching ===== */
+.announcement-card{display:none;margin-bottom:12px;padding:13px 14px;border:1px solid #e7d3a5;border-left:4px solid var(--gold);border-radius:12px;background:#fff9e9;box-shadow:0 8px 20px rgba(68,49,19,.06)}
+.announcement-card.show{display:block}
+.announcement-card.important{border-left-color:#d07122;background:#fff4e5}
+.announcement-card.urgent{border-left-color:var(--red);background:var(--red-pale)}
+.announcement-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.announcement-label{font-size:9px;font-weight:900;letter-spacing:.12em;color:#946c18}
+.announcement-title{font-size:14px;font-weight:900;line-height:1.5;margin-top:3px}
+.announcement-body{font-size:11px;color:var(--ink2);line-height:1.65;margin-top:5px;white-space:pre-wrap}
+.announcement-close{border:0;background:transparent;color:var(--ink3);font-size:18px;line-height:1;cursor:pointer}
+.announcement-action{display:inline-flex;margin-top:9px;color:var(--red);font-size:11px;font-weight:900;text-decoration:none}
+.home-hub-section{margin:18px 0 4px}
+.home-hub-heading{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:9px}
+.home-hub-title{font-size:16px;font-weight:900}
+.home-hub-sub{font-size:10px;color:var(--ink3);line-height:1.5;margin-top:2px}
+.home-hub-all{border:0;background:none;color:var(--red);font-size:10px;font-weight:900;cursor:pointer}
+.home-library-action{width:100%;margin-top:2px;border:2px solid var(--red);border-radius:13px;background:#fff;color:var(--red);padding:14px 16px;font-family:inherit;font-size:14px;font-weight:900;letter-spacing:.03em;cursor:pointer;box-shadow:0 8px 18px rgba(139,26,26,.08)}
+.home-library-action:active{transform:translateY(1px)}
+.tutorial-home-card{position:relative;overflow:hidden;padding:17px;border-radius:16px;background:linear-gradient(135deg,#5f1416,var(--red) 55%,#bc633f);color:#fff;box-shadow:0 14px 28px rgba(139,26,26,.18);margin-bottom:12px}
+.tutorial-home-card::after{content:'▶';position:absolute;right:18px;top:18px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35)}
+.tutorial-kicker{font-size:9px;font-weight:900;letter-spacing:.15em;color:#f1d8a4}
+.tutorial-title{font-size:18px;font-weight:900;margin-top:5px;max-width:75%}
+.tutorial-copy{font-size:11px;line-height:1.7;color:rgba(255,255,255,.78);margin-top:7px;max-width:78%}
+.tutorial-actions{display:flex;gap:8px;margin-top:12px}
+.tutorial-action{border:1px solid rgba(255,255,255,.5);border-radius:999px;background:rgba(255,255,255,.12);color:#fff;padding:8px 12px;font-family:inherit;font-size:10px;font-weight:900;cursor:pointer;text-decoration:none}
+.resource-row,.library-resource-list{display:grid;grid-template-columns:1fr;gap:10px;padding:2px 0 10px}
+.resource-card{width:100%;min-height:132px;border:1px solid var(--border);border-radius:15px;background:#fff;padding:14px;display:flex;flex-direction:column;box-shadow:0 8px 20px rgba(23,20,15,.05)}
+.resource-card[role="button"]{cursor:pointer;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.resource-card[role="button"]:hover,.resource-card[role="button"]:focus-visible{border-color:#d7b75e;box-shadow:0 12px 25px rgba(91,17,20,.11);transform:translateY(-1px);outline:none}
+.resource-card[role="button"]:active{transform:translateY(1px)}
+.resource-card.has-image{min-height:210px;background-size:cover;background-position:center;position:relative;isolation:isolate;color:#fff;border:0;justify-content:flex-end}
+.resource-card.has-image::before{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;background:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.82))}
+.resource-type{font-size:9px;font-weight:900;letter-spacing:.1em;color:var(--red)}
+.resource-card.has-image .resource-type{color:#f2d99a}
+.resource-title{font-size:15px;font-weight:900;line-height:1.45;margin-top:6px}
+.resource-description{font-size:10px;line-height:1.65;color:var(--ink3);margin-top:5px;flex:1}
+.resource-card.has-image .resource-description{color:rgba(255,255,255,.78)}
+.resource-link{display:inline-flex;align-items:center;margin-top:12px;color:var(--red);font-size:10px;font-weight:900;text-decoration:none;border:0;background:none;padding:0;font-family:inherit;cursor:pointer}
+.resource-card.has-image .resource-link{color:#fff}
+.resource-link:disabled{color:var(--ink3);cursor:default}
+.resource-link.is-disabled{color:var(--ink3);cursor:default}
+.resource-card.gakumeiza-youtube{position:relative;isolation:isolate;overflow:hidden;min-height:198px;border:1px solid rgba(201,168,76,.58);background:linear-gradient(145deg,#5f1114 0%,var(--red) 58%,#2b1715 100%);color:#fff;box-shadow:0 14px 28px rgba(91,17,20,.2)}
+.resource-card.gakumeiza-youtube::before{content:'古今樂明座';position:absolute;right:-5px;bottom:10px;z-index:-1;color:rgba(255,255,255,.075);font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:38px;font-weight:900;white-space:nowrap;transform:rotate(-4deg)}
+.resource-card.gakumeiza-youtube::after{content:'▶';position:absolute;right:15px;top:15px;width:42px;height:42px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.45);border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:14px;box-shadow:0 8px 18px rgba(43,23,21,.22)}
+.resource-card.gakumeiza-youtube .resource-type{color:#f1d58e}
+.resource-card.gakumeiza-youtube .resource-title{max-width:76%;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:20px;line-height:1.45}
+.resource-card.gakumeiza-youtube .resource-description{max-width:78%;color:rgba(255,255,255,.76)}
+.resource-card.gakumeiza-youtube .resource-link{color:#fff}
+.resource-card.gakumeiza-score{position:relative;isolation:isolate;overflow:hidden;min-height:176px;border:1px solid #d9bd72;background:linear-gradient(145deg,#fffaf0 0%,#f6e8bd 58%,#ead08a 100%);box-shadow:0 14px 28px rgba(108,76,20,.13)}
+.resource-card.gakumeiza-score::before{content:'♩  ♪';position:absolute;right:14px;top:7px;z-index:-1;color:rgba(139,26,26,.1);font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:54px;font-weight:900;transform:rotate(-7deg)}
+.resource-card.gakumeiza-score .resource-type{color:#856316}
+.resource-card.gakumeiza-score .resource-title{max-width:78%;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:20px;color:#501719}
+.resource-card.gakumeiza-score .resource-description{max-width:82%;font-size:11px;color:#6d5826}
+.resource-card.gakumeiza-score .resource-link{align-self:flex-start;border-radius:999px;background:var(--red);color:#fff;padding:9px 13px}
+.keiko-modal{position:fixed;inset:0;z-index:500;display:none;align-items:flex-end;justify-content:center;background:rgba(24,20,18,.58);padding:18px 0 0}
+.keiko-modal.show{display:flex}
+.keiko-modal-card{width:min(430px,100%);max-height:92vh;overflow:auto;border-radius:24px 24px 0 0;background:var(--bg);box-shadow:0 -25px 70px rgba(0,0,0,.25)}
+.keiko-modal-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 18px;background:rgba(250,250,248,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.keiko-modal-head h2{font-size:18px}
+.keiko-modal-close{width:36px;height:36px;border:1px solid var(--border);border-radius:50%;background:#fff;color:var(--ink);font-size:18px;cursor:pointer}
+.keiko-modal-body{padding:18px 18px calc(30px + env(safe-area-inset-bottom))}
+.help-tabs{display:flex;gap:7px;overflow:auto;margin-bottom:14px;scrollbar-width:none}
+.help-tab{flex:none;border:1px solid var(--border);background:#fff;color:var(--ink3);border-radius:999px;padding:8px 11px;font-family:inherit;font-size:10px;font-weight:900;cursor:pointer}
+.help-tab.active{border-color:var(--red);background:var(--red);color:#fff}
+.help-panel{display:none}
+.help-panel.active{display:block}
+.help-panel h3{font-size:19px;margin-bottom:7px}
+.help-panel>p{font-size:12px;color:var(--ink3);line-height:1.75}
+.help-guide{display:grid;gap:9px;margin-top:14px}
+.help-guide-step{display:flex;gap:11px;padding:12px;background:#fff;border:1px solid var(--border);border-radius:12px;font-size:12px;line-height:1.65;color:var(--ink2)}
+.help-guide-step b{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--red);color:#fff;font-size:10px}
+.help-primary-action{width:100%;margin-top:16px;border:0;border-radius:12px;background:var(--red);color:#fff;padding:16px 18px;font-family:inherit;font-size:15px;font-weight:900;letter-spacing:.04em;cursor:pointer;box-shadow:0 10px 20px rgba(139,26,26,.18)}
+.help-primary-action:active{transform:translateY(1px)}
+.coaching-form{display:grid;gap:13px}
+.coaching-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.coaching-field{display:grid;gap:6px}
+.coaching-field.full{grid-column:1/-1}
+.coaching-field label{font-size:11px;font-weight:900}
+.coaching-field input,.coaching-field select,.coaching-field textarea{width:100%;border:1px solid var(--border);border-radius:10px;background:#fff;padding:11px;font-family:inherit;font-size:13px;outline:none}
+.coaching-field input:focus,.coaching-field select:focus,.coaching-field textarea:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(139,26,26,.08)}
+.estimate-card{padding:14px;border-radius:13px;background:var(--gold-pale);border:1px solid #ead293}
+.estimate-row{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:12px}
+.estimate-total{margin-top:5px;padding-top:9px;border-top:1px solid #e2c676;font-size:15px;font-weight:900}
+.estimate-note{font-size:9px;color:#856816;line-height:1.6;margin-top:7px}
+.coaching-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.coaching-actions button{border:1px solid var(--red);border-radius:11px;padding:12px 8px;font-family:inherit;font-size:11px;font-weight:900;cursor:pointer}
+.coaching-estimate-btn{background:#fff;color:var(--red)}
+.coaching-submit-btn{background:var(--red);color:#fff}
+.coaching-actions button:disabled{opacity:.55;cursor:wait}
+.coaching-status{min-height:18px;color:var(--red);font-size:11px;line-height:1.6}
+.request-field-hidden{display:none}
+.estimate-card.is-calculating{opacity:.65}
+.estimate-delivery{color:var(--red);font-weight:900}
+.request-disclaimer{padding:11px 12px;border-left:3px solid var(--gold);border-radius:0 9px 9px 0;background:var(--gold-pale);color:#745b1d;font-size:10px;line-height:1.7}
+.library-intro{margin-bottom:14px}
+.library-intro h2{font-size:21px}
+.library-intro p{font-size:12px;color:var(--ink3);line-height:1.7;margin-top:5px}
+.library-resource-section{margin:16px 0 22px}
+.library-section-heading{margin-bottom:10px}
+.library-section-kicker{font-size:9px;font-weight:900;letter-spacing:.12em;color:#9a7119}
+.library-section-title{font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:19px;font-weight:900;color:var(--ink);margin-top:3px}
+.library-section-copy{font-size:10px;color:var(--ink3);line-height:1.6;margin-top:3px}
+.youtube-feed{margin:18px 0}
+.youtube-feed-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:10px}
+.youtube-feed-title{font-size:17px;font-weight:900;color:var(--ink)}
+.youtube-feed-sub{font-size:10px;color:var(--ink3);line-height:1.5;margin-top:3px}
+.youtube-channel-link{flex:none;color:var(--red);font-size:10px;font-weight:900;text-decoration:none}
+.youtube-video-list{display:grid;gap:10px}
+.youtube-video-card{display:grid;grid-template-columns:128px minmax(0,1fr);gap:11px;align-items:center;padding:8px;border:1px solid var(--border);border-radius:14px;background:#fff;color:var(--ink);text-decoration:none;box-shadow:0 7px 16px rgba(23,20,15,.045);transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.youtube-video-card:hover,.youtube-video-card:focus-visible{border-color:#d7b75e;box-shadow:0 10px 22px rgba(91,17,20,.1);transform:translateY(-1px);outline:none}
+.youtube-thumb{position:relative;overflow:hidden;aspect-ratio:16/9;border-radius:10px;background:#eee}
+.youtube-thumb img{display:block;width:100%;height:100%;object-fit:cover}
+.youtube-play{position:absolute;left:50%;top:50%;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:rgba(139,26,26,.88);color:#fff;font-size:11px;transform:translate(-50%,-50%);box-shadow:0 5px 13px rgba(0,0,0,.23)}
+.youtube-video-copy{min-width:0}
+.youtube-video-title{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:3;font-size:12px;font-weight:800;line-height:1.55}
+.youtube-video-meta{margin-top:6px;color:var(--ink3);font-size:9px;line-height:1.5}
+.youtube-feed-status{padding:18px;border:1px dashed var(--border);border-radius:13px;background:#fff;color:var(--ink3);font-size:11px;text-align:center;line-height:1.7}
 </style>
 
 </head>
@@ -412,7 +529,7 @@ textarea:focus,input:focus{border-color:var(--red)}
 
 <div class="screen" id="screen-home">
   <div class="header">
-      <div><div class="header-title">KEIKO™︎</div><div class="header-sub">supported by <a href="https://sites.google.com/view/kokongakumeiza/" target="_blank" rel="noopener noreferrer">古今樂明座</a></div></div>
+    <a class="brand-home-link" href="https://sites.google.com/view/kokongakumeiza/?utm_source=keiko&amp;utm_medium=app&amp;utm_campaign=brand_header" target="_blank" rel="noopener noreferrer" aria-label="古今樂明座公式サイトを開く"><div class="header-title">KEIKO™︎</div><div class="header-sub">supported by 古今樂明座</div></a>
     <div class="header-right">
       <span id="headerUserName" style="font-size:12px;opacity:0.9"></span>
       <button class="logout-btn" onclick="doLogout()">ログアウト</button>
@@ -420,13 +537,14 @@ textarea:focus,input:focus{border-color:var(--red)}
   </div>
   <div class="context-panel" id="viewContextPanel">
     <div class="context-heading">
-      <div class="context-label">今いる場所を切り替える</div>
-      <div class="context-current" id="viewContextCurrent">表示先を確認中</div>
+      <div class="context-label">稽古するチームを選ぶ</div>
+      <div class="context-current" id="viewContextCurrent">所属チームを確認中</div>
     </div>
     <div class="context-buttons" id="viewContextButtons"></div>
-    <div class="context-helper">稽古ログとホームの内容は、選んだ場所のものに切り替わります。</div>
+    <div class="context-helper">掛け持ちしている場合、今回どのチームで稽古するかを選びます。</div>
   </div>
   <div class="content">
+    <div class="announcement-card" id="announcementCard" aria-live="polite"></div>
     <div class="goodnews-card" id="goodNewsCard">
       <div class="goodnews-header">
       <div class="goodnews-title">みんなの Good&amp;New</div>
@@ -454,59 +572,68 @@ textarea:focus,input:focus{border-color:var(--red)}
     </div>
     <button class="quick-btn btn-primary" id="homeRecordBtn" onclick="goTo('form')">📝 稽古ログを記録する</button>
     <button class="quick-btn btn-secondary" id="homeLogsBtn" onclick="goTo('log')">📖 過去のログを見る</button>
-    <div class="global-home-card" id="globalHomeCard">
-      <div class="global-home-kicker">KEIKO GLOBAL</div>
-      <div class="global-home-title">稽古の知恵を、ひらく。</div>
-      <div class="global-home-copy">個人やチームの枠を越えて、公開されたノートを読み、学びを共有できます。</div>
-      <button class="global-home-btn" type="button" onclick="goTo('notes')">グローバルノートを見る</button>
-    </div>
-    <div class="global-card show" id="globalParticipationCard">
-      <div class="global-title" id="globalParticipationTitle">グローバルに参加する</div>
-      <div class="global-copy" id="globalParticipationCopy">参加すると、公開された稽古ノートを読んだり、自分または許可されたチーム名で投稿できます。</div>
-      <button class="global-action" id="globalParticipationBtn" type="button" onclick="toggleGlobalParticipation()">グローバルに参加する</button>
-    </div>
-    <div class="help-card" id="helpSection">
-      <div class="help-title">？ KEIKO ヘルプ</div>
-      <div class="help-lead">KEIKOは、毎回の気づきを次の行動につなげる稽古ノートです。</div>
-      <div class="help-steps">
-        <div class="help-step"><span class="help-step-number">1</span><div class="help-step-copy">稽古前に「今回意識すること」とタイムキーパーを確認します。</div></div>
-        <div class="help-step"><span class="help-step-number">2</span><div class="help-step-copy">稽古後に、コンディション・一番の学び・次回やることを記録します。</div></div>
-        <div class="help-step"><span class="help-step-number">3</span><div class="help-step-copy">過去ログやチームノートを見返し、次の稽古へつなげます。</div></div>
-        <div class="help-step"><span class="help-step-number">4</span><div class="help-step-copy">チームの掛け持ち・移籍に必要な登録コードは、KEIKO運営または参加先チームの責任者から受け取ります。アプリ内には表示されません。</div></div>
-      </div>
-    </div>
-    <div class="settings-card" id="personalSettings">
-      <div class="settings-title">⚙ 個人設定</div>
-      <div class="settings-lead" id="membershipLead">所属チームを確認・変更できます。</div>
-      <div class="membership-list" id="membershipList"><span class="membership-chip">読み込み中...</span></div>
-      <div class="membership-actions">
-        <button class="membership-btn" type="button" onclick="openMembershipEditor('join')">＋ チームを掛け持ち</button>
-        <button class="membership-btn" type="button" onclick="openMembershipEditor('transfer')">↪ チームを移籍</button>
-        <button class="membership-btn danger" id="graduateTeamBtn" type="button" onclick="graduateFromTeams()">チームを卒業して個人利用にする</button>
-      </div>
-      <div class="membership-editor" id="membershipEditor">
-        <div class="membership-editor-title" id="membershipEditorTitle">参加するチームを選択</div>
-        <select id="membershipTeamSelect"></select>
-        <label class="membership-code-label" for="membershipRegistrationCode">登録コード</label>
-        <input type="password" id="membershipRegistrationCode" autocomplete="off" maxlength="64" placeholder="運営から受け取った登録コード">
-        <div class="membership-code-help">KEIKO運営または参加先チームの責任者から共有されたコードを入力してください。</div>
-        <div class="membership-editor-actions">
-          <button class="membership-editor-cancel" type="button" onclick="closeMembershipEditor()">キャンセル</button>
-          <button class="membership-editor-submit" id="membershipSubmitBtn" type="button" onclick="submitMembershipChange()">変更する</button>
+    <details class="help-card" id="helpSection">
+      <summary class="help-summary">
+        <span class="help-summary-copy">
+          <span class="help-title">？ KEIKO ヘルプ</span>
+          <span class="help-summary-sub">KEIKOの使い方を確認する</span>
+        </span>
+        <span class="help-summary-icon" aria-hidden="true">⌄</span>
+      </summary>
+      <div class="help-accordion-body">
+        <div class="help-lead">KEIKOは、毎回の気づきを次の行動につなげる稽古ノートです。</div>
+        <div class="help-steps">
+          <div class="help-step"><span class="help-step-number">1</span><div class="help-step-copy">稽古前に「今回意識すること」とタイムキーパーを確認します。</div></div>
+          <div class="help-step"><span class="help-step-number">2</span><div class="help-step-copy">稽古後に、コンディション・一番の学び・次回やることを記録します。</div></div>
+          <div class="help-step"><span class="help-step-number">3</span><div class="help-step-copy">過去ログやチームノートを見返し、次の稽古へつなげます。</div></div>
+          <div class="help-step"><span class="help-step-number">4</span><div class="help-step-copy">チームの掛け持ち・移籍に必要な登録コードは、KEIKO運営または参加先チームの責任者から受け取ります。</div></div>
         </div>
+        <button class="help-primary-action" type="button" onclick="openHelpDialog('first-log')">使い方を見る</button>
       </div>
-      <div class="membership-status" id="membershipStatus"></div>
-      <div class="membership-code-notice">登録コードはアプリ内には表示されません。掛け持ち・移籍の前に、KEIKO運営または参加先チームの責任者へ確認してください。</div>
-    </div>
-    <div class="operator-card" id="operatorSettings">
-      <div class="operator-badge">KEIKO 運営</div>
-      <a class="operator-os-link" href="./admin.html">KEIKO Admin OSを開く →</a>
-      <div class="settings-title">⚙ チーム設定</div>
-      <div class="settings-lead">学校以外のチームについて、グローバルノートへの投稿を許可できます。</div>
-      <div id="operatorTeams"><div class="note-empty">管理情報を読み込み中...</div></div>
-      <div class="settings-title" style="margin-top:14px">🚨 未対応の通報</div>
-      <div id="operatorReports"><div class="note-empty">通報を読み込み中...</div></div>
-    </div>
+    </details>
+    <section class="home-hub-section" id="learningHubSection">
+      <div class="home-hub-heading"><div><div class="home-hub-title">学ぶ</div><div class="home-hub-sub">楽譜・音源と公式チャンネルから稽古を深める</div></div></div>
+      <div class="resource-row" id="learningResourceRow"></div>
+      <button class="home-library-action" type="button" onclick="goTo('library')">ライブラリを見る →</button>
+    </section>
+    <section class="home-hub-section" id="connectionHubSection">
+      <div class="home-hub-heading"><div><div class="home-hub-title">つながる</div><div class="home-hub-sub">ラジオや勉強会で知見を広げる</div></div></div>
+      <div class="resource-row" id="connectionResourceRow"></div>
+    </section>
+    <section class="home-hub-section" id="serviceHubSection">
+      <div class="home-hub-heading"><div><div class="home-hub-title">相談・依頼する</div><div class="home-hub-sub">道具の相談や指導依頼をKEIKOから</div></div></div>
+      <div class="resource-row" id="serviceResourceRow"></div>
+    </section>
+    <details class="settings-card" id="personalSettings">
+      <summary class="settings-summary">
+        <span class="settings-summary-copy">
+          <span class="settings-title">⚙ 個人設定</span>
+          <span class="settings-summary-sub">チームの移籍・掛け持ち</span>
+        </span>
+        <span class="settings-summary-icon" aria-hidden="true">⌄</span>
+      </summary>
+      <div class="settings-accordion-body">
+        <div class="settings-lead" id="membershipLead">所属チームを確認・変更できます。</div>
+        <div class="membership-list" id="membershipList"><span class="membership-chip">読み込み中...</span></div>
+        <div class="membership-actions">
+          <button class="membership-btn" type="button" onclick="openMembershipEditor('join')">＋ チームを掛け持ち</button>
+          <button class="membership-btn" type="button" onclick="openMembershipEditor('transfer')">↪ チームを移籍</button>
+          <button class="membership-btn danger" id="graduateTeamBtn" type="button" onclick="graduateFromTeams()">チームを卒業して個人利用にする</button>
+        </div>
+        <div class="membership-editor" id="membershipEditor">
+          <div class="membership-editor-title" id="membershipEditorTitle">参加するチームを選択</div>
+          <select id="membershipTeamSelect"></select>
+          <label class="membership-code-label" for="membershipRegistrationCode">登録コード</label>
+          <input type="password" id="membershipRegistrationCode" autocomplete="off" maxlength="64" placeholder="運営から受け取った登録コード">
+          <div class="membership-code-help">KEIKO運営または参加先チームの責任者から共有されたコードを入力してください。</div>
+          <div class="membership-editor-actions">
+            <button class="membership-editor-cancel" type="button" onclick="closeMembershipEditor()">キャンセル</button>
+            <button class="membership-editor-submit" id="membershipSubmitBtn" type="button" onclick="submitMembershipChange()">変更する</button>
+          </div>
+        </div>
+        <div class="membership-status" id="membershipStatus"></div>
+      </div>
+    </details>
   </div>
   <div class="bottom-nav">
     <button class="nav-item active" aria-current="page" onclick="goTo('home')"><span class="nav-icon">🏠</span>ホーム</button>
@@ -624,6 +751,11 @@ textarea:focus,input:focus{border-color:var(--red)}
     </div>
   </div>
   <div class="content notes-content" id="notesContentArea">
+    <div class="global-card" id="globalParticipationCard">
+      <div class="global-title" id="globalParticipationTitle">グローバルに参加する</div>
+      <div class="global-copy" id="globalParticipationCopy">参加すると、公開された稽古ノートを読んだり、自分または許可されたチーム名で投稿できます。</div>
+      <button class="global-action" id="globalParticipationBtn" type="button" onclick="toggleGlobalParticipation()">グローバルに参加する</button>
+    </div>
     <div class="note-compose">
       <div class="note-destination-banner" id="noteDestinationBanner"></div>
       <div class="note-compose-title" id="noteComposeTitle">指導内容・練習内容をまとめる</div>
@@ -653,18 +785,29 @@ textarea:focus,input:focus{border-color:var(--red)}
 <!-- LIBRARY -->
 
 <div class="screen" id="screen-library">
-  <div class="header"><div><div class="header-title">🎁 ライブラリ</div><div class="header-sub">Google Drive</div></div></div>
+  <div class="header"><div><div class="header-title">🎁 ライブラリ</div><div class="header-sub">supported by 古今樂明座</div></div></div>
   <div class="content">
-    <div class="library-panel">
-      <div class="library-panel-title">Google Drive から教材を開く</div>
-      <div class="library-panel-text">
-        教材ライブラリ機能は一度シンプル化し、ここから Google Drive フォルダへ直接移動する形にしています。
+    <div class="library-intro"><h2>古今樂明座から学ぶ</h2><p>楽譜・音源と演奏動画を、目的ごとのセクションからすぐに開けます。</p></div>
+    <section class="library-resource-section" aria-labelledby="libraryScoreTitle">
+      <div class="library-section-heading">
+        <div class="library-section-kicker">SCORE &amp; AUDIO</div>
+        <h3 class="library-section-title" id="libraryScoreTitle">古今樂明座の楽譜・音源</h3>
+        <p class="library-section-copy">稽古ですぐに使える楽譜と音源を、曲ごとに確認できます。</p>
       </div>
-      <div class="library-actions library-actions-stack">
-        <a class="library-folder-link" href="https://drive.google.com/drive/folders/1a9iaxd2OKBywSuRZvPib1gyGciL22HpM?usp=drive_link" target="_blank" rel="noopener noreferrer">📁 Google Drive フォルダを開く →</a>
-        <a class="library-folder-link" href="https://sites.google.com/view/kokongakumeiza/%E8%AD%9C%E9%9D%A2%E3%81%A8%E9%9F%B3%E6%BA%90?authuser=0" target="_blank" rel="noopener noreferrer">🎼 古今樂明座 提供音源・楽譜</a>
+      <div class="library-resource-list" id="libraryResourceList"></div>
+    </section>
+    <section class="library-resource-section" aria-labelledby="libraryYoutubeChannelTitle">
+      <div class="library-section-heading">
+        <div class="library-section-kicker">OFFICIAL YOUTUBE</div>
+        <h3 class="library-section-title" id="libraryYoutubeChannelTitle">古今樂明座 Official YouTube</h3>
+        <p class="library-section-copy">公演映像や楽曲をまとめて見るなら、公式チャンネルへ。</p>
       </div>
-    </div>
+      <div class="library-resource-list" id="libraryYoutubeChannelList"></div>
+    </section>
+    <section class="youtube-feed" aria-labelledby="youtubeFeedTitle">
+      <div class="youtube-feed-head"><div><h3 class="youtube-feed-title" id="youtubeFeedTitle">古今樂明座の最新動画</h3><div class="youtube-feed-sub">最新の演奏・楽曲・ラジオを縦に並べています</div></div><a class="youtube-channel-link" href="https://m.youtube.com/@Kokongakumeiza" target="_blank" rel="noopener noreferrer">チャンネルへ →</a></div>
+      <div class="youtube-video-list" id="youtubeVideoList"><div class="youtube-feed-status">最新動画を読み込み中...</div></div>
+    </section>
   </div>
   <div class="bottom-nav">
     <button class="nav-item" onclick="goTo('home')"><span class="nav-icon">🏠</span>ホーム</button>
@@ -672,6 +815,80 @@ textarea:focus,input:focus{border-color:var(--red)}
     <button class="nav-item" onclick="goTo('log')"><span class="nav-icon">📖</span>ログ</button>
     <button class="nav-item" onclick="goTo('notes')"><span class="nav-icon">🗒️</span>ノート</button>
     <button class="nav-item active" aria-current="page" onclick="goTo('library')"><span class="nav-icon">🎁</span>ライブラリ</button>
+  </div>
+</div>
+
+<!-- HELP -->
+
+<div class="keiko-modal" id="helpDialog" role="dialog" aria-modal="true" aria-labelledby="helpDialogTitle">
+  <div class="keiko-modal-card">
+    <div class="keiko-modal-head"><h2 id="helpDialogTitle">KEIKOの使い方</h2><button class="keiko-modal-close" type="button" onclick="closeHelpDialog()" aria-label="閉じる">×</button></div>
+    <div class="keiko-modal-body">
+      <div class="help-tabs">
+        <button class="help-tab active" type="button" data-help-tab="first-log" onclick="selectHelpTab('first-log')">はじめてのログ</button>
+        <button class="help-tab" type="button" data-help-tab="notes" onclick="selectHelpTab('notes')">ノート</button>
+        <button class="help-tab" type="button" data-help-tab="global" onclick="selectHelpTab('global')">グローバル</button>
+        <button class="help-tab" type="button" data-help-tab="library" onclick="selectHelpTab('library')">ライブラリ</button>
+      </div>
+      <section class="help-panel active" data-help-panel="first-log"><h3>1回目の記録をつくる</h3><p>稽古後の気づきを、次の稽古で実行できる形にします。</p><div class="help-guide"><div class="help-guide-step"><b>1</b><span>ホームの「稽古ログを記録する」を押します。</span></div><div class="help-guide-step"><b>2</b><span>コンディション、今日一番の学び、次にやること、Good &amp; Newを入力します。</span></div><div class="help-guide-step"><b>3</b><span>「記録を保存する」を押し、ホームで稽古日数と今回意識することを確認します。</span></div></div><button class="quick-btn btn-primary" style="margin-top:14px" type="button" onclick="closeHelpDialog();goTo('form')">1回目の記録をはじめる</button></section>
+      <section class="help-panel" data-help-panel="notes"><h3>指導内容をチームで積み上げる</h3><p>共有事項ではなく、指導内容と練習内容を残して、次の稽古を考える時間を減らします。</p><div class="help-guide"><div class="help-guide-step"><b>1</b><span>タイトルに今日の稽古テーマを書きます。</span></div><div class="help-guide-step"><b>2</b><span>内容に指導内容、練習内容、次回へのつながりをまとめます。</span></div><div class="help-guide-step"><b>3</b><span>チームメンバーは「アイデアをシェア」から理解や補足を残します。チーム内ノートは他チームから見えません。</span></div></div></section>
+      <section class="help-panel" data-help-panel="global"><h3>公開範囲を確認して共有する</h3><p>グローバルはGeneralユーザーだけが任意で参加できます。Studentの情報は公開されません。</p><div class="help-guide"><div class="help-guide-step"><b>1</b><span>自分だけ、チーム内、グローバルの違いを確認します。</span></div><div class="help-guide-step"><b>2</b><span>公開前に表示される名前と所属を確認します。</span></div><div class="help-guide-step"><b>3</b><span>個人情報や学校情報を含む内容は公開しません。</span></div></div></section>
+      <section class="help-panel" data-help-panel="library"><h3>教材から学ぶ</h3><p>楽譜、音源、演奏動画を開き、稽古前後の確認に使います。</p><div class="help-guide"><div class="help-guide-step"><b>1</b><span>楽譜・音源、公式YouTubeチャンネル、最新動画の順に画面を縦へ進みます。</span></div><div class="help-guide-step"><b>2</b><span>楽譜を見る、音源を聴く、演奏を見るから学び方を選びます。</span></div><div class="help-guide-step"><b>3</b><span>外部教材は新しいタブで開きます。</span></div></div></section>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOM BACHI REQUEST -->
+
+<div class="keiko-modal" id="bachiDialog" role="dialog" aria-modal="true" aria-labelledby="bachiDialogTitle">
+  <div class="keiko-modal-card">
+    <div class="keiko-modal-head"><h2 id="bachiDialogTitle">カスタムバチを依頼する</h2><button class="keiko-modal-close" type="button" onclick="closeBachiDialog()" aria-label="閉じる">×</button></div>
+    <div class="keiko-modal-body">
+      <form class="coaching-form" id="bachiForm" onsubmit="submitBachiOrder(event)">
+        <div class="coaching-grid">
+          <div class="coaching-field full"><label for="bachiRequesterName">依頼者名</label><input id="bachiRequesterName" required maxlength="100"></div>
+          <div class="coaching-field full"><label for="bachiEmail">メールアドレス</label><input id="bachiEmail" type="email" required autocomplete="email"></div>
+          <div class="coaching-field full"><label for="bachiWood">木の種類</label><select id="bachiWood" required onchange="handleBachiWoodChange()"><option value="">料金表を読み込み中...</option></select></div>
+          <div class="coaching-field"><label for="bachiLength">長さ（cm）</label><input id="bachiLength" type="number" min="30" max="60" step="0.1" inputmode="decimal" required oninput="scheduleBachiEstimate()"></div>
+          <div class="coaching-field"><label for="bachiDiameter">太さ（mm）</label><input id="bachiDiameter" type="number" min="15" max="40" step="0.1" inputmode="decimal" required oninput="scheduleBachiEstimate()"></div>
+          <div class="coaching-field full"><label for="bachiQuantity">数量（組）</label><input id="bachiQuantity" type="number" min="1" max="500" step="1" inputmode="numeric" value="1" required oninput="scheduleBachiEstimate()"></div>
+        </div>
+        <div class="estimate-card" id="bachiEstimateCard">
+          <div class="estimate-row"><span>1組の概算</span><strong id="bachiPairPrice">条件を入力してください</strong></div>
+          <div class="estimate-row"><span>商品・税・標準送料</span><strong id="bachiBreakdown">計算前</strong></div>
+          <div class="estimate-row estimate-total"><span>概算合計</span><strong id="bachiTotalPrice">未計算</strong></div>
+          <div class="estimate-row"><span>お届け目安</span><strong class="estimate-delivery" id="bachiDeliveryDate">未計算</strong></div>
+          <div class="estimate-note" id="bachiEstimateNote">入力内容に応じて概算と納期が自動更新されます。</div>
+        </div>
+        <div class="request-disclaimer">これは注文確定・決済ではありません。送信後に仕様と在庫を確認し、古今樂明座から正式金額をご連絡します。</div>
+        <div class="coaching-actions"><button class="coaching-estimate-btn" id="bachiEstimateBtn" type="button" onclick="estimateBachiOrder()">概算を更新</button><button class="coaching-submit-btn" id="bachiSubmitBtn" type="submit">この内容で依頼する</button></div>
+        <div class="coaching-status" id="bachiStatus" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- COACHING REQUEST -->
+
+<div class="keiko-modal" id="coachingDialog" role="dialog" aria-modal="true" aria-labelledby="coachingDialogTitle">
+  <div class="keiko-modal-card">
+    <div class="keiko-modal-head"><h2 id="coachingDialogTitle">谷川に指導を依頼する</h2><button class="keiko-modal-close" type="button" onclick="closeCoachingDialog()" aria-label="閉じる">×</button></div>
+    <div class="keiko-modal-body">
+      <form class="coaching-form" id="coachingForm" onsubmit="submitCoachingRequest(event)">
+        <div class="coaching-grid">
+          <div class="coaching-field full"><label for="coachingTeam">依頼チーム名</label><input id="coachingTeam" required maxlength="120" list="coachingTeamOptions"><datalist id="coachingTeamOptions"></datalist></div>
+          <div class="coaching-field full"><label for="coachingContactName">担当者の名前</label><input id="coachingContactName" required maxlength="100"></div>
+          <div class="coaching-field full"><label for="coachingEmail">連絡用メールアドレス</label><input id="coachingEmail" type="email" required autocomplete="email"></div>
+          <div class="coaching-field full"><label for="coachingLocation">指導場所</label><input id="coachingLocation" required maxlength="300" placeholder="学校名・施設名・住所" onchange="scheduleCoachingEstimate()"></div>
+          <div class="coaching-field full"><label for="coachingDuration">希望する指導時間</label><select id="coachingDuration" required onchange="scheduleCoachingEstimate()"><option value="">料金表を読み込み中...</option></select></div>
+          <div class="coaching-field full"><label for="coachingTopic">相談したい指導内容（任意）</label><textarea id="coachingTopic" rows="3" maxlength="2000" placeholder="例：基礎打ち、楽曲指導、チーム全体の音づくり"></textarea></div>
+        </div>
+        <div class="estimate-card" id="coachingEstimateCard"><div class="estimate-row"><span>指導料</span><strong id="coachingLessonFee">条件を入力してください</strong></div><div class="estimate-row"><span>交通費</span><strong id="coachingTransportFee">府中駅からの往復を計算</strong></div><div class="estimate-row estimate-total"><span>概算合計</span><strong id="coachingTotalFee">未計算</strong></div><div class="estimate-note" id="coachingEstimateNote">指導時間と場所を入力すると自動で概算します。</div></div>
+        <div class="request-disclaimer">送信時点では予約確定・決済になりません。谷川の指導可能日をご案内し、メールで日程をすり合わせた後に確定します。</div>
+        <div class="coaching-actions"><button class="coaching-estimate-btn" id="coachingEstimateBtn" type="button" onclick="estimateCoachingRequest()">概算を計算</button><button class="coaching-submit-btn" id="coachingSubmitBtn" type="submit">この内容で送信</button></div>
+        <div class="coaching-status" id="coachingStatus" aria-live="polite"></div>
+      </form>
+    </div>
   </div>
 </div>
 
@@ -686,11 +903,12 @@ const GOOD_NEWS_ROTATE_MS = 3000;
 const GOOD_NEWS_REFRESH_MS = 60000;
 const GOOD_NEWS_RECENT_LIMIT = 4;
 const NOTES_REFRESH_MS = 45000;
-const APP_VERSION = '2026-10-31-02';
+const APP_VERSION = '2026-11-03-15';
 const APP_VERSION_KEY = 'taiko_app_version';
 const VIEW_KIND_KEY = 'taiko_view_kind';
 const APP_ROLE_KEY = 'taiko_app_role';
 const GLOBAL_PARTICIPATION_KEY = 'taiko_global_participation';
+const ONBOARDING_COMPLETE_PREFIX = 'keiko_onboarding_complete:';
 const TEAM_CACHE_KEY = 'taiko_team_options';
 const MEMBERSHIP_CACHE_KEY = 'taiko_memberships_v1';
 const PRACTICE_CACHE_PREFIX = 'taiko_practice_cache_v1:';
@@ -753,14 +971,6 @@ const globalState = {
   enabled: false,
   updating: false,
 };
-const operatorState = {
-  teams: [],
-  reports: [],
-  loaded: false,
-  loading: false,
-  updatingTeamIds: new Set(),
-  moderatingReportIds: new Set(),
-};
 const goodNewsState = {
   items: [],
   timerId: null,
@@ -797,6 +1007,39 @@ const formMissionState = {
   loading: false,
   requestId: 0,
 };
+const FALLBACK_HOME_RESOURCES = [
+  { resourceId: 'tutorial-first-log', resourceType: 'tutorial', title: 'はじめてのKEIKO', description: '最初の稽古ログを記録し、ホームで確認するまでを案内します。', imageUrl: '', destinationUrl: 'keiko://tutorial', sortOrder: 10 },
+  { resourceId: 'kokongakumeiza-score-audio', resourceType: 'score', title: '古今樂明座 提供音源・楽譜', description: '稽古で使える楽譜と音源をまとめています。', imageUrl: '', destinationUrl: 'https://sites.google.com/view/kokongakumeiza/%E8%AD%9C%E9%9D%A2%E3%81%A8%E9%9F%B3%E6%BA%90?authuser=0', sortOrder: 20 },
+  { resourceId: 'kokongakumeiza-youtube', resourceType: 'music', title: '古今樂明座 Official YouTubeチャンネル', description: '公演映像や楽曲から、音・身体の使い方・舞台表現を学べます。', imageUrl: '', destinationUrl: 'https://m.youtube.com/@Kokongakumeiza', sortOrder: 30 },
+  { resourceId: 'hachijo-beginner-solo', resourceType: 'video', title: '八丈太鼓・初心者ソロ演奏', description: '初心者の稽古で使える演奏例です。', imageUrl: 'https://i.ytimg.com/vi/VEtbMLf1Oyk/hqdefault.jpg', destinationUrl: 'https://youtu.be/VEtbMLf1Oyk', sortOrder: 40 },
+  { resourceId: 'hachijo-mawashiuchi', resourceType: 'video', title: '八丈太鼓・廻し打ち', description: '廻し打ちの身体の流れを動画で確認できます。', imageUrl: 'https://i.ytimg.com/vi/Ty1__22CeB8/hqdefault.jpg', destinationUrl: 'https://youtu.be/Ty1__22CeB8', sortOrder: 50 },
+  { resourceId: 'gakumeiza-radio', resourceType: 'radio', title: '樂明座ラジオ', description: '古今樂明座の考え方や稽古の知見を、YouTubeの再生リストで聴けます。', imageUrl: 'https://i.ytimg.com/vi/awLvvl1AvhU/hqdefault.jpg', destinationUrl: 'https://m.youtube.com/watch?v=awLvvl1AvhU&list=PLmk028LkL7RF9l2NIJBfL07O0b1-pBrRJ', sortOrder: 60 },
+  { resourceId: 'custom-bachi-order', resourceType: 'order', title: 'カスタムバチを注文する', description: '木材・長さ・太さ・数量から概算と納期を確認できます。', imageUrl: '', destinationUrl: 'keiko://bachi', sortOrder: 70 },
+  { resourceId: 'discord-study', resourceType: 'community', title: 'Discordの勉強会に参加', description: '指導と稽古について学ぶコミュニティです。', imageUrl: '', destinationUrl: '', sortOrder: 80, generalOnly: true },
+  { resourceId: 'coaching-request', resourceType: 'coaching', title: '谷川に指導を依頼する', description: '場所と指導時間だけで概算を確認し、日程は返信メールで調整できます。', imageUrl: '', destinationUrl: 'keiko://coaching', sortOrder: 90, generalOnly: true },
+];
+const homeHubState = { announcements: [], resources: [], loaded: false, loading: false, lastFetchedAt: 0 };
+const FALLBACK_YOUTUBE_VIDEOS = [
+  { videoId: 'awLvvl1AvhU', title: '【がくラジ】子ども向け太鼓曲「初音」を作る', publishedAt: '2026-10-31T12:00:20Z' },
+  { videoId: 'p0-um7Qew_4', title: '【がくラジ】売名なるか？公式ロゴステッカーを自作してバイクに貼ってみた', publishedAt: '2026-10-30T12:00:08Z' },
+  { videoId: 'd9-c83Nrx8c', title: '【がくラジ】クセ強メンバーを動物に例えてみた', publishedAt: '2026-10-29T12:00:34Z' },
+  { videoId: 'kGFLJhYDYHk', title: '【がくラジ】太鼓の美学、ゴっさん編', publishedAt: '2026-10-28T12:00:24Z' },
+  { videoId: 'XSX8NyS1Hg4', title: '【がくラジ】上手い人ほど音を減らす？森ちゃんが語る魅せる太鼓の秘密', publishedAt: '2026-10-26T12:00:19Z' },
+  { videoId: '3tIFf8wfK44', title: '【がくラジ】森ちゃんが150時間捧げた神ゲーを語り尽くす', publishedAt: '2026-10-25T12:00:20Z' },
+  { videoId: 'mW3_ZxN_djA', title: '【がくラジ】もやしっこゲーマー、太鼓歴12年の原点', publishedAt: '2026-10-24T12:00:28Z' },
+  { videoId: 'KK-UDYt5Bbw', title: '【がくラジ】200kgを押して峠を越えた話', publishedAt: '2026-10-24T12:00:01Z' },
+  { videoId: 'Jvr4fw9f3Mo', title: '【がくラジ】ハリーポッターの杖みたいに選ぶバチ', publishedAt: '2026-10-22T12:00:33Z' },
+  { videoId: 'DI7XokxX6XU', title: '【がくラジ】誰でも打てる場所を作ります！新拠点プロジェクト', publishedAt: '2026-10-21T12:00:26Z' },
+].map(item => ({ ...item, thumbnailUrl: `https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg`, destinationUrl: `https://m.youtube.com/watch?v=${item.videoId}` }));
+const youtubeState = { items: [], loaded: false, loading: false };
+const BACHI_WOOD_CHOICES = [
+  { woodCode: 'hinoki', displayName: 'ヒノキ' },
+  { woodCode: 'hou', displayName: 'ホオ' },
+  { woodCode: 'maple', displayName: 'カエデ' },
+];
+const requestCatalogState = { woods: [], coachingRates: [], loaded: false, loading: false, promise: null };
+const bachiRequestState = { estimate: null, timerId: null, estimating: false, submitting: false };
+const coachingRequestState = { estimate: null, timerId: null, estimating: false, submitting: false };
 
 const goodNewsElements = {
   card: () => document.getElementById('goodNewsCard'),
@@ -806,6 +1049,7 @@ const goodNewsElements = {
 
 document.addEventListener('DOMContentLoaded', initializeGoodNewsFeed);
 document.addEventListener('DOMContentLoaded', initializeAuthUi);
+document.addEventListener('DOMContentLoaded', initializeHubDialogs);
 window.addEventListener('online', () => flushOutbox());
 
 function initializeGoodNewsFeed() {
@@ -822,6 +1066,27 @@ function initializeAuthUi() {
   if (launchInput) {
     launchInput.addEventListener('input', handleLaunchTeamNameInput);
   }
+}
+function initializeHubDialogs() {
+  ['helpDialog', 'bachiDialog', 'coachingDialog'].forEach(id => {
+    const dialog = document.getElementById(id);
+    dialog?.addEventListener('click', event => {
+      if (event.target === dialog) dialog.classList.remove('show');
+    });
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      closeHelpDialog();
+      closeBachiDialog();
+      closeCoachingDialog();
+    }
+  });
+  document.addEventListener('visibilitychange', () => {
+    const homeScreen = document.getElementById('screen-home');
+    if (!document.hidden && hasSession() && homeScreen?.classList.contains('active')) {
+      loadHomeHub({ force: true });
+    }
+  });
 }
 // ============================================
 // 起動処理
@@ -958,6 +1223,568 @@ async function supabaseRead(functionName, payload = {}, options = {}) {
   const error = new Error(json?.message || json?.msg || `Supabaseの読み込みに失敗しました (${response.status})`);
   error.code = json?.code || `http_${response.status}`;
   throw error;
+}
+
+function visibleFallbackResources() {
+  const isStudent = localStorage.getItem('taiko_user_type') === 'student';
+  return FALLBACK_HOME_RESOURCES.filter(item => !isStudent || !item.generalOnly);
+}
+
+async function loadHomeHub(options = {}) {
+  if (homeHubState.loading) return;
+  if (homeHubState.loaded && !options.force) {
+    renderHomeHub();
+    return;
+  }
+  if (options.force && homeHubState.loaded && Date.now() - homeHubState.lastFetchedAt < 30000) {
+    renderHomeHub();
+    return;
+  }
+  homeHubState.loading = true;
+  try {
+    const result = await supabaseRead('get_keiko_home_hub', { p_team_id: getTeamId() || null });
+    homeHubState.announcements = Array.isArray(result.announcements) ? result.announcements : [];
+    homeHubState.resources = Array.isArray(result.resources) && result.resources.length ? result.resources : visibleFallbackResources();
+    homeHubState.loaded = true;
+    homeHubState.lastFetchedAt = Date.now();
+  } catch (error) {
+    console.warn('home hub fallback active', error);
+    homeHubState.announcements = [];
+    homeHubState.resources = visibleFallbackResources();
+    homeHubState.loaded = true;
+    homeHubState.lastFetchedAt = Date.now();
+  } finally {
+    homeHubState.loading = false;
+    renderHomeHub();
+  }
+}
+
+function renderHomeHub() {
+  renderAnnouncementCard();
+  const resources = homeHubState.resources.length ? homeHubState.resources : visibleFallbackResources();
+  renderResourceRow('learningResourceRow', selectHomeLearningResources(resources));
+  renderResourceRow('connectionResourceRow', resources.filter(item => ['radio', 'community'].includes(item.resourceType)));
+  renderResourceRow('serviceResourceRow', resources.filter(item => ['order', 'coaching'].includes(item.resourceType)));
+  renderLibraryResources(resources);
+}
+
+function selectHomeLearningResources(resources) {
+  const fallbacks = visibleFallbackResources();
+  const findResource = predicate => resources.find(predicate) || fallbacks.find(predicate);
+  return [findResource(isGakumeizaScoreResource)].filter(Boolean);
+}
+
+function renderAnnouncementCard() {
+  const card = document.getElementById('announcementCard');
+  if (!card) return;
+  const item = homeHubState.announcements.find(announcement => !announcement.isRead) || homeHubState.announcements[0];
+  if (!item) {
+    card.className = 'announcement-card';
+    card.innerHTML = '';
+    return;
+  }
+  const priorityLabel = item.priority === 'urgent' ? '重要なお知らせ' : item.priority === 'important' ? 'お知らせ' : 'KEIKOからのお知らせ';
+  card.className = `announcement-card show ${escapeAttr(item.priority || 'normal')}`;
+  const actionUrl = safeDestinationUrl(item.actionUrl);
+  card.innerHTML = `<div class="announcement-top"><div><div class="announcement-label">${esc(priorityLabel)}</div><div class="announcement-title">${esc(item.title)}</div></div><button class="announcement-close" type="button" aria-label="既読にする" onclick="markAnnouncementRead('${escapeAttr(item.announcementId)}')">×</button></div><div class="announcement-body">${esc(item.body)}</div>${actionUrl ? `<a class="announcement-action" href="${escapeAttr(actionUrl)}" target="_blank" rel="noopener noreferrer">${esc(item.actionLabel || '詳しく見る')} →</a>` : ''}`;
+}
+
+async function markAnnouncementRead(announcementId) {
+  const item = homeHubState.announcements.find(announcement => announcement.announcementId === announcementId);
+  if (item) item.isRead = true;
+  renderAnnouncementCard();
+  try {
+    await supabaseRead('mark_keiko_announcement_read', { p_announcement_id: announcementId });
+  } catch (error) {
+    console.warn('announcement read state was not synced', error);
+  }
+}
+
+function resourceTypeLabel(type) {
+  return ({ score: '楽譜・音源', music: 'MUSIC', video: 'VIDEO', site: '公式サイト', radio: 'RADIO', community: 'COMMUNITY', order: 'ONLINE ORDER', coaching: 'COACHING' })[type] || 'KEIKO';
+}
+
+function isGakumeizaRadioResource(item) {
+  return String(item?.resourceId || '') === 'gakumeiza-radio'
+    || String(item?.title || '').includes('樂明座ラジオ');
+}
+
+function isGakumeizaYoutubeResource(item) {
+  const destination = String(item?.destinationUrl || '');
+  const title = String(item?.title || '');
+  return String(item?.resourceId || '') === 'kokongakumeiza-youtube'
+    || destination.includes('youtube.com/@Kokongakumeiza')
+    || title === '古今樂明座の楽曲'
+    || title.includes('古今樂明座 公式YouTube')
+    || title.includes('古今樂明座 Official YouTube');
+}
+
+function isGakumeizaScoreResource(item) {
+  return item?.resourceType === 'score'
+    || String(item?.resourceId || '') === 'kokongakumeiza-score-audio'
+    || String(item?.title || '').includes('提供音源・楽譜');
+}
+
+function resourceDestinationUrl(item) {
+  if (isGakumeizaRadioResource(item)) {
+    return 'https://m.youtube.com/watch?v=awLvvl1AvhU&list=PLmk028LkL7RF9l2NIJBfL07O0b1-pBrRJ';
+  }
+  return item?.destinationUrl || '';
+}
+
+function resourceImageUrl(item) {
+  if (isGakumeizaYoutubeResource(item)) return '';
+  if (isGakumeizaRadioResource(item) && !item?.imageUrl) {
+    return 'https://i.ytimg.com/vi/awLvvl1AvhU/hqdefault.jpg';
+  }
+  return item?.imageUrl || '';
+}
+
+function renderResourceRow(containerId, items) {
+  const container = document.getElementById(containerId);
+  const section = container?.closest('.home-hub-section');
+  if (!container) return;
+  if (!items.length) {
+    if (section) section.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+  if (section) section.style.display = '';
+  container.innerHTML = items.map(resourceCardMarkup).join('');
+  bindResourceCards(container);
+}
+
+function resourceCardMarkup(item) {
+  const imageUrl = safeDestinationUrl(resourceImageUrl(item));
+  const destinationUrl = safeDestinationUrl(resourceDestinationUrl(item));
+  const isGakumeizaYoutube = isGakumeizaYoutubeResource(item);
+  const isGakumeizaScore = isGakumeizaScoreResource(item);
+  const title = isGakumeizaYoutube ? '古今樂明座 Official YouTubeチャンネル' : item.title;
+  const description = isGakumeizaYoutube
+    ? '公演映像や楽曲から、音・身体の使い方・舞台表現を学べます。'
+    : isGakumeizaScore
+      ? '稽古ですぐ使える古今樂明座の楽譜と音源を、曲ごとに確認できます。'
+    : (item.description || '');
+  const actionLabel = isGakumeizaYoutube
+    ? '公式チャンネルを見る →'
+    : isGakumeizaScore ? '楽譜・音源を開く →'
+      : isGakumeizaRadioResource(item) ? 'YouTubeで聴く →' : '開く →';
+  const imageStyle = imageUrl ? ` style="background-image:url('${escapeAttr(imageUrl)}')"` : '';
+  const cardClass = [imageUrl ? 'has-image' : '', isGakumeizaYoutube ? 'gakumeiza-youtube' : '', isGakumeizaScore ? 'gakumeiza-score' : ''].filter(Boolean).join(' ');
+  const resourceId = escapeAttr(item.resourceId || item.sourceKey || item.title);
+  const interactionAttributes = destinationUrl
+    ? ` role="button" tabindex="0" data-resource-id="${resourceId}" aria-label="${escapeAttr(title)}を開く"`
+    : ' aria-disabled="true"';
+  return `<article class="resource-card ${cardClass}"${interactionAttributes}${imageStyle}><div class="resource-type">${esc(resourceTypeLabel(item.resourceType))}</div><div class="resource-title">${esc(title)}</div><div class="resource-description">${esc(description)}</div><span class="resource-link ${destinationUrl ? '' : 'is-disabled'}">${destinationUrl ? esc(actionLabel) : '準備中'}</span></article>`;
+}
+
+function bindResourceCards(container) {
+  container.querySelectorAll('[data-resource-id]').forEach(card => {
+    card.addEventListener('click', () => openHomeResource(card.dataset.resourceId));
+    card.addEventListener('keydown', event => {
+      if (!['Enter', ' '].includes(event.key)) return;
+      event.preventDefault();
+      openHomeResource(card.dataset.resourceId);
+    });
+  });
+}
+
+function openHomeResource(resourceId) {
+  const resources = [...homeHubState.resources, ...visibleFallbackResources()];
+  const item = resources.find(resource => String(resource.resourceId || resource.sourceKey || resource.title) === String(resourceId));
+  const destinationUrl = safeDestinationUrl(resourceDestinationUrl(item));
+  if (!destinationUrl) return;
+  if (destinationUrl === 'keiko://tutorial') {
+    openHelpDialog('first-log');
+    return;
+  }
+  if (destinationUrl === 'keiko://bachi') {
+    openBachiDialog();
+    return;
+  }
+  if (destinationUrl === 'keiko://coaching') {
+    openCoachingDialog();
+    return;
+  }
+  window.open(destinationUrl, '_blank', 'noopener,noreferrer');
+}
+
+function safeDestinationUrl(value) {
+  const textValue = String(value || '').trim();
+  if (['keiko://tutorial', 'keiko://bachi', 'keiko://coaching'].includes(textValue)) return textValue;
+  try {
+    const parsed = new URL(textValue);
+    return ['https:', 'http:'].includes(parsed.protocol) ? parsed.href : '';
+  } catch (error) {
+    return '';
+  }
+}
+
+function renderLibraryResources(resources = homeHubState.resources) {
+  const availableResources = resources.length ? resources : visibleFallbackResources();
+  const fallbackResources = visibleFallbackResources();
+  const scoreList = document.getElementById('libraryResourceList');
+  const youtubeChannelList = document.getElementById('libraryYoutubeChannelList');
+  if (scoreList) {
+    const score = availableResources.find(isGakumeizaScoreResource) || fallbackResources.find(isGakumeizaScoreResource);
+    scoreList.innerHTML = score ? resourceCardMarkup(score) : '';
+    bindResourceCards(scoreList);
+  }
+  if (youtubeChannelList) {
+    const channel = availableResources.find(isGakumeizaYoutubeResource) || fallbackResources.find(isGakumeizaYoutubeResource);
+    youtubeChannelList.innerHTML = channel ? resourceCardMarkup(channel) : '';
+    bindResourceCards(youtubeChannelList);
+  }
+}
+
+async function loadYoutubeVideos(options = {}) {
+  if (youtubeState.loading) return;
+  if (youtubeState.loaded && !options.force) {
+    renderYoutubeVideos();
+    return;
+  }
+  youtubeState.loading = true;
+  renderYoutubeVideos();
+  try {
+    const result = await authenticatedEdgeRequest('getYoutubeVideos', { limit: 10 });
+    youtubeState.items = Array.isArray(result.videos) && result.videos.length
+      ? result.videos.slice(0, 10)
+      : FALLBACK_YOUTUBE_VIDEOS;
+    youtubeState.loaded = true;
+  } catch (error) {
+    console.warn('YouTube feed fallback active', error);
+    youtubeState.items = FALLBACK_YOUTUBE_VIDEOS;
+    youtubeState.loaded = true;
+  } finally {
+    youtubeState.loading = false;
+    renderYoutubeVideos();
+  }
+}
+
+function renderYoutubeVideos() {
+  const container = document.getElementById('youtubeVideoList');
+  if (!container) return;
+  if (youtubeState.loading && !youtubeState.items.length) {
+    container.innerHTML = '<div class="youtube-feed-status">最新動画を読み込み中...</div>';
+    return;
+  }
+  const items = youtubeState.items.length ? youtubeState.items : FALLBACK_YOUTUBE_VIDEOS;
+  container.innerHTML = items.slice(0, 10).map(item => {
+    const videoId = String(item.videoId || '').trim();
+    const destinationUrl = safeDestinationUrl(item.destinationUrl || `https://m.youtube.com/watch?v=${encodeURIComponent(videoId)}`);
+    const thumbnailUrl = safeDestinationUrl(item.thumbnailUrl || `https://i.ytimg.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg`);
+    if (!videoId || !destinationUrl || !thumbnailUrl) return '';
+    const publishedAt = item.publishedAt ? new Date(item.publishedAt) : null;
+    const publishedLabel = publishedAt && !Number.isNaN(publishedAt.getTime())
+      ? publishedAt.toLocaleDateString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric' })
+      : '';
+    return `<a class="youtube-video-card" href="${escapeAttr(destinationUrl)}" target="_blank" rel="noopener noreferrer"><div class="youtube-thumb"><img src="${escapeAttr(thumbnailUrl)}" alt="" loading="lazy"><span class="youtube-play">▶</span></div><div class="youtube-video-copy"><div class="youtube-video-title">${esc(item.title || '古今樂明座の動画')}</div><div class="youtube-video-meta">${esc(publishedLabel)}　古今樂明座 Official YouTube</div></div></a>`;
+  }).join('');
+}
+
+function renderTutorialState(tutorialResource) {
+  const card = document.getElementById('tutorialHomeCard');
+  if (!card) return;
+  const complete = localStorage.getItem(`${ONBOARDING_COMPLETE_PREFIX}${getUserId()}`) === '1';
+  const button = tutorialResource?.destinationUrl && tutorialResource.destinationUrl !== 'keiko://tutorial'
+    ? `<button class="tutorial-action" type="button" data-resource-id="${escapeAttr(tutorialResource.resourceId)}">動画を見る</button><button class="tutorial-action" type="button" onclick="openHelpDialog('first-log')">手順を見る</button>`
+    : `<button class="tutorial-action" type="button" onclick="openHelpDialog('first-log')">${complete ? '使い方を見直す' : '使い方を見る'}</button>`;
+  card.querySelector('.tutorial-kicker').textContent = complete ? 'KEIKO HELP' : 'START KEIKO / 90 SEC';
+  card.querySelector('.tutorial-title').textContent = complete ? 'KEIKOをもっと使いこなす。' : '最初の記録を、次の稽古につなげる。';
+  card.querySelector('.tutorial-copy').textContent = complete ? 'ノート、グローバル、ライブラリの使い方も確認できます。' : '登録から1回目のログ保存、ホームへの反映までを短く案内します。';
+  card.querySelector('.tutorial-actions').innerHTML = button;
+  bindResourceCards(card);
+}
+
+function openHelpDialog(section = 'first-log') {
+  if (localStorage.getItem('taiko_user_type') === 'student' && section === 'global') section = 'first-log';
+  selectHelpTab(section);
+  const globalTab = document.querySelector('[data-help-tab="global"]');
+  if (globalTab) globalTab.style.display = localStorage.getItem('taiko_user_type') === 'student' ? 'none' : '';
+  document.getElementById('helpDialog')?.classList.add('show');
+}
+
+function closeHelpDialog() {
+  document.getElementById('helpDialog')?.classList.remove('show');
+}
+
+function selectHelpTab(section) {
+  document.querySelectorAll('[data-help-tab]').forEach(button => button.classList.toggle('active', button.dataset.helpTab === section));
+  document.querySelectorAll('[data-help-panel]').forEach(panel => panel.classList.toggle('active', panel.dataset.helpPanel === section));
+}
+
+async function loadRequestCatalogs() {
+  if (requestCatalogState.loaded) return requestCatalogState;
+  if (requestCatalogState.promise) return requestCatalogState.promise;
+  requestCatalogState.loading = true;
+  requestCatalogState.promise = authenticatedEdgeRequest('getRequestCatalogs', {})
+    .then(result => {
+      const woods = Array.isArray(result.woods) ? result.woods : [];
+      requestCatalogState.woods = BACHI_WOOD_CHOICES
+        .map(choice => {
+          const wood = woods.find(item => item.woodCode === choice.woodCode);
+          return wood ? { ...wood, displayName: choice.displayName } : null;
+        })
+        .filter(Boolean);
+      requestCatalogState.coachingRates = Array.isArray(result.coachingRates) ? result.coachingRates : [];
+      requestCatalogState.loaded = true;
+      return requestCatalogState;
+    })
+    .finally(() => {
+      requestCatalogState.loading = false;
+      requestCatalogState.promise = null;
+    });
+  return requestCatalogState.promise;
+}
+
+async function openBachiDialog() {
+  document.getElementById('bachiRequesterName').value = getName();
+  document.getElementById('bachiStatus').textContent = '料金表を読み込んでいます...';
+  document.getElementById('bachiDialog')?.classList.add('show');
+  try {
+    await loadRequestCatalogs();
+    const select = document.getElementById('bachiWood');
+    select.innerHTML = requestCatalogState.woods.map(item => `<option value="${escapeAttr(item.woodCode)}">${esc(item.displayName)}</option>`).join('');
+    if (!requestCatalogState.woods.length) throw new Error('現在選択できる木材がありません。');
+    handleBachiWoodChange();
+    document.getElementById('bachiStatus').textContent = '';
+  } catch (error) {
+    document.getElementById('bachiStatus').textContent = error.message || '料金表を読み込めませんでした。';
+  }
+}
+
+function closeBachiDialog() {
+  document.getElementById('bachiDialog')?.classList.remove('show');
+}
+
+function handleBachiWoodChange() {
+  const woodCode = document.getElementById('bachiWood').value;
+  const wood = requestCatalogState.woods.find(item => item.woodCode === woodCode);
+  const length = document.getElementById('bachiLength');
+  const diameter = document.getElementById('bachiDiameter');
+  if (wood) {
+    length.min = wood.minLengthCm;
+    length.max = wood.maxLengthCm;
+    diameter.min = wood.minDiameterMm;
+    diameter.max = wood.maxDiameterMm;
+    if (!length.value) length.value = wood.standardLengthCm;
+    if (!diameter.value) diameter.value = wood.standardDiameterMm;
+  }
+  scheduleBachiEstimate();
+}
+
+function collectBachiPayload() {
+  return {
+    requesterName: document.getElementById('bachiRequesterName').value.trim(),
+    contactEmail: document.getElementById('bachiEmail').value.trim(),
+    woodCode: document.getElementById('bachiWood').value,
+    lengthCm: document.getElementById('bachiLength').value,
+    diameterMm: document.getElementById('bachiDiameter').value,
+    quantityPairs: document.getElementById('bachiQuantity').value,
+  };
+}
+
+function canEstimateBachi() {
+  const payload = collectBachiPayload();
+  return !!payload.woodCode && Number(payload.lengthCm) > 0 && Number(payload.diameterMm) > 0 && Number(payload.quantityPairs) > 0;
+}
+
+function scheduleBachiEstimate() {
+  clearTimeout(bachiRequestState.timerId);
+  if (!canEstimateBachi()) return;
+  bachiRequestState.timerId = setTimeout(() => estimateBachiOrder({ silent: true }), 350);
+}
+
+function renderBachiEstimate(result) {
+  bachiRequestState.estimate = result;
+  document.getElementById('bachiPairPrice').textContent = `${formatYen(result.pairPriceEstimate)} / 組`;
+  document.getElementById('bachiBreakdown').textContent = `商品 ${formatYen(result.subtotalEstimate)}・税 ${formatYen(result.taxEstimate)}・送料 ${formatYen(result.shippingFeeEstimate)}`;
+  document.getElementById('bachiTotalPrice').textContent = formatYen(result.totalEstimate);
+  document.getElementById('bachiDeliveryDate').textContent = formatRequestDate(result.estimatedDeliveryDate);
+  document.getElementById('bachiEstimateNote').textContent = result.estimateNote || '最終仕様を確認後に正式金額をご連絡します。';
+}
+
+async function estimateBachiOrder(options = {}) {
+  if (!canEstimateBachi() || bachiRequestState.estimating) return;
+  const card = document.getElementById('bachiEstimateCard');
+  const button = document.getElementById('bachiEstimateBtn');
+  const status = document.getElementById('bachiStatus');
+  bachiRequestState.estimating = true;
+  card.classList.add('is-calculating');
+  button.disabled = true;
+  if (!options.silent) status.textContent = '概算を計算しています...';
+  try {
+    const result = await authenticatedEdgeRequest('estimateBachiOrder', collectBachiPayload());
+    renderBachiEstimate(result);
+    status.textContent = options.silent ? '' : '概算を更新しました。';
+  } catch (error) {
+    status.textContent = error.message || '概算を計算できませんでした。';
+  } finally {
+    bachiRequestState.estimating = false;
+    card.classList.remove('is-calculating');
+    button.disabled = false;
+  }
+}
+
+async function submitBachiOrder(event) {
+  event.preventDefault();
+  const form = document.getElementById('bachiForm');
+  if (!form?.reportValidity() || bachiRequestState.submitting) return;
+  const button = document.getElementById('bachiSubmitBtn');
+  const status = document.getElementById('bachiStatus');
+  bachiRequestState.submitting = true;
+  button.disabled = true;
+  status.textContent = '依頼を送信しています...';
+  try {
+    const result = await authenticatedEdgeRequest('createBachiOrder', collectBachiPayload());
+    renderBachiEstimate(result);
+    status.textContent = `依頼を受け付けました。受付番号: ${result.orderId}。${requestEmailStatusText(result.emailStatus)}`;
+    showToast('カスタムバチの依頼を送信しました');
+  } catch (error) {
+    status.textContent = error.message || '依頼を送信できませんでした。';
+  } finally {
+    bachiRequestState.submitting = false;
+    button.disabled = false;
+  }
+}
+
+async function openCoachingDialog() {
+  if (localStorage.getItem('taiko_user_type') === 'student') {
+    showToast('指導依頼は代表者または一般ユーザーからご利用ください');
+    return;
+  }
+  const teams = getRegularTeams();
+  const teamInput = document.getElementById('coachingTeam');
+  const datalist = document.getElementById('coachingTeamOptions');
+  datalist.innerHTML = teams.map(team => `<option value="${escapeAttr(team.teamName)}"></option>`).join('');
+  teamInput.value = getCurrentMembership()?.teamName || teams[0]?.teamName || '';
+  document.getElementById('coachingContactName').value = getName();
+  document.getElementById('coachingStatus').textContent = '料金表を読み込んでいます...';
+  document.getElementById('coachingDialog')?.classList.add('show');
+  try {
+    await loadRequestCatalogs();
+    const rateSelect = document.getElementById('coachingDuration');
+    const hourly = requestCatalogState.coachingRates.find(item => item.rateCode === 'hourly');
+    const hourlyOptions = hourly ? [60, 90, 120, 150, 180].map(minutes => {
+      const label = minutes % 60 === 0 ? `${minutes / 60}時間` : `${Math.floor(minutes / 60)}時間30分`;
+      return `<option value="hourly:${minutes}">${label}</option>`;
+    }) : [];
+    const fixedOptions = requestCatalogState.coachingRates
+      .filter(item => item.rateCode !== 'hourly' && Number(item.durationMinutes) > 0)
+      .map(item => `<option value="${escapeAttr(item.rateCode)}:${Number(item.durationMinutes)}">${esc(item.displayName)}</option>`);
+    rateSelect.innerHTML = '<option value="">選択してください</option>' + [...hourlyOptions, ...fixedOptions].join('');
+    if (!requestCatalogState.coachingRates.length) throw new Error('現在選択できる指導時間がありません。');
+    document.getElementById('coachingStatus').textContent = '';
+  } catch (error) {
+    document.getElementById('coachingStatus').textContent = error.message || '料金表を読み込めませんでした。';
+  }
+}
+
+function closeCoachingDialog() {
+  document.getElementById('coachingDialog')?.classList.remove('show');
+}
+
+function collectCoachingPayload() {
+  const teamName = document.getElementById('coachingTeam').value.trim();
+  const selectedTeam = getRegularTeams().find(team => team.teamName === teamName);
+  const [rateType = '', durationMinutes = ''] = document.getElementById('coachingDuration').value.split(':');
+  return {
+    teamId: selectedTeam?.teamId || '',
+    teamName: teamName || '個人・その他',
+    contactName: document.getElementById('coachingContactName').value.trim(),
+    contactEmail: document.getElementById('coachingEmail').value.trim(),
+    location: document.getElementById('coachingLocation').value.trim(),
+    rateType,
+    durationMinutes,
+    lessonTopic: document.getElementById('coachingTopic').value.trim(),
+  };
+}
+
+function canEstimateCoaching() {
+  const payload = collectCoachingPayload();
+  return !!payload.location && !!payload.rateType && Number(payload.durationMinutes) > 0;
+}
+
+function scheduleCoachingEstimate() {
+  clearTimeout(coachingRequestState.timerId);
+  if (!canEstimateCoaching()) return;
+  coachingRequestState.timerId = setTimeout(() => estimateCoachingRequest({ silent: true }), 650);
+}
+
+function formatYen(value) {
+  return value === null || value === undefined ? '確認後に確定' : `${new Intl.NumberFormat('ja-JP').format(Number(value))}円`;
+}
+
+function formatDurationLabel(minutes) {
+  const hours = Math.floor(Number(minutes) / 60);
+  const remainder = Number(minutes) % 60;
+  return remainder ? `${hours}時間${remainder}分` : `${hours}時間`;
+}
+
+function formatRequestDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return '確認後に確定';
+  const [year, month, day] = String(value).split('-').map(Number);
+  return `${year}年${month}月${day}日ごろ`;
+}
+
+function requestEmailStatusText(emailStatus) {
+  if (emailStatus === 'sent') return '受付完了メールをご確認ください。';
+  return '依頼内容は保存されています。受付メールを確認できない場合は、古今樂明座からの連絡をお待ちください。';
+}
+
+function renderCoachingEstimate(result) {
+  coachingRequestState.estimate = result;
+  const rateLabel = result.rateType === 'hourly'
+    ? `${result.rateLabel || '時間制'}（${formatDurationLabel(result.durationMinutes)}）`
+    : result.rateLabel || '';
+  document.getElementById('coachingLessonFee').textContent = `${rateLabel} ${formatYen(result.lessonFeeEstimate)}`.trim();
+  document.getElementById('coachingTransportFee').textContent = formatYen(result.transportFeeEstimate);
+  document.getElementById('coachingTotalFee').textContent = formatYen(result.totalEstimate);
+  document.getElementById('coachingEstimateNote').textContent = result.estimateNote || '正式金額は内容確認後に確定します。';
+}
+
+async function estimateCoachingRequest(options = {}) {
+  if (!canEstimateCoaching() || coachingRequestState.estimating) return;
+  const button = document.getElementById('coachingEstimateBtn');
+  const card = document.getElementById('coachingEstimateCard');
+  const status = document.getElementById('coachingStatus');
+  coachingRequestState.estimating = true;
+  button.disabled = true;
+  card.classList.add('is-calculating');
+  if (!options.silent) status.textContent = '府中駅からの交通費を含めて計算しています...';
+  try {
+    const result = await authenticatedEdgeRequest('estimateCoachingRequest', collectCoachingPayload());
+    renderCoachingEstimate(result);
+    status.textContent = options.silent ? '' : '概算を更新しました。内容を確認して送信してください。';
+  } catch (error) {
+    status.textContent = error.message || '概算を計算できませんでした。';
+  } finally {
+    coachingRequestState.estimating = false;
+    button.disabled = false;
+    card.classList.remove('is-calculating');
+  }
+}
+
+async function submitCoachingRequest(event) {
+  event.preventDefault();
+  const form = document.getElementById('coachingForm');
+  if (!form?.reportValidity() || coachingRequestState.submitting) return;
+  const button = document.getElementById('coachingSubmitBtn');
+  const status = document.getElementById('coachingStatus');
+  coachingRequestState.submitting = true;
+  button.disabled = true;
+  status.textContent = '指導依頼を送信しています...';
+  try {
+    const result = await authenticatedEdgeRequest('createCoachingRequest', collectCoachingPayload());
+    renderCoachingEstimate(result);
+    status.textContent = `依頼を受け付けました。受付番号: ${result.requestId}。${requestEmailStatusText(result.emailStatus)}`;
+    showToast('指導依頼を送信しました');
+  } catch (error) {
+    status.textContent = error.message || '指導依頼を送信できませんでした。';
+  } finally {
+    coachingRequestState.submitting = false;
+    button.disabled = false;
+  }
 }
 
 function mapSupabaseLog(row) {
@@ -1305,6 +2132,7 @@ async function doRegister() {
     hydratePracticeCache();
     goTo('home');
     loadHome({ background: homeState.loaded });
+    setTimeout(() => openHelpDialog('first-log'), 350);
   } catch(e) {
     err.textContent = e.message || '通信エラー。Wi-Fiを確認してください';
   }
@@ -1402,6 +2230,7 @@ function resetTeamScopedState() {
   Object.assign(notesState, { items: [], loading: false, loaded: false, lastFetchedAt: 0, loadingMore: false, hasMore: false, nextCursor: null });
   notesState.expandedNoteIds.clear();
   Object.assign(formMissionState, { teamId: '', latestLog: null, loading: false, requestId: formMissionState.requestId + 1 });
+  Object.assign(homeHubState, { announcements: [], resources: [], loaded: false, loading: false, lastFetchedAt: 0 });
 }
 
 function applyMembershipContext(context) {
@@ -1419,7 +2248,11 @@ function applyMembershipContext(context) {
   cacheMemberships();
 
   const requestedTeamId = String(context.teamId || context.team_id || '');
-  const current = items.find(item => item.teamId === requestedTeamId)
+  const regularItems = items.filter(item => !item.isPersonal);
+  const current = regularItems.find(item => item.teamId === requestedTeamId)
+    || regularItems.find(item => item.teamId === previousTeamId)
+    || regularItems[0]
+    || items.find(item => item.teamId === requestedTeamId)
     || items.find(item => item.teamId === previousTeamId)
     || items[0]
     || null;
@@ -1433,12 +2266,12 @@ function applyMembershipContext(context) {
   } else {
     ['taiko_team_id', 'taiko_group', 'taiko_team_type', 'taiko_is_personal'].forEach(key => localStorage.removeItem(key));
   }
+  localStorage.removeItem(VIEW_KIND_KEY);
 
   renderMembershipSettings();
   renderFormTeamPicker();
   renderViewContextSwitcher();
   renderGlobalParticipation();
-  renderOperatorSettings();
   syncAudienceUi();
   return previousTeamId !== (current?.teamId || '');
 }
@@ -1470,16 +2303,8 @@ function getRegularTeams() {
   return getMemberships().filter(item => !item.isPersonal);
 }
 
-function isGlobalView() {
-  return localStorage.getItem(VIEW_KIND_KEY) === 'global' && isGlobalParticipant();
-}
-
 function isGlobalParticipant() {
   return globalState.enabled || localStorage.getItem(GLOBAL_PARTICIPATION_KEY) === '1';
-}
-
-function isOperator() {
-  return localStorage.getItem(APP_ROLE_KEY) === 'operator';
 }
 
 function canTeamPublishGlobal(team) {
@@ -1487,7 +2312,7 @@ function canTeamPublishGlobal(team) {
 }
 
 function getContextTheme(team) {
-  if (!team) return GLOBAL_CONTEXT_THEME;
+  if (!team) return PERSONAL_CONTEXT_THEME;
   if (team.isPersonal) return PERSONAL_CONTEXT_THEME;
   const index = Math.max(0, getRegularTeams().findIndex(item => item.teamId === team.teamId));
   return CONTEXT_THEMES[index % CONTEXT_THEMES.length];
@@ -1505,42 +2330,33 @@ function applyScreenNavTheme(screen, theme) {
 
 function renderViewContextSwitcher() {
   const container = document.getElementById('viewContextButtons');
-  if (!container) return;
-  const teamButtons = getMemberships().map(team => {
-    const active = !isGlobalView() && team.teamId === getTeamId();
+  const panel = document.getElementById('viewContextPanel');
+  if (!container || !panel) return;
+  const regularTeams = getRegularTeams();
+  panel.style.display = regularTeams.length > 1 ? '' : 'none';
+  const teamButtons = regularTeams.map(team => {
+    const active = team.teamId === getTeamId();
     const theme = getContextTheme(team);
     return `
     <button class="context-btn ${active ? 'active' : ''}" style="${contextThemeStyle(theme)}" type="button" aria-pressed="${active}" onclick="switchViewContext('team','${escapeAttr(team.teamId)}')">
-      ${team.isPersonal ? '自分' : esc(team.teamName)}
+      ${esc(team.teamName)}
     </button>`;
   });
-  if (isGlobalParticipant()) {
-    const active = isGlobalView();
-    teamButtons.push(`<button class="context-btn ${active ? 'active' : ''}" style="${contextThemeStyle(GLOBAL_CONTEXT_THEME)}" type="button" aria-pressed="${active}" onclick="switchViewContext('global')">グローバル</button>`);
-  }
   container.innerHTML = teamButtons.join('');
 
-  const currentTeam = isGlobalView() ? null : getCurrentMembership();
+  const currentTeam = getCurrentMembership();
   const theme = getContextTheme(currentTeam);
-  const panel = document.getElementById('viewContextPanel');
-  if (panel) {
-    panel.style.setProperty('--context-color', theme.color);
-    panel.style.setProperty('--context-soft', theme.soft);
-  }
+  panel.style.setProperty('--context-color', theme.color);
+  panel.style.setProperty('--context-soft', theme.soft);
   applyScreenNavTheme(document.getElementById('screen-home'), theme);
   const current = document.getElementById('viewContextCurrent');
-  if (current) current.textContent = isGlobalView()
-    ? 'グローバルを表示中'
-    : currentTeam?.isPersonal ? '自分を表示中' : `${currentTeam?.teamName || '表示先'}を表示中`;
+  if (current) current.textContent = `${currentTeam?.teamName || '所属チーム'}を選択中`;
 }
 
 async function switchViewContext(kind, teamId = '') {
-  if (kind === 'global' && !isGlobalParticipant()) {
-    showToast('先にグローバルへ参加してください');
-    return;
-  }
-  if (kind === 'team' && teamId === getTeamId() && !isGlobalView()) return;
-  if (kind === 'global' && isGlobalView()) return;
+  if (kind !== 'team' || teamId === getTeamId()) return;
+  const team = getRegularTeams().find(item => item.teamId === teamId);
+  if (!team) return;
 
   if (getOutbox().length) {
     await flushOutbox();
@@ -1550,47 +2366,24 @@ async function switchViewContext(kind, teamId = '') {
     }
   }
 
-  if (document.getElementById('screen-notes')?.classList.contains('active')) saveNoteDraft();
-  clearNoteComposerFields();
   resetTeamScopedState();
-  if (kind === 'global') {
-    localStorage.setItem(VIEW_KIND_KEY, 'global');
-    notesState.scope = 'global';
-    notesState.teamId = '';
-  } else {
-    const team = getMemberships().find(item => item.teamId === teamId);
-    if (!team) return;
-    localStorage.setItem(VIEW_KIND_KEY, 'team');
-    localStorage.setItem('taiko_team_id', team.teamId);
-    localStorage.setItem('taiko_group', team.teamName);
-    localStorage.setItem('taiko_team_type', team.teamType);
-    localStorage.setItem('taiko_is_personal', team.isPersonal ? '1' : '0');
-    notesState.scope = team.isPersonal ? 'private' : 'team';
-    notesState.teamId = team.teamId;
-    hydratePracticeCache();
-  }
-  hydrateNotesCache();
+  localStorage.removeItem(VIEW_KIND_KEY);
+  localStorage.setItem('taiko_team_id', team.teamId);
+  localStorage.setItem('taiko_group', team.teamName);
+  localStorage.setItem('taiko_team_type', team.teamType);
+  localStorage.setItem('taiko_is_personal', '0');
+  hydratePracticeCache();
   updateHome();
-  if (!isGlobalView()) loadHome({ background: homeState.loaded });
-  if (document.getElementById('screen-notes')?.classList.contains('active')) updateNotes();
+  loadHome({ background: homeState.loaded });
 }
 
 function syncAudienceUi() {
-  const global = isGlobalView();
   const personal = isPersonalMode();
   const goodNewsCard = document.getElementById('goodNewsCard');
   const timekeeperCard = document.getElementById('timekeeperCard');
-  if (goodNewsCard) goodNewsCard.style.display = personal || global ? 'none' : '';
-  if (timekeeperCard) timekeeperCard.style.display = personal || global ? 'none' : '';
-  ['practiceHero', 'practiceDayCard', 'homeRecordBtn', 'homeLogsBtn'].forEach(id => {
-    const element = document.getElementById(id);
-    if (element) element.style.display = global ? 'none' : '';
-  });
-  document.getElementById('globalHomeCard')?.classList.toggle('show', global);
-  document.querySelectorAll('.nav-item[onclick*="\'form\'"],.nav-item[onclick*="\'log\'"]').forEach(button => {
-    button.style.display = global ? 'none' : '';
-  });
-  if (personal || global) {
+  if (goodNewsCard) goodNewsCard.style.display = personal ? 'none' : '';
+  if (timekeeperCard) timekeeperCard.style.display = personal ? 'none' : '';
+  if (personal) {
     stopGoodNewsTicker();
     stopGoodNewsRefresh();
   }
@@ -1610,9 +2403,9 @@ function renderMembershipSettings() {
     lead.textContent = '所属情報を再読み込みしてください。';
   } else {
     list.innerHTML = memberships.map(team => `
-      <button class="membership-chip ${!isGlobalView() && team.teamId === getTeamId() ? 'current' : ''}" type="button" onclick="switchViewContext('team','${escapeAttr(team.teamId)}')">
-        ${team.isPersonal ? '個人利用' : esc(team.teamName)}${!isGlobalView() && team.teamId === getTeamId() ? '・表示中' : ''}
-      </button>
+      ${team.isPersonal
+        ? '<span class="membership-chip">個人用ノート</span>'
+        : `<button class="membership-chip ${team.teamId === getTeamId() ? 'current' : ''}" type="button" onclick="switchViewContext('team','${escapeAttr(team.teamId)}')">${esc(team.teamName)}${team.teamId === getTeamId() ? '・選択中' : ''}</button>`}
     `).join('');
     lead.textContent = regularTeams.length === 0
       ? '個人利用中です。自分のログとノートを利用できます。'
@@ -1624,14 +2417,18 @@ function renderMembershipSettings() {
 }
 
 function renderGlobalParticipation() {
+  const card = document.getElementById('globalParticipationCard');
   const title = document.getElementById('globalParticipationTitle');
   const copy = document.getElementById('globalParticipationCopy');
   const button = document.getElementById('globalParticipationBtn');
-  if (!title || !copy || !button) return;
+  if (!card || !title || !copy || !button) return;
+  const canUseGlobal = localStorage.getItem('taiko_user_type') === 'general';
+  card.classList.toggle('show', canUseGlobal);
+  if (!canUseGlobal) return;
   const enabled = isGlobalParticipant();
   title.textContent = enabled ? 'グローバル参加中' : 'グローバルに参加する';
   copy.textContent = enabled
-    ? '表示先の「グローバル」から、公開された稽古ノートを確認できます。'
+    ? 'ノート画面上部の「グローバル」から、公開された稽古ノートを確認できます。'
     : '参加すると、公開された稽古ノートを読んだり、自分または許可されたチーム名で投稿できます。';
   setPendingButton(button, globalState.updating, '更新中...', enabled ? 'グローバルから退出する' : 'グローバルに参加する');
 }
@@ -1663,21 +2460,17 @@ async function toggleGlobalParticipation() {
     renderGlobalParticipation();
     renderViewContextSwitcher();
     if (globalState.enabled) {
-      await switchViewContext('global');
+      notesState.scope = 'global';
+      notesState.teamId = getPreferredGlobalAuthorTeamId();
+      if (document.getElementById('screen-notes')?.classList.contains('active')) updateNotes();
       showToast('グローバルに参加しました');
     } else {
-      localStorage.setItem(VIEW_KIND_KEY, 'team');
-      const fallback = getRegularTeams()[0] || getPersonalTeam();
-      if (fallback) {
-        resetTeamScopedState();
-        localStorage.setItem('taiko_team_id', fallback.teamId);
-        localStorage.setItem('taiko_group', fallback.teamName);
-        localStorage.setItem('taiko_team_type', fallback.teamType);
-        localStorage.setItem('taiko_is_personal', fallback.isPersonal ? '1' : '0');
-        hydratePracticeCache();
-        updateHome();
-        loadHome({ background: homeState.loaded });
+      if (notesState.scope === 'global') {
+        const fallback = getCurrentMembership();
+        notesState.scope = fallback?.isPersonal ? 'private' : 'team';
+        notesState.teamId = fallback?.teamId || getPersonalTeam()?.teamId || '';
       }
+      if (document.getElementById('screen-notes')?.classList.contains('active')) updateNotes();
       showToast('グローバルから退出しました');
     }
   } catch (error) {
@@ -1686,132 +2479,6 @@ async function toggleGlobalParticipation() {
   } finally {
     globalState.updating = false;
     renderGlobalParticipation();
-  }
-}
-
-function renderOperatorSettings() {
-  const card = document.getElementById('operatorSettings');
-  if (!card) return;
-  card.classList.toggle('show', isOperator());
-  if (!isOperator()) return;
-  renderOperatorTeams();
-  renderOperatorReports();
-  if (!operatorState.loaded && !operatorState.loading) loadOperatorDashboard();
-}
-
-async function loadOperatorDashboard(force = false) {
-  if (!isOperator() || operatorState.loading || (!force && operatorState.loaded)) return;
-  operatorState.loading = true;
-  renderOperatorTeams();
-  renderOperatorReports();
-  try {
-    const result = await authenticatedEdgeRequest('getOperatorDashboard');
-    operatorState.teams = Array.isArray(result.teams) ? result.teams : [];
-    operatorState.reports = Array.isArray(result.reports) ? result.reports : [];
-    operatorState.loaded = true;
-  } catch (error) {
-    console.error(error);
-    showToast('運営情報を取得できませんでした');
-  } finally {
-    operatorState.loading = false;
-    renderOperatorTeams();
-    renderOperatorReports();
-  }
-}
-
-function renderOperatorTeams() {
-  const container = document.getElementById('operatorTeams');
-  if (!container || !isOperator()) return;
-  if (operatorState.loading && !operatorState.teams.length) {
-    container.innerHTML = '<div class="note-empty">チーム設定を読み込み中...</div>';
-    return;
-  }
-  if (!operatorState.teams.length) {
-    container.innerHTML = '<div class="note-empty">管理対象のチームはありません。</div>';
-    return;
-  }
-  container.innerHTML = operatorState.teams.map(team => {
-    const isSchool = team.teamType === 'student';
-    const enabled = !!team.globalNotesEnabled;
-    const pending = operatorState.updatingTeamIds.has(team.teamId);
-    return `<div class="operator-team-row">
-      <div class="operator-team-head">
-        <div><div class="operator-team-name">${esc(team.teamName)}</div><div class="operator-team-meta">${isSchool ? '学校チーム・グローバル禁止' : enabled ? 'グローバル投稿を許可中' : 'チーム内のみ'}</div></div>
-        <button class="operator-toggle ${enabled ? 'enabled' : ''}" type="button" onclick="updateTeamGlobalSetting('${escapeAttr(team.teamId)}',${enabled ? 'false' : 'true'})" ${isSchool || pending ? 'disabled' : ''}>${pending ? '更新中...' : enabled ? '公開を停止' : '公開を許可'}</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-async function updateTeamGlobalSetting(teamId, enabled) {
-  if (!isOperator() || operatorState.updatingTeamIds.has(teamId)) return;
-  const team = operatorState.teams.find(item => item.teamId === teamId);
-  if (!team) return;
-  if (!confirm(`${team.teamName}のグローバル投稿を${enabled ? '許可' : '停止'}しますか？`)) return;
-  operatorState.updatingTeamIds.add(teamId);
-  renderOperatorTeams();
-  try {
-    await authenticatedEdgeRequest('updateTeamSettings', { teamId, globalNotesEnabled: enabled });
-    team.globalNotesEnabled = enabled;
-    team.globalScope = enabled ? 'global' : 'disabled';
-    const membership = getMemberships().find(item => item.teamId === teamId);
-    if (membership) {
-      membership.globalNotesEnabled = enabled;
-      membership.globalScope = team.globalScope;
-      cacheMemberships();
-    }
-    renderNoteScopeButtons();
-    showToast('チーム設定を更新しました');
-  } catch (error) {
-    console.error(error);
-    showToast(error?.message || 'チーム設定を更新できませんでした');
-  } finally {
-    operatorState.updatingTeamIds.delete(teamId);
-    renderOperatorTeams();
-  }
-}
-
-function renderOperatorReports() {
-  const container = document.getElementById('operatorReports');
-  if (!container || !isOperator()) return;
-  if (operatorState.loading && !operatorState.loaded) {
-    container.innerHTML = '<div class="note-empty">通報を読み込み中...</div>';
-    return;
-  }
-  if (!operatorState.reports.length) {
-    container.innerHTML = '<div class="note-empty">未対応の通報はありません。</div>';
-    return;
-  }
-  container.innerHTML = operatorState.reports.map(report => {
-    const pending = operatorState.moderatingReportIds.has(report.reportId);
-    return `<div class="operator-report">
-      <div class="operator-team-name">${esc(report.authorName || '投稿者不明')}・${esc(report.teamName || '個人')}</div>
-      <div class="operator-report-meta">${esc(fmtDateTime(report.createdAt))} / メール ${esc(report.emailStatus || 'pending')}</div>
-      <div class="operator-report-body">理由: ${esc(report.reason)}\n\n${esc(report.content)}</div>
-      <div class="operator-report-actions">
-        <button type="button" onclick="moderateReport('${escapeAttr(report.reportId)}','dismiss')" ${pending ? 'disabled' : ''}>問題なし</button>
-        <button type="button" onclick="moderateReport('${escapeAttr(report.reportId)}','resolve')" ${pending ? 'disabled' : ''}>対応済み</button>
-        <button class="hide" type="button" onclick="moderateReport('${escapeAttr(report.reportId)}','hide_content')" ${pending ? 'disabled' : ''}>投稿を非表示</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-async function moderateReport(reportId, operation) {
-  if (!isOperator() || operatorState.moderatingReportIds.has(reportId)) return;
-  if (operation === 'hide_content' && !confirm('対象の投稿を全員から非表示にしますか？')) return;
-  operatorState.moderatingReportIds.add(reportId);
-  renderOperatorReports();
-  try {
-    await authenticatedEdgeRequest('moderateReport', { reportId, operation });
-    operatorState.reports = operatorState.reports.filter(item => item.reportId !== reportId);
-    showToast(operation === 'hide_content' ? '投稿を非表示にしました' : '通報を処理しました');
-  } catch (error) {
-    console.error(error);
-    showToast(error?.message || '通報を処理できませんでした');
-  } finally {
-    operatorState.moderatingReportIds.delete(reportId);
-    renderOperatorReports();
   }
 }
 
@@ -1940,18 +2607,15 @@ function doLogout() {
 // 画面切り替え
 // ============================================
 function goTo(s) {
-  if (isGlobalView() && ['form', 'log'].includes(s)) {
-    showToast('稽古ログは「自分」またはチーム表示で利用できます');
-    s = 'home';
-  }
   document.querySelectorAll('.screen').forEach(x => x.classList.remove('active'));
   const activeScreen = document.getElementById('screen-' + s);
   activeScreen.classList.add('active');
-  applyScreenNavTheme(activeScreen, isGlobalView() ? GLOBAL_CONTEXT_THEME : getContextTheme(getCurrentMembership()));
-  if (s === 'home')    updateHome();
+  applyScreenNavTheme(activeScreen, getContextTheme(getCurrentMembership()));
+  if (s === 'home')    { updateHome(); loadHomeHub({ force: true }); }
   if (s === 'form')    updateForm();
   if (s === 'log')     ensureLogsLoaded();
   if (s === 'notes')   updateNotes();
+  if (s === 'library') { renderLibraryResources(); loadHomeHub(); loadYoutubeVideos(); }
   syncAudienceUi();
   syncGoodNewsTickerWithView();
 }
@@ -2128,11 +2792,6 @@ function getDateKey() {
 async function loadHome(options = {}) {
   const { background = false } = options;
   if (homeState.loading) return;
-  if (isGlobalView()) {
-    updateHome();
-    return;
-  }
-
   homeState.loading = true;
   const showOverlay = !background && !homeState.loaded;
   const startedAt = Date.now();
@@ -2174,11 +2833,8 @@ function updateHome() {
   renderMembershipSettings();
   renderViewContextSwitcher();
   renderGlobalParticipation();
-  renderOperatorSettings();
   syncAudienceUi();
-  document.getElementById('headerUserName').textContent = isGlobalView()
-    ? `${getName()} | グローバル`
-    : getGroup() ? `${getName()} | ${isPersonalMode() ? '自分' : getGroup()}` : getName();
+  document.getElementById('headerUserName').textContent = getGroup() ? `${getName()} | ${isPersonalMode() ? '自分' : getGroup()}` : getName();
   const total = homeState.totalCount;
   document.getElementById('practiceDayCount').textContent = total;
 
@@ -2189,7 +2845,7 @@ function updateHome() {
   } else {
     m.textContent = 'まだ記録がありません'; m.className = 'hero-focus-empty';
   }
-  if (!isGlobalView()) ensureGoodNewsFeed();
+  ensureGoodNewsFeed();
 }
 
 function renderTimekeeper() {
@@ -2256,11 +2912,11 @@ function isHomeScreenActive() {
 }
 
 function canRunGoodNewsTicker() {
-  return !isGlobalView() && !isPersonalMode() && isHomeScreenActive() && !document.hidden && hasSession();
+  return !isPersonalMode() && isHomeScreenActive() && !document.hidden && hasSession();
 }
 
 function ensureGoodNewsFeed(force = false) {
-  if (!hasSession() || isGlobalView() || isPersonalMode()) return;
+  if (!hasSession() || isPersonalMode()) return;
   const isStale = Date.now() - goodNewsState.lastFetchedAt > GOOD_NEWS_REFRESH_MS;
   if ((force || !goodNewsState.loaded || isStale) && !goodNewsState.loading) {
     loadGoodNewsFeed({ force, background: goodNewsState.loaded && !force });
@@ -2496,13 +3152,11 @@ function renderFormTeamPicker() {
   const picker = document.getElementById('formTeamPicker');
   const select = document.getElementById('formTeamSelect');
   if (!picker || !select) return;
-  const teams = isPersonalMode()
-    ? getMemberships().filter(team => team.isPersonal)
-    : getRegularTeams();
+  const teams = getRegularTeams().length ? getRegularTeams() : getMemberships().filter(team => team.isPersonal);
   const previousValue = select.value;
   select.innerHTML = teams.map(team => `<option value="${escapeAttr(team.teamId)}">${team.isPersonal ? '自分' : esc(team.teamName)}</option>`).join('');
-  const preferred = teams.find(team => team.teamId === previousValue)
-    || teams.find(team => team.teamId === getTeamId())
+  const preferred = teams.find(team => team.teamId === getTeamId())
+    || teams.find(team => team.teamId === previousValue)
     || teams[0];
   if (preferred) select.value = preferred.teamId;
   picker.classList.toggle('show', teams.length > 1);
@@ -2709,7 +3363,7 @@ function applySavedLog(json, payload, queued) {
     group: targetTeam?.teamName || '',
     pending: queued,
   };
-  const isActiveTeam = !isGlobalView() && payload.p_team_id === getTeamId();
+  const isActiveTeam = payload.p_team_id === getTeamId();
   if (isActiveTeam) {
     cachedLogs = [savedLog, ...cachedLogs.filter(log => log.id !== savedLog.id)];
     if (!json.duplicate) homeState.totalCount += 1;
@@ -2729,6 +3383,8 @@ function applySavedLog(json, payload, queued) {
   document.getElementById('successText').textContent = queued
     ? '通信が戻り次第、自動で保存します。入力内容はこの端末に保持されています。'
     : `「${payload.p_next_action.substring(0,20)}${payload.p_next_action.length>20?'…':''}」を次の稽古の誓いに登録しました！`;
+  localStorage.setItem(`${ONBOARDING_COMPLETE_PREFIX}${getUserId()}`, '1');
+  renderTutorialState(homeHubState.resources.find(item => item.resourceType === 'tutorial'));
   document.getElementById('successOverlay').classList.add('show');
 }
 
@@ -2906,6 +3562,7 @@ function renderAchievementLog(log) {
 // チームノート
 // ============================================
 function updateNotes() {
+  renderGlobalParticipation();
   initializeNoteScope();
   renderNoteScopeButtons();
   hydrateNoteDraft();
@@ -2916,10 +3573,7 @@ function updateNotes() {
 function initializeNoteScope() {
   const validTeam = notesState.scope === 'team' && getRegularTeams().some(team => team.teamId === notesState.teamId);
   if (notesState.scope === 'private' || validTeam || (notesState.scope === 'global' && isGlobalParticipant())) return;
-  if (isGlobalView() && isGlobalParticipant()) {
-    notesState.scope = 'global';
-    notesState.teamId = getPreferredGlobalAuthorTeamId();
-  } else if (isPersonalMode()) {
+  if (isPersonalMode()) {
     notesState.scope = 'private';
     notesState.teamId = getPersonalTeam()?.teamId || getTeamId();
   } else {
@@ -3476,7 +4130,6 @@ async function reportContent(contentType, contentId) {
       reason: reason.trim(),
     });
     showToast(result.emailStatus === 'sent' ? '運営へ通報しました' : '通報を受け付けました');
-    if (isOperator()) loadOperatorDashboard(true);
   } catch (error) {
     console.error(error);
     showToast(error?.message || '通報を送信できませんでした');
