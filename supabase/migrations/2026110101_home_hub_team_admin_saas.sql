@@ -131,7 +131,7 @@ values
   ('kokongakumeiza-youtube', 'music', '古今樂明座 Official YouTubeチャンネル', '公演映像や楽曲から、音・身体の使い方・舞台表現を学べます。', null, 'https://m.youtube.com/@Kokongakumeiza', 'all', 30, 'active'),
   ('hachijo-beginner-solo', 'video', '八丈太鼓・初心者ソロ演奏', '初心者の稽古で使える演奏例です。', 'https://i.ytimg.com/vi/VEtbMLf1Oyk/hqdefault.jpg', 'https://youtu.be/VEtbMLf1Oyk', 'all', 40, 'active'),
   ('hachijo-mawashiuchi', 'video', '八丈太鼓・廻し打ち', '廻し打ちの身体の流れを動画で確認できます。', 'https://i.ytimg.com/vi/Ty1__22CeB8/hqdefault.jpg', 'https://youtu.be/Ty1__22CeB8', 'all', 50, 'active'),
-  ('gakumeiza-radio', 'radio', '樂明座ラジオ', '古今樂明座の考え方や稽古の知見を、YouTubeの再生リストで聴けます。', 'https://i.ytimg.com/vi/awLvvl1AvhU/hqdefault.jpg', 'https://m.youtube.com/watch?v=awLvvl1AvhU&list=PLmk028LkL7RF9l2NIJBfL07O0b1-pBrRJ', 'all', 60, 'inactive'),
+  ('gakumeiza-radio', 'radio', '樂明座ラジオ', '古今樂明座の考え方や稽古の知見を、YouTubeの再生リストで聴けます。', 'https://i.ytimg.com/vi/awLvvl1AvhU/hqdefault.jpg', 'https://m.youtube.com/watch?v=awLvvl1AvhU&list=PLmk028LkL7RF9l2NIJBfL07O0b1-pBrRJ', 'all', 60, 'archived'),
   ('custom-bachi-order', 'order', 'カスタムバチを注文する', 'オンライン注文フォームから用途に合うバチを相談できます。', null, null, 'all', 70, 'active'),
   ('discord-study', 'community', 'Discordの勉強会に参加', '指導と稽古について学ぶコミュニティです。', null, null, 'general', 80, 'active'),
   ('coaching-request', 'coaching', '古今樂明座に指導を依頼する', '場所と指導時間だけで概算を確認し、日程は返信メールで調整できます。', null, 'keiko://coaching', 'general', 90, 'active')

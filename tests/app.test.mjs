@@ -375,7 +375,7 @@ test('home hub exposes one help entry, vertical resources, announcements, and in
   assert.match(woodChoicesMigration, /\('hou', 'ホオ', 1600/);
   assert.match(woodChoicesMigration, /\('maple', 'カエデ', 1600/);
   assert.match(woodChoicesMigration, /on conflict \(wood_code\) do update/);
-  assert.match(resourceCleanupMigration, /set status = 'inactive'/);
+  assert.match(resourceCleanupMigration, /set status = 'archived'/);
   assert.match(resourceCleanupMigration, /where source_key = 'gakumeiza-radio'/);
   assert.match(resourceCleanupMigration, /set title = '古今樂明座に指導を依頼する'/);
   assert.match(requestMigration, /\('half_day', '半日（4時間）', 24000/);

@@ -1,7 +1,7 @@
 begin;
 
 update public.home_resources
-set status = 'inactive',
+set status = 'archived',
     updated_at = now()
 where source_key = 'gakumeiza-radio';
 
