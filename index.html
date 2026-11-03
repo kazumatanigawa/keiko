@@ -901,7 +901,7 @@ const GOOD_NEWS_ROTATE_MS = 3000;
 const GOOD_NEWS_REFRESH_MS = 60000;
 const GOOD_NEWS_RECENT_LIMIT = 4;
 const NOTES_REFRESH_MS = 45000;
-const APP_VERSION = '2026-11-03-16';
+const APP_VERSION = '2026-11-03-17';
 const APP_VERSION_KEY = 'taiko_app_version';
 const VIEW_KIND_KEY = 'taiko_view_kind';
 const APP_ROLE_KEY = 'taiko_app_role';
@@ -1262,20 +1262,26 @@ function renderHomeHub() {
   const resources = homeHubState.resources.length ? homeHubState.resources : visibleFallbackResources();
   renderResourceRow('learningResourceRow', selectHomeLearningResources(resources));
   renderResourceRow('connectionResourceRow', selectHomeConnectionResources(resources));
-  renderResourceRow('serviceResourceRow', resources.filter(item => ['order', 'coaching'].includes(item.resourceType)));
+  renderResourceRow('serviceResourceRow', selectHomeServiceResources(resources));
   renderLibraryResources(resources);
 }
 
 function selectHomeLearningResources(resources) {
   const fallbacks = visibleFallbackResources();
   const findResource = predicate => resources.find(predicate) || fallbacks.find(predicate);
-  return [findResource(isGakumeizaScoreResource)].filter(Boolean);
+  return [findResource(isGakumeizaScoreResource), findResource(isGakumeizaYoutubeResource)].filter(Boolean);
 }
 
 function selectHomeConnectionResources(resources) {
   const fallbacks = visibleFallbackResources();
   const discord = resources.find(isDiscordStudyResource) || fallbacks.find(isDiscordStudyResource);
   return discord ? [discord] : [];
+}
+
+function selectHomeServiceResources(resources) {
+  const fallbacks = visibleFallbackResources();
+  const findResource = predicate => resources.find(predicate) || fallbacks.find(predicate);
+  return [findResource(isBachiOrderResource), findResource(isCoachingRequestResource)].filter(Boolean);
 }
 
 function renderAnnouncementCard() {
@@ -1316,6 +1322,18 @@ function isGakumeizaRadioResource(item) {
 function isDiscordStudyResource(item) {
   return String(item?.resourceId || '') === 'discord-study'
     || String(item?.title || '').includes('Discord');
+}
+
+function isBachiOrderResource(item) {
+  return item?.resourceType === 'order'
+    || String(item?.resourceId || '') === 'custom-bachi-order'
+    || String(item?.destinationUrl || '') === 'keiko://bachi';
+}
+
+function isCoachingRequestResource(item) {
+  return item?.resourceType === 'coaching'
+    || String(item?.resourceId || '') === 'coaching-request'
+    || String(item?.destinationUrl || '') === 'keiko://coaching';
 }
 
 function isGakumeizaYoutubeResource(item) {

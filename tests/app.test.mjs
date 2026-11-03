@@ -291,9 +291,11 @@ test('home hub exposes one help entry, vertical resources, announcements, and in
   assert.match(html, /class="home-library-action"[^>]*>ライブラリを見る →</);
   assert.match(html, /renderResourceRow\('learningResourceRow', selectHomeLearningResources\(resources\)\)/);
   assert.match(html, /renderResourceRow\('connectionResourceRow', selectHomeConnectionResources\(resources\)\)/);
+  assert.match(html, /renderResourceRow\('serviceResourceRow', selectHomeServiceResources\(resources\)\)/);
   assert.match(html, /const discord = resources\.find\(isDiscordStudyResource\) \|\| fallbacks\.find\(isDiscordStudyResource\)/);
   assert.match(html, /String\(item\?\.resourceId \|\| ''\) === 'discord-study'/);
-  assert.match(html, /return \[findResource\(isGakumeizaScoreResource\)\]\.filter\(Boolean\)/);
+  assert.match(html, /return \[findResource\(isGakumeizaScoreResource\), findResource\(isGakumeizaYoutubeResource\)\]\.filter\(Boolean\)/);
+  assert.match(html, /return \[findResource\(isBachiOrderResource\), findResource\(isCoachingRequestResource\)\]\.filter\(Boolean\)/);
   assert.match(html, /if \(isGakumeizaYoutubeResource\(item\)\) return '';/);
   assert.match(html, /id="libraryResourceList"/);
   assert.match(html, /id="libraryYoutubeChannelList"/);
