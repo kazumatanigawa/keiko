@@ -111,7 +111,7 @@ test('admin team detail is scoped, paged, sorted, and audited', async () => {
 test('all application collections use bounded reads', async () => {
   const html = await read('index.html');
   assert.match(html, /get_keiko_logs_page_v2/);
-  assert.match(html, /get_keiko_notes_feed/);
+  assert.match(html, /search_keiko_notes/);
   assert.match(html, /get_keiko_note_comments_v2/);
   assert.doesNotMatch(html, /get_keiko_notes['"]/);
   assert.match(html, /p_limit:\s*20/);
@@ -470,5 +470,8 @@ test('team managers can search only team-visible logs and users can search notes
   assert.match(html, /id="noteSearchInput"/);
   assert.match(html, /function getNotesReadRequest\(cursor = null\)/);
   assert.match(html, /functionName: 'search_keiko_notes'/);
+  assert.match(html, /p_query: notesState\.query/);
+  assert.doesNotMatch(html, /return \{ functionName: 'get_keiko_notes_feed', payload: base \}/);
+  assert.match(html, /function retryNotesLoad\(\)/);
   assert.match(html, /p_scope: context\.scope/);
 });

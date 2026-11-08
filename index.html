@@ -954,7 +954,7 @@ const GOOD_NEWS_ROTATE_MS = 3000;
 const GOOD_NEWS_REFRESH_MS = 60000;
 const GOOD_NEWS_RECENT_LIMIT = 4;
 const NOTES_REFRESH_MS = 45000;
-const APP_VERSION = '2026-11-08-01';
+const APP_VERSION = '2026-11-08-02';
 const APP_VERSION_KEY = 'taiko_app_version';
 const VIEW_KIND_KEY = 'taiko_view_kind';
 const APP_ROLE_KEY = 'taiko_app_role';
@@ -1050,6 +1050,7 @@ const notesState = {
   scope: '',
   teamId: '',
   query: '',
+  error: '',
   items: [],
   loading: false,
   loaded: false,
@@ -2321,7 +2322,7 @@ function resetTeamScopedState() {
   Object.assign(logState, { loaded: false, loading: false, loadingMore: false, hasMore: false, nextCursor: null, lastFetchedAt: 0, error: '' });
   Object.assign(teamLogSearchState, { mode: 'self', teamId: '', items: [], members: [], total: 0, offset: 0, loading: false, loaded: false, error: '' });
   Object.assign(goodNewsState, { items: [], loading: false, loaded: false, lastFetchedAt: 0, currentItemId: null, recentIds: [], recentNames: [], error: '' });
-  Object.assign(notesState, { query: '', items: [], loading: false, loaded: false, lastFetchedAt: 0, loadingMore: false, hasMore: false, nextCursor: null });
+  Object.assign(notesState, { query: '', error: '', items: [], loading: false, loaded: false, lastFetchedAt: 0, loadingMore: false, hasMore: false, nextCursor: null });
   notesState.expandedNoteIds.clear();
   Object.assign(formMissionState, { teamId: '', latestLog: null, loading: false, requestId: formMissionState.requestId + 1 });
   Object.assign(homeHubState, { announcements: [], resources: [], loaded: false, loading: false, lastFetchedAt: 0 });
@@ -3999,7 +4000,7 @@ function selectNoteScope(scope, teamId = '') {
   notesState.query = '';
   const searchInput = document.getElementById('noteSearchInput');
   if (searchInput) searchInput.value = '';
-  Object.assign(notesState, { items: [], loaded: false, loading: false, loadingMore: false, hasMore: false, nextCursor: null, lastFetchedAt: 0 });
+  Object.assign(notesState, { error: '', items: [], loaded: false, loading: false, loadingMore: false, hasMore: false, nextCursor: null, lastFetchedAt: 0 });
   notesState.expandedNoteIds.clear();
   hydrateNotesCache();
   updateNotes();
@@ -4097,6 +4098,11 @@ function renderNotes() {
     return;
   }
 
+  if (notesState.error && !notesState.items.length) {
+    content.innerHTML = `<div class="note-empty">ノートを取得できませんでした。<br><button class="log-load-more-btn" style="margin-top:12px" type="button" onclick="retryNotesLoad()">もう一度読み込む</button></div>`;
+    return;
+  }
+
   if (!notesState.items.length) {
     content.innerHTML = notesState.query
       ? `<div class="note-empty">「${esc(notesState.query)}」に一致するノートはありません。</div>`
@@ -4164,7 +4170,7 @@ function searchNotes() {
     return;
   }
   notesState.query = query;
-  Object.assign(notesState, { items: [], loaded: false, loading: false, loadingMore: false, hasMore: false, nextCursor: null, lastFetchedAt: 0 });
+  Object.assign(notesState, { error: '', items: [], loaded: false, loading: false, loadingMore: false, hasMore: false, nextCursor: null, lastFetchedAt: 0 });
   notesState.expandedNoteIds.clear();
   renderNoteSearchState();
   renderNotes();
@@ -4179,7 +4185,7 @@ function clearNoteSearch() {
     return;
   }
   notesState.query = '';
-  Object.assign(notesState, { items: [], loaded: false, loading: false, loadingMore: false, hasMore: false, nextCursor: null, lastFetchedAt: 0 });
+  Object.assign(notesState, { error: '', items: [], loaded: false, loading: false, loadingMore: false, hasMore: false, nextCursor: null, lastFetchedAt: 0 });
   notesState.expandedNoteIds.clear();
   hydrateNotesCache();
   renderNoteSearchState();
@@ -4189,20 +4195,24 @@ function clearNoteSearch() {
 
 function getNotesReadRequest(cursor = null) {
   const context = getNotesContext();
-  const base = {
-    p_scope: context.scope,
-    p_team_id: context.scope === 'team' ? context.teamId : null,
-    p_cursor_created_at: cursor?.createdAt || null,
-    p_cursor_id: cursor?.id || null,
-    p_limit: 20,
+  return {
+    functionName: 'search_keiko_notes',
+    payload: {
+      p_scope: context.scope,
+      p_team_id: context.scope === 'team' ? context.teamId : null,
+      p_query: notesState.query,
+      p_cursor_created_at: cursor?.createdAt || null,
+      p_cursor_id: cursor?.id || null,
+      p_limit: 20,
+    },
   };
-  if (notesState.query) {
-    return {
-      functionName: 'search_keiko_notes',
-      payload: { ...base, p_query: notesState.query },
-    };
-  }
-  return { functionName: 'get_keiko_notes_feed', payload: base };
+}
+
+function retryNotesLoad() {
+  notesState.error = '';
+  Object.assign(notesState, { loaded: false, loading: false, loadingMore: false, hasMore: false, nextCursor: null, lastFetchedAt: 0 });
+  renderNotes();
+  ensureNotesLoaded({ force: true });
 }
 
 function renderNoteComments(comments) {
@@ -4261,6 +4271,7 @@ async function ensureNotesLoaded(options = {}) {
   if (!force && isFresh) return;
 
   notesState.loading = true;
+  notesState.error = '';
   renderNoteSearchState();
   if (!background || !notesState.items.length) renderNotes();
 
@@ -4276,6 +4287,7 @@ async function ensureNotesLoaded(options = {}) {
     cacheNotes();
   } catch (error) {
     console.error(error);
+    notesState.error = error?.message || 'ノートの取得に失敗しました';
     showToast('ノートの取得に失敗しました');
   } finally {
     notesState.loading = false;
