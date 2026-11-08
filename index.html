@@ -208,6 +208,34 @@ textarea:focus,input:focus{border-color:var(--red)}
 .log-achievement-text{font-size:12px;color:var(--ink2);line-height:1.6}
 .log-load-more{display:flex;justify-content:center;padding:10px 0 18px}
 .log-load-more-btn{border:1px solid var(--red);background:#fff;color:var(--red);border-radius:999px;padding:10px 22px;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer}
+.log-view-switcher{display:none;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;padding:5px;background:#eee9df;border-radius:12px}
+.log-view-switcher.show{display:grid}
+.log-view-btn{border:0;border-radius:9px;background:transparent;color:var(--ink3);padding:10px 8px;font-family:inherit;font-size:12px;font-weight:900;cursor:pointer}
+.log-view-btn.active{background:#fff;color:var(--red);box-shadow:0 4px 12px rgba(35,29,20,.08)}
+.team-log-search-panel{display:none;background:#fff;border:1px solid #e3d8c3;border-radius:var(--radius);padding:15px;margin-bottom:12px}
+.team-log-search-panel.show{display:block}
+.search-panel-kicker{font-size:9px;font-weight:900;letter-spacing:.14em;color:var(--red)}
+.search-panel-title{font-size:15px;font-weight:900;color:var(--ink);margin-top:3px}
+.search-panel-copy{font-size:10px;color:var(--ink3);line-height:1.6;margin-top:5px}
+.search-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:13px}
+.search-field{min-width:0}
+.search-field.full{grid-column:1/-1}
+.search-field label{display:block;font-size:10px;font-weight:900;color:var(--ink2);margin-bottom:5px}
+.search-field input,.search-field select{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px 11px;background:#fff;color:var(--ink);font-family:inherit;font-size:12px;outline:none}
+.search-field input:focus,.search-field select:focus{border-color:var(--red)}
+.search-actions{display:flex;gap:8px;margin-top:11px}
+.search-action{flex:1;border:1px solid var(--red);border-radius:10px;background:#fff;color:var(--red);padding:10px 8px;font-family:inherit;font-size:12px;font-weight:900;cursor:pointer}
+.search-action.primary{background:var(--red);color:#fff}
+.search-action:disabled{opacity:.5;cursor:default}
+.search-result-meta{font-size:11px;color:var(--ink3);line-height:1.6;margin:11px 1px 8px}
+.team-log-author{font-size:12px;font-weight:900;color:var(--red)}
+.note-search-panel{background:#fff;border:1px solid color-mix(in srgb,var(--note-accent) 24%,var(--border));border-radius:var(--radius);padding:13px;margin-bottom:12px}
+.note-search-row{display:flex;gap:8px}
+.note-search-row input{min-width:0;flex:1;padding:10px 11px;font-size:13px}
+.note-search-btn{flex:none;border:0;border-radius:10px;background:var(--note-accent);color:#fff;padding:0 15px;font-family:inherit;font-size:12px;font-weight:900;cursor:pointer}
+.note-search-clear{display:none;border:0;background:transparent;color:var(--note-accent);font-family:inherit;font-size:11px;font-weight:800;padding:8px 0 0;cursor:pointer}
+.note-search-clear.show{display:inline-block}
+.note-search-status{min-height:17px;font-size:10px;color:var(--ink3);line-height:1.6;margin-top:5px}
 .log-load-more-btn:disabled{opacity:.5;cursor:not-allowed}
 .note-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
 .note-title{font-size:16px;font-weight:700;color:var(--ink);line-height:1.5}
@@ -721,7 +749,27 @@ textarea:focus,input:focus{border-color:var(--red)}
 
 <div class="screen" id="screen-log">
   <div class="header"><div><div class="header-title">📖 稽古ログ</div><div class="header-sub" id="logName"></div></div></div>
-  <div class="content" id="logContent"><div style="text-align:center;padding:40px 0;color:var(--ink3)">読み込み中...</div></div>
+  <div class="content">
+    <div class="log-view-switcher" id="logViewSwitcher">
+      <button class="log-view-btn active" id="selfLogViewBtn" type="button" onclick="switchLogView('self')">自分のログ</button>
+      <button class="log-view-btn" id="teamLogViewBtn" type="button" onclick="switchLogView('team')">チームのログ</button>
+    </div>
+    <section class="team-log-search-panel" id="teamLogSearchPanel">
+      <div class="search-panel-kicker">TEAM MANAGEMENT</div>
+      <div class="search-panel-title">チームの稽古ログを検索</div>
+      <div class="search-panel-copy">設立管理者・指導者だけが使えます。個人限定ログは検索結果に含まれません。</div>
+      <div class="search-form-grid">
+        <div class="search-field full"><label for="teamLogQuery">キーワード</label><input type="search" id="teamLogQuery" placeholder="学び・次にやること・Good & Newから検索" onkeydown="handleTeamLogSearchKey(event)"></div>
+        <div class="search-field full"><label for="teamLogMember">メンバー</label><select id="teamLogMember"><option value="">全員</option></select></div>
+        <div class="search-field"><label for="teamLogDateFrom">開始日</label><input type="date" id="teamLogDateFrom"></div>
+        <div class="search-field"><label for="teamLogDateTo">終了日</label><input type="date" id="teamLogDateTo"></div>
+        <div class="search-field full"><label for="teamLogCondition">コンディション</label><select id="teamLogCondition"><option value="">すべて</option><option value="1">☠️ つかれた</option><option value="2">💦 いまいち</option><option value="3">😃 普通</option><option value="4">💪 いい感じ</option><option value="5">🔥 最高</option></select></div>
+      </div>
+      <div class="search-actions"><button class="search-action" type="button" onclick="clearTeamLogSearch()">条件をクリア</button><button class="search-action primary" id="teamLogSearchBtn" type="button" onclick="searchTeamLogs()">検索する</button></div>
+      <div class="search-result-meta" id="teamLogResultMeta"></div>
+    </section>
+    <div id="logContent"><div style="text-align:center;padding:40px 0;color:var(--ink3)">読み込み中...</div></div>
+  </div>
   <div class="bottom-nav">
     <button class="nav-item" onclick="goTo('home')"><span class="nav-icon">🏠</span>ホーム</button>
     <button class="nav-item" onclick="goTo('form')"><span class="nav-icon">✏️</span>記録</button>
@@ -753,6 +801,11 @@ textarea:focus,input:focus{border-color:var(--red)}
       <div class="global-title" id="globalParticipationTitle">グローバルに参加する</div>
       <div class="global-copy" id="globalParticipationCopy">参加すると、公開された稽古ノートを読んだり、自分または許可されたチーム名で投稿できます。</div>
       <button class="global-action" id="globalParticipationBtn" type="button" onclick="toggleGlobalParticipation()">グローバルに参加する</button>
+    </div>
+    <div class="note-search-panel">
+      <div class="note-search-row"><input type="search" id="noteSearchInput" placeholder="タイトル・内容・投稿者を検索" onkeydown="handleNoteSearchKey(event)"><button class="note-search-btn" id="noteSearchBtn" type="button" onclick="searchNotes()">検索</button></div>
+      <button class="note-search-clear" id="noteSearchClear" type="button" onclick="clearNoteSearch()">検索を解除</button>
+      <div class="note-search-status" id="noteSearchStatus">表示中の公開範囲から検索できます。</div>
     </div>
     <div class="note-compose">
       <div class="note-destination-banner" id="noteDestinationBanner"></div>
@@ -901,7 +954,7 @@ const GOOD_NEWS_ROTATE_MS = 3000;
 const GOOD_NEWS_REFRESH_MS = 60000;
 const GOOD_NEWS_RECENT_LIMIT = 4;
 const NOTES_REFRESH_MS = 45000;
-const APP_VERSION = '2026-11-03-17';
+const APP_VERSION = '2026-11-08-01';
 const APP_VERSION_KEY = 'taiko_app_version';
 const VIEW_KIND_KEY = 'taiko_view_kind';
 const APP_ROLE_KEY = 'taiko_app_role';
@@ -950,6 +1003,18 @@ const logState = {
   lastFetchedAt: 0,
   error: '',
 };
+const teamLogSearchState = {
+  mode: 'self',
+  teamId: '',
+  items: [],
+  members: [],
+  total: 0,
+  offset: 0,
+  limit: 20,
+  loading: false,
+  loaded: false,
+  error: '',
+};
 const teamState = {
   items: [],
   loaded: false,
@@ -984,6 +1049,7 @@ const goodNewsState = {
 const notesState = {
   scope: '',
   teamId: '',
+  query: '',
   items: [],
   loading: false,
   loaded: false,
@@ -2253,8 +2319,9 @@ function resetTeamScopedState() {
   cachedLogs = [];
   Object.assign(homeState, { totalCount: 0, latestLog: null, timekeeper: null, loaded: false, loading: false, lastFetchedAt: 0 });
   Object.assign(logState, { loaded: false, loading: false, loadingMore: false, hasMore: false, nextCursor: null, lastFetchedAt: 0, error: '' });
+  Object.assign(teamLogSearchState, { mode: 'self', teamId: '', items: [], members: [], total: 0, offset: 0, loading: false, loaded: false, error: '' });
   Object.assign(goodNewsState, { items: [], loading: false, loaded: false, lastFetchedAt: 0, currentItemId: null, recentIds: [], recentNames: [], error: '' });
-  Object.assign(notesState, { items: [], loading: false, loaded: false, lastFetchedAt: 0, loadingMore: false, hasMore: false, nextCursor: null });
+  Object.assign(notesState, { query: '', items: [], loading: false, loaded: false, lastFetchedAt: 0, loadingMore: false, hasMore: false, nextCursor: null });
   notesState.expandedNoteIds.clear();
   Object.assign(formMissionState, { teamId: '', latestLog: null, loading: false, requestId: formMissionState.requestId + 1 });
   Object.assign(homeHubState, { announcements: [], resources: [], loaded: false, loading: false, lastFetchedAt: 0 });
@@ -2328,6 +2395,15 @@ function getPersonalTeam() {
 
 function getRegularTeams() {
   return getMemberships().filter(item => !item.isPersonal);
+}
+
+function isTeamStaffRole(role) {
+  return ['owner_admin', 'owner', 'manager', 'coach', 'advisor'].includes(String(role || ''));
+}
+
+function canManageCurrentTeam() {
+  const membership = getCurrentMembership();
+  return !!membership && !membership.isPersonal && isTeamStaffRole(membership.teamRole);
 }
 
 function isGlobalParticipant() {
@@ -3460,11 +3536,128 @@ function hideLoading() {
   if (_loadingEl) _loadingEl.style.display = 'none';
 }
 function ensureLogsLoaded() {
+  renderLogViewSwitcher();
+  if (teamLogSearchState.mode === 'team' && canManageCurrentTeam()) {
+    updateLog();
+    if (!teamLogSearchState.loaded && !teamLogSearchState.loading) loadTeamAdminLogs({ reset: true });
+    return;
+  }
   updateLog();
   const isStale = Date.now() - logState.lastFetchedAt > PRACTICE_REFRESH_MS;
   if ((!logState.loaded || isStale) && !logState.loading) {
     loadLogs({ reset: true, background: cachedLogs.length > 0 });
   }
+}
+
+function renderLogViewSwitcher() {
+  const switcher = document.getElementById('logViewSwitcher');
+  const panel = document.getElementById('teamLogSearchPanel');
+  const canManage = canManageCurrentTeam();
+  if (!canManage) teamLogSearchState.mode = 'self';
+  switcher?.classList.toggle('show', canManage);
+  panel?.classList.toggle('show', canManage && teamLogSearchState.mode === 'team');
+  document.getElementById('selfLogViewBtn')?.classList.toggle('active', teamLogSearchState.mode === 'self');
+  document.getElementById('teamLogViewBtn')?.classList.toggle('active', teamLogSearchState.mode === 'team');
+}
+
+function switchLogView(mode) {
+  if (mode === 'team' && !canManageCurrentTeam()) {
+    showToast('このチームの管理権限がありません');
+    return;
+  }
+  teamLogSearchState.mode = mode === 'team' ? 'team' : 'self';
+  if (teamLogSearchState.mode === 'team' && teamLogSearchState.teamId !== getTeamId()) {
+    Object.assign(teamLogSearchState, { teamId: getTeamId(), items: [], members: [], total: 0, offset: 0, loaded: false, error: '' });
+  }
+  renderLogViewSwitcher();
+  updateLog();
+  if (teamLogSearchState.mode === 'team' && !teamLogSearchState.loaded) loadTeamAdminLogs({ reset: true });
+  if (teamLogSearchState.mode === 'self') ensureLogsLoaded();
+}
+
+function handleTeamLogSearchKey(event) {
+  if (event.key !== 'Enter') return;
+  event.preventDefault();
+  searchTeamLogs();
+}
+
+function teamLogSearchPayload(offset = 0) {
+  const conditionValue = document.getElementById('teamLogCondition')?.value || '';
+  return {
+    p_team_id: getTeamId(),
+    p_query: document.getElementById('teamLogQuery')?.value.trim() || '',
+    p_user_id: document.getElementById('teamLogMember')?.value || null,
+    p_date_from: document.getElementById('teamLogDateFrom')?.value || null,
+    p_date_to: document.getElementById('teamLogDateTo')?.value || null,
+    p_condition: conditionValue ? Number(conditionValue) : null,
+    p_limit: teamLogSearchState.limit,
+    p_offset: offset,
+  };
+}
+
+function searchTeamLogs() {
+  loadTeamAdminLogs({ reset: true });
+}
+
+function clearTeamLogSearch() {
+  ['teamLogQuery', 'teamLogMember', 'teamLogDateFrom', 'teamLogDateTo', 'teamLogCondition'].forEach(id => {
+    const field = document.getElementById(id);
+    if (field) field.value = '';
+  });
+  loadTeamAdminLogs({ reset: true });
+}
+
+async function loadTeamAdminLogs(options = {}) {
+  const { reset = false } = options;
+  if (teamLogSearchState.loading || !canManageCurrentTeam()) return;
+  const nextOffset = reset ? 0 : teamLogSearchState.items.length;
+  teamLogSearchState.loading = true;
+  teamLogSearchState.error = '';
+  updateLog();
+  try {
+    const result = await supabaseRead('search_keiko_team_logs', teamLogSearchPayload(nextOffset));
+    const incoming = Array.isArray(result.logs) ? result.logs.map(mapTeamAdminLog).filter(Boolean) : [];
+    teamLogSearchState.items = reset ? incoming : teamLogSearchState.items.concat(incoming);
+    teamLogSearchState.members = Array.isArray(result.members) ? result.members : teamLogSearchState.members;
+    teamLogSearchState.total = Number(result.total || 0);
+    teamLogSearchState.offset = nextOffset;
+    teamLogSearchState.teamId = getTeamId();
+    teamLogSearchState.loaded = true;
+    renderTeamLogMemberOptions();
+  } catch (error) {
+    console.error(error);
+    teamLogSearchState.error = error?.message || 'チームの稽古ログを取得できませんでした';
+  } finally {
+    teamLogSearchState.loading = false;
+    updateLog();
+  }
+}
+
+function mapTeamAdminLog(row) {
+  if (!row) return null;
+  return {
+    ...mapSupabaseLog(row),
+    userId: row.userId ?? row.user_id ?? '',
+    displayName: row.displayName ?? row.display_name ?? '名前未設定',
+    memo: row.memo || '',
+    grade: row.grade || '',
+    term: row.term || '',
+    visibility: row.visibility || 'team',
+  };
+}
+
+function renderTeamLogMemberOptions() {
+  const select = document.getElementById('teamLogMember');
+  if (!select) return;
+  const selected = select.value;
+  select.innerHTML = '<option value="">全員</option>' + teamLogSearchState.members.map(member =>
+    `<option value="${escapeAttr(member.userId || '')}">${esc(member.displayName || '名前未設定')}</option>`
+  ).join('');
+  if ([...select.options].some(option => option.value === selected)) select.value = selected;
+}
+
+function loadMoreTeamLogs() {
+  loadTeamAdminLogs({ reset: false });
 }
 
 async function loadLogs(options = {}) {
@@ -3530,6 +3723,11 @@ function fmtDate(val) {
   return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${'日月火水木金土'[d.getDay()]}）`;
 }
 function updateLog() {
+  renderLogViewSwitcher();
+  if (teamLogSearchState.mode === 'team' && canManageCurrentTeam()) {
+    renderTeamAdminLogs();
+    return;
+  }
   const displayGroup = isPersonalMode() ? '自分' : getGroup();
   document.getElementById('logName').textContent = displayGroup ? `${getName()} さんの記録｜${displayGroup}` : getName() + ' さんの記録';
   const el = document.getElementById('logContent');
@@ -3558,6 +3756,50 @@ function updateLog() {
     ? `<div class="log-load-more"><button class="log-load-more-btn" type="button" onclick="loadMoreLogs()" ${logState.loadingMore ? 'disabled aria-busy="true"' : ''}>${logState.loadingMore ? '読み込み中...' : 'さらに読み込む'}</button></div>`
     : '';
   el.innerHTML = entries + loadMore;
+}
+
+function renderTeamAdminLogs() {
+  const current = getCurrentMembership();
+  document.getElementById('logName').textContent = `${current?.teamName || getGroup()}｜チーム管理`;
+  const el = document.getElementById('logContent');
+  const meta = document.getElementById('teamLogResultMeta');
+  const button = document.getElementById('teamLogSearchBtn');
+  if (button) {
+    button.disabled = teamLogSearchState.loading;
+    button.textContent = teamLogSearchState.loading ? '検索中...' : '検索する';
+  }
+  if (meta) {
+    meta.textContent = teamLogSearchState.loaded
+      ? `${teamLogSearchState.total}件中 ${teamLogSearchState.items.length}件を表示` : '';
+  }
+  if (teamLogSearchState.loading && !teamLogSearchState.items.length) {
+    el.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--ink3)">チームのログを検索中...</div>';
+    return;
+  }
+  if (teamLogSearchState.error && !teamLogSearchState.items.length) {
+    el.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--ink3)">${esc(teamLogSearchState.error)}</div>`;
+    return;
+  }
+  if (!teamLogSearchState.items.length) {
+    el.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--ink3)">条件に一致するチーム共有ログはありません</div>';
+    return;
+  }
+  const entries = teamLogSearchState.items.map(log => `
+    <div class="log-entry">
+      <div class="log-date"><span>${esc(fmtDate(log.date))}</span><span class="log-cond">${COND_EMOJI[log.cond] || ''}</span></div>
+      <div class="team-log-author">${esc(log.displayName)}</div>
+      ${renderProfileMeta(log)}
+      <div class="log-section"><div class="log-section-label">今日の学び</div><div class="log-section-text">${esc(log.learning)}</div></div>
+      <div class="log-next"><div class="log-next-label">▶ 次の稽古でやること</div><div class="log-next-text">${esc(log.next)}</div></div>
+      ${renderAchievementLog(log)}
+      <div class="log-section" style="margin-top:8px"><div class="log-section-label">Good & New</div><div class="log-section-text">${esc(log.goodNew)}</div></div>
+      ${log.memo ? `<div class="log-section"><div class="log-section-label">メモ</div><div class="log-section-text">${esc(log.memo)}</div></div>` : ''}
+    </div>`).join('');
+  const hasMore = teamLogSearchState.items.length < teamLogSearchState.total;
+  const more = hasMore
+    ? `<div class="log-load-more"><button class="log-load-more-btn" type="button" onclick="loadMoreTeamLogs()" ${teamLogSearchState.loading ? 'disabled' : ''}>${teamLogSearchState.loading ? '読み込み中...' : 'さらに読み込む'}</button></div>`
+    : '';
+  el.innerHTML = entries + more;
 }
 
 function renderProfileMeta(log) {
@@ -3592,6 +3834,7 @@ function updateNotes() {
   renderGlobalParticipation();
   initializeNoteScope();
   renderNoteScopeButtons();
+  renderNoteSearchState();
   hydrateNoteDraft();
   renderNotes();
   ensureNotesLoaded({ background: true });
@@ -3753,6 +3996,9 @@ function selectNoteScope(scope, teamId = '') {
   clearNoteComposerFields();
   notesState.scope = scope;
   notesState.teamId = nextTeamId;
+  notesState.query = '';
+  const searchInput = document.getElementById('noteSearchInput');
+  if (searchInput) searchInput.value = '';
   Object.assign(notesState, { items: [], loaded: false, loading: false, loadingMore: false, hasMore: false, nextCursor: null, lastFetchedAt: 0 });
   notesState.expandedNoteIds.clear();
   hydrateNotesCache();
@@ -3773,6 +4019,7 @@ function getNotesCacheKey() {
 }
 
 function hydrateNotesCache() {
+  if (notesState.query) return;
   const key = getNotesCacheKey();
   if (!key || notesState.loaded) return;
   try {
@@ -3789,6 +4036,7 @@ function hydrateNotesCache() {
 }
 
 function cacheNotes() {
+  if (notesState.query) return;
   const key = getNotesCacheKey();
   if (!key) return;
   localStorage.setItem(key, JSON.stringify({
@@ -3850,7 +4098,9 @@ function renderNotes() {
   }
 
   if (!notesState.items.length) {
-    content.innerHTML = '<div class="note-empty">まだ稽古内容の記録がありません。最初の指導内容や練習内容を残してください。</div>';
+    content.innerHTML = notesState.query
+      ? `<div class="note-empty">「${esc(notesState.query)}」に一致するノートはありません。</div>`
+      : '<div class="note-empty">まだ稽古内容の記録がありません。最初の指導内容や練習内容を残してください。</div>';
     return;
   }
 
@@ -3880,6 +4130,79 @@ function renderNotes() {
     ? `<div class="log-load-more"><button class="log-load-more-btn" type="button" onclick="loadMoreNotes()" ${notesState.loadingMore ? 'disabled' : ''}>${notesState.loadingMore ? '読み込み中...' : 'さらにノートを読み込む'}</button></div>`
     : '';
   content.innerHTML = cards + more;
+}
+
+function renderNoteSearchState() {
+  const input = document.getElementById('noteSearchInput');
+  const clear = document.getElementById('noteSearchClear');
+  const status = document.getElementById('noteSearchStatus');
+  const button = document.getElementById('noteSearchBtn');
+  if (input && document.activeElement !== input) input.value = notesState.query;
+  clear?.classList.toggle('show', !!notesState.query);
+  if (button) {
+    button.disabled = notesState.loading;
+    button.textContent = notesState.loading ? '検索中...' : '検索';
+  }
+  if (!status) return;
+  if (notesState.query) {
+    status.textContent = `「${notesState.query}」の検索結果を、現在の公開範囲だけから表示しています。`;
+  } else {
+    status.textContent = '表示中の公開範囲から検索できます。';
+  }
+}
+
+function handleNoteSearchKey(event) {
+  if (event.key !== 'Enter') return;
+  event.preventDefault();
+  searchNotes();
+}
+
+function searchNotes() {
+  const query = document.getElementById('noteSearchInput')?.value.trim() || '';
+  if (!query) {
+    clearNoteSearch();
+    return;
+  }
+  notesState.query = query;
+  Object.assign(notesState, { items: [], loaded: false, loading: false, loadingMore: false, hasMore: false, nextCursor: null, lastFetchedAt: 0 });
+  notesState.expandedNoteIds.clear();
+  renderNoteSearchState();
+  renderNotes();
+  ensureNotesLoaded({ force: true });
+}
+
+function clearNoteSearch() {
+  const input = document.getElementById('noteSearchInput');
+  if (input) input.value = '';
+  if (!notesState.query) {
+    renderNoteSearchState();
+    return;
+  }
+  notesState.query = '';
+  Object.assign(notesState, { items: [], loaded: false, loading: false, loadingMore: false, hasMore: false, nextCursor: null, lastFetchedAt: 0 });
+  notesState.expandedNoteIds.clear();
+  hydrateNotesCache();
+  renderNoteSearchState();
+  renderNotes();
+  ensureNotesLoaded({ force: true, background: notesState.items.length > 0 });
+}
+
+function getNotesReadRequest(cursor = null) {
+  const context = getNotesContext();
+  const base = {
+    p_scope: context.scope,
+    p_team_id: context.scope === 'team' ? context.teamId : null,
+    p_cursor_created_at: cursor?.createdAt || null,
+    p_cursor_id: cursor?.id || null,
+    p_limit: 20,
+  };
+  if (notesState.query) {
+    return {
+      functionName: 'search_keiko_notes',
+      payload: { ...base, p_query: notesState.query },
+    };
+  }
+  return { functionName: 'get_keiko_notes_feed', payload: base };
 }
 
 function renderNoteComments(comments) {
@@ -3938,17 +4261,12 @@ async function ensureNotesLoaded(options = {}) {
   if (!force && isFresh) return;
 
   notesState.loading = true;
+  renderNoteSearchState();
   if (!background || !notesState.items.length) renderNotes();
 
   try {
-    const context = getNotesContext();
-    const json = await supabaseRead('get_keiko_notes_feed', {
-      p_scope: context.scope,
-      p_team_id: context.scope === 'team' ? context.teamId : null,
-      p_cursor_created_at: null,
-      p_cursor_id: null,
-      p_limit: 20,
-    });
+    const request = getNotesReadRequest();
+    const json = await supabaseRead(request.functionName, request.payload);
 
     notesState.items = Array.isArray(json.notes) ? json.notes : [];
     notesState.hasMore = !!json.hasMore;
@@ -3961,6 +4279,7 @@ async function ensureNotesLoaded(options = {}) {
     showToast('ノートの取得に失敗しました');
   } finally {
     notesState.loading = false;
+    renderNoteSearchState();
     renderNotes();
   }
 }
@@ -3970,14 +4289,8 @@ async function loadMoreNotes() {
   notesState.loadingMore = true;
   renderNotes();
   try {
-    const context = getNotesContext();
-    const json = await supabaseRead('get_keiko_notes_feed', {
-      p_scope: context.scope,
-      p_team_id: context.scope === 'team' ? context.teamId : null,
-      p_cursor_created_at: notesState.nextCursor.createdAt,
-      p_cursor_id: notesState.nextCursor.id,
-      p_limit: 20,
-    });
+    const request = getNotesReadRequest(notesState.nextCursor);
+    const json = await supabaseRead(request.functionName, request.payload);
     const existing = new Set(notesState.items.map(note => note.noteId));
     notesState.items.push(...(json.notes || []).filter(note => !existing.has(note.noteId)));
     notesState.hasMore = !!json.hasMore;

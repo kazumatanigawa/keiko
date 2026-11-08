@@ -67,3 +67,13 @@ The initial bachi catalog uses one-month lead times and editable reference
 prices for ヒノキ, ホオ, and カエデ. Confirm those prices in the Table Editor
 before accepting production requests. Half-day and full-day coaching defaults
 are four and eight hours at the same 6,000 JPY hourly basis.
+
+`2026110801_team_admin_note_search.sql` adds authenticated search for the main
+KEIKO app. Membership roles `owner_admin`, `owner`, `manager`, `coach`, and
+`advisor` may search only `visibility = 'team'` practice logs in their assigned
+team; every search is written to `team_admin_audit_events`. Private logs are
+never returned. All signed-in users may search notes, but results remain inside
+the selected private, team, or global scope. Private notes stay owner-only,
+team search requires membership, and global search requires an opted-in General
+profile. The browser calls these two RPCs directly with the current user JWT;
+no service-role key is exposed to the client.

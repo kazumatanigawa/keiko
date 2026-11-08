@@ -443,3 +443,32 @@ test('Admin OS accepts scoped team administrators without exposing operator tool
   assert.match(edge, /get_keiko_scoped_admin_user_detail/);
   assert.match(edge, /get_keiko_scoped_admin_team_detail/);
 });
+
+test('team managers can search only team-visible logs and users can search notes within their current scope', async () => {
+  const html = await read('index.html');
+  const sql = await read('supabase/migrations/2026110801_team_admin_note_search.sql');
+
+  assert.match(sql, /create or replace function public\.search_keiko_team_logs\b/);
+  assert.match(sql, /not public\.keiko_is_team_staff\(v_actor_user_id, p_team_id\)/);
+  assert.match(sql, /pl\.team_id = p_team_id[\s\S]*pl\.visibility = 'team'/);
+  assert.doesNotMatch(sql, /pl\.visibility\s+in\s*\([^)]*private/);
+  assert.match(sql, /insert into public\.team_admin_audit_events/);
+  assert.match(sql, /grant execute on function public\.search_keiko_team_logs[\s\S]*to authenticated/);
+
+  assert.match(sql, /create or replace function public\.search_keiko_notes\b/);
+  assert.match(sql, /v_scope = 'private'[\s\S]*n\.author_user_id = v_user_id/);
+  assert.match(sql, /v_scope = 'team'[\s\S]*n\.team_id = p_team_id[\s\S]*n\.visibility in \('team', 'global'\)/);
+  assert.match(sql, /v_scope = 'global'[\s\S]*n\.visibility = 'global'/);
+  assert.match(sql, /p\.user_type = 'general'/);
+  assert.match(sql, /grant execute on function public\.search_keiko_notes[\s\S]*to authenticated/);
+
+  assert.match(html, /id="logViewSwitcher"/);
+  assert.match(html, /id="teamLogSearchPanel"/);
+  assert.match(html, /function isTeamStaffRole\(role\)[\s\S]*owner_admin/);
+  assert.match(html, /supabaseRead\('search_keiko_team_logs'/);
+  assert.match(html, /個人限定ログは検索結果に含まれません/);
+  assert.match(html, /id="noteSearchInput"/);
+  assert.match(html, /function getNotesReadRequest\(cursor = null\)/);
+  assert.match(html, /functionName: 'search_keiko_notes'/);
+  assert.match(html, /p_scope: context\.scope/);
+});
