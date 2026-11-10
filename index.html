@@ -128,6 +128,23 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;backgroun
 .membership-editor-submit{background:var(--red);color:#fff}
 .membership-editor-cancel{background:#eee9df;color:var(--ink2)}
 .membership-status{min-height:18px;margin-top:8px;font-size:11px;color:var(--red);line-height:1.6}
+.pin-settings{margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+.pin-settings-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pin-settings-title{font-size:13px;font-weight:900;color:var(--ink)}
+.pin-settings-copy{font-size:10px;color:var(--ink3);line-height:1.6;margin-top:3px}
+.pin-settings-toggle{flex:none;border:1px solid var(--red);border-radius:999px;background:#fff;color:var(--red);padding:8px 12px;font-family:inherit;font-size:11px;font-weight:900;cursor:pointer}
+.pin-change-form{display:none;margin-top:12px;padding:13px;background:#faf7f1;border:1px solid #eadfc9;border-radius:10px}
+.pin-change-form.show{display:block}
+.pin-change-field{display:block;margin-top:10px}
+.pin-change-field:first-child{margin-top:0}
+.pin-change-label{display:block;font-size:11px;font-weight:900;color:var(--ink2);margin-bottom:5px}
+.pin-change-input{width:100%;letter-spacing:.45em;text-align:center;font-size:18px!important;font-weight:800}
+.pin-change-actions{display:flex;gap:8px;margin-top:12px}
+.pin-change-actions button{flex:1;border:0;border-radius:9px;padding:10px 8px;font-family:inherit;font-size:11px;font-weight:800;cursor:pointer}
+.pin-change-actions button:disabled{opacity:.5;cursor:default}
+.pin-change-cancel{background:#eee9df;color:var(--ink2)}
+.pin-change-submit{background:var(--red);color:#fff}
+.pin-change-status{min-height:18px;margin-top:8px;font-size:11px;color:var(--red);line-height:1.6}
 .context-panel{--context-color:var(--red);--context-soft:var(--red-pale);background:linear-gradient(135deg,var(--context-soft),#fff 82%);border:0;border-bottom:1px solid color-mix(in srgb,var(--context-color) 24%,#fff);padding:12px 16px 13px;box-shadow:0 10px 24px rgba(23,20,15,.09);position:sticky;top:57px;z-index:90;transition:background .25s ease,border-color .25s ease}
 .context-heading,.note-scope-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
 .context-label{font-size:10px;font-weight:900;letter-spacing:.14em;color:var(--ink3)}
@@ -634,7 +651,7 @@ textarea:focus,input:focus{border-color:var(--red)}
       <summary class="settings-summary">
         <span class="settings-summary-copy">
           <span class="settings-title">⚙ 個人設定</span>
-          <span class="settings-summary-sub">チームの移籍・掛け持ち</span>
+          <span class="settings-summary-sub">チームの移籍・掛け持ち／PIN変更</span>
         </span>
         <span class="settings-summary-icon" aria-hidden="true">⌄</span>
       </summary>
@@ -658,6 +675,19 @@ textarea:focus,input:focus{border-color:var(--red)}
           </div>
         </div>
         <div class="membership-status" id="membershipStatus"></div>
+        <section class="pin-settings" aria-labelledby="pinSettingsTitle">
+          <div class="pin-settings-head">
+            <div><div class="pin-settings-title" id="pinSettingsTitle">4桁PINを変更</div><div class="pin-settings-copy">現在のPINを確認してから、新しいPINへ変更します。</div></div>
+            <button class="pin-settings-toggle" type="button" onclick="togglePinChangeForm()">変更する</button>
+          </div>
+          <div class="pin-change-form" id="pinChangeForm">
+            <label class="pin-change-field"><span class="pin-change-label">現在のPIN</span><input class="pin-change-input" id="currentPinInput" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="current-password" placeholder="••••" oninput="sanitizePinField(this)"></label>
+            <label class="pin-change-field"><span class="pin-change-label">新しいPIN</span><input class="pin-change-input" id="newPinInput" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="new-password" placeholder="••••" oninput="sanitizePinField(this)"></label>
+            <label class="pin-change-field"><span class="pin-change-label">新しいPINをもう一度</span><input class="pin-change-input" id="confirmPinInput" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="new-password" placeholder="••••" oninput="sanitizePinField(this)"></label>
+            <div class="pin-change-status" id="pinChangeStatus"></div>
+            <div class="pin-change-actions"><button class="pin-change-cancel" type="button" onclick="togglePinChangeForm(false)">キャンセル</button><button class="pin-change-submit" id="pinChangeSubmit" type="button" onclick="submitPinChange()">PINを変更する</button></div>
+          </div>
+        </section>
       </div>
     </details>
   </div>
@@ -954,7 +984,7 @@ const GOOD_NEWS_ROTATE_MS = 3000;
 const GOOD_NEWS_REFRESH_MS = 60000;
 const GOOD_NEWS_RECENT_LIMIT = 4;
 const NOTES_REFRESH_MS = 45000;
-const APP_VERSION = '2026-11-08-02';
+const APP_VERSION = '2026-11-08-03';
 const APP_VERSION_KEY = 'taiko_app_version';
 const VIEW_KIND_KEY = 'taiko_view_kind';
 const APP_ROLE_KEY = 'taiko_app_role';
@@ -1030,6 +1060,7 @@ const membershipState = {
   submitting: false,
   action: '',
 };
+const pinChangeState = { submitting: false };
 const globalState = {
   enabled: false,
   updating: false,
@@ -2687,6 +2718,73 @@ async function graduateFromTeams() {
   } finally {
     membershipState.submitting = false;
     renderMembershipSettings();
+  }
+}
+
+function sanitizePinField(input) {
+  input.value = input.value.replace(/\D/g, '').slice(0, 4);
+}
+
+function clearPinChangeFields() {
+  ['currentPinInput', 'newPinInput', 'confirmPinInput'].forEach(id => {
+    const input = document.getElementById(id);
+    if (input) input.value = '';
+  });
+  const status = document.getElementById('pinChangeStatus');
+  if (status) status.textContent = '';
+}
+
+function togglePinChangeForm(forceOpen) {
+  if (pinChangeState.submitting) return;
+  const form = document.getElementById('pinChangeForm');
+  if (!form) return;
+  const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !form.classList.contains('show');
+  form.classList.toggle('show', shouldOpen);
+  clearPinChangeFields();
+  if (shouldOpen) document.getElementById('currentPinInput')?.focus();
+}
+
+async function submitPinChange() {
+  if (pinChangeState.submitting) return;
+  const currentPin = document.getElementById('currentPinInput')?.value || '';
+  const newPin = document.getElementById('newPinInput')?.value || '';
+  const confirmPin = document.getElementById('confirmPinInput')?.value || '';
+  const status = document.getElementById('pinChangeStatus');
+  const button = document.getElementById('pinChangeSubmit');
+  if (![currentPin, newPin, confirmPin].every(pin => /^\d{4}$/.test(pin))) {
+    status.textContent = 'すべての欄に4桁の数字を入力してください。';
+    return;
+  }
+  if (newPin !== confirmPin) {
+    status.textContent = '新しいPINが一致しません。';
+    return;
+  }
+  if (currentPin === newPin) {
+    status.textContent = '現在と異なるPINを設定してください。';
+    return;
+  }
+  if (!confirm('4桁PINを変更しますか？\n変更後は、新しいPINで再度ログインしてください。')) return;
+
+  pinChangeState.submitting = true;
+  setPendingButton(button, true, '変更中...', 'PINを変更する');
+  status.textContent = '本人確認とPINの変更を行っています...';
+  try {
+    await authenticatedEdgeRequest('changePin', { currentPin, newPin, confirmPin });
+    const loginName = getName();
+    clearPinChangeFields();
+    alert('PINを変更しました。新しいPINでログインしてください。');
+    stopGoodNewsTicker();
+    stopGoodNewsRefresh();
+    clearSession();
+    if (loginName) localStorage.setItem('taiko_name', loginName);
+    localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
+    location.reload();
+  } catch (error) {
+    console.error(error);
+    status.textContent = error?.message || 'PINを変更できませんでした。';
+  } finally {
+    pinChangeState.submitting = false;
+    setPendingButton(button, false, '変更中...', 'PINを変更する');
   }
 }
 

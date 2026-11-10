@@ -29,10 +29,11 @@ Deno.serve(async (request) => {
     const action = text(payload.action);
     if (!action) throw userError('invalid_request', '操作が指定されていません。');
 
-    if (action === 'health') return json({ status: 'ok', service: 'keiko-api', version: '2026-11-03-09' });
+    if (action === 'health') return json({ status: 'ok', service: 'keiko-api', version: '2026-11-08-01' });
     if (action === 'getTeams') return json(await getTeams());
     if (action === 'login') return json(await login(payload));
     if (action === 'register') return json(await register(payload));
+    if (action === 'changePin') return json(await changePin(request, payload));
     if (action === 'manageMembership') return json(await manageMembership(request, payload));
     if (action === 'getOperatorDashboard') return json(await getOperatorDashboard(request));
     if (action === 'getAdminAccess') return json(await getAdminAccess(request));
@@ -149,6 +150,50 @@ async function login(payload: JsonRecord) {
   const password = await deriveAuthPassword(String(profile.legacy_user_id || profile.id), pin);
   const session = await passwordLogin(String(authUser.email), password);
   return buildSessionResponse(session);
+}
+
+async function changePin(request: Request, payload: JsonRecord) {
+  const userId = await authenticatedUserId(request);
+  const currentPin = validatePin(payload.currentPin);
+  const newPin = validatePin(payload.newPin);
+  const confirmPin = validatePin(payload.confirmPin);
+  if (newPin !== confirmPin) throw userError('pin_mismatch', '新しいPINが一致しません。');
+  if (currentPin === newPin) throw userError('pin_unchanged', '現在と異なるPINを設定してください。');
+
+  const profiles = await adminRequest('/rest/v1/profiles', {
+    query: { select: 'id,status,legacy_user_id', id: `eq.${userId}`, status: 'eq.active', limit: '1' },
+  }) as JsonRecord[];
+  const profile = profiles[0];
+  if (!profile) throw userError('profile_required', '利用者情報が見つかりません。');
+
+  const authUser = await adminRequest(`/auth/v1/admin/users/${encodeURIComponent(userId)}`) as JsonRecord;
+  const email = String(authUser.email || '');
+  if (!email) throw userError('profile_required', 'ログイン情報が見つかりません。');
+
+  const legacyUserId = String(profile.legacy_user_id || userId);
+  const currentPassword = await deriveAuthPassword(legacyUserId, currentPin);
+  try {
+    await passwordLogin(email, currentPassword);
+  } catch (error) {
+    throw userError('current_pin_invalid', '現在のPINが正しくありません。');
+  }
+
+  const newPassword = await deriveAuthPassword(legacyUserId, newPin);
+  await adminRequest(`/auth/v1/admin/users/${encodeURIComponent(userId)}`, {
+    method: 'PUT',
+    body: { password: newPassword },
+  });
+
+  try {
+    await userRequest('/auth/v1/logout', readBearerToken(request), {
+      method: 'POST',
+      query: { scope: 'global' },
+    });
+  } catch (error) {
+    console.error('Global logout after PIN change failed', error);
+  }
+
+  return { status: 'ok' };
 }
 
 async function register(payload: JsonRecord) {

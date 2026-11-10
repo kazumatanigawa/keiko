@@ -71,6 +71,7 @@ test('Edge API has a deliberately small public action surface', async () => {
   assert.match(source, /KEIKO_AUTH_PEPPER/);
   assert.match(source, /KEIKO_REGISTRATION_CODE/);
   assert.match(source, /action === 'manageMembership'/);
+  assert.match(source, /action === 'changePin'/);
   for (const action of ['getOperatorDashboard', 'updateTeamSettings', 'reportContent', 'moderateReport']) {
     assert.match(source, new RegExp(`action === '${action}'`));
   }
@@ -81,6 +82,31 @@ test('Edge API has a deliberately small public action surface', async () => {
   assert.match(source, /constantTimeEquals\(text\(payload\.registrationCode\), REGISTRATION_CODE\)/);
   const config = await read('supabase/config.toml');
   assert.match(config, /\[functions\.keiko-api\][\s\S]*verify_jwt\s*=\s*false/);
+});
+
+test('signed-in users can change their four-digit PIN without storing it in the browser', async () => {
+  const html = await read('index.html');
+  const edge = await read('supabase/functions/keiko-api/index.ts');
+
+  for (const id of ['pinChangeForm', 'currentPinInput', 'newPinInput', 'confirmPinInput', 'pinChangeSubmit']) {
+    assert.match(html, new RegExp(`id="${id}"`));
+  }
+  assert.match(html, /autocomplete="current-password"/);
+  assert.match(html, /autocomplete="new-password"/);
+  assert.match(html, /authenticatedEdgeRequest\('changePin'/);
+  assert.match(html, /currentPin === newPin/);
+  assert.match(html, /newPin !== confirmPin/);
+  assert.match(html, /clearSession\(\)[\s\S]*localStorage\.setItem\('taiko_name'/);
+  assert.doesNotMatch(html, /localStorage\.setItem\([^,]*pin/i);
+
+  assert.match(edge, /async function changePin\(request: Request, payload: JsonRecord\)/);
+  assert.match(edge, /const userId = await authenticatedUserId\(request\)/);
+  assert.match(edge, /current_pin_invalid/);
+  assert.match(edge, /deriveAuthPassword\(legacyUserId, currentPin\)/);
+  assert.match(edge, /deriveAuthPassword\(legacyUserId, newPin\)/);
+  assert.match(edge, /\/auth\/v1\/admin\/users\/\$\{encodeURIComponent\(userId\)\}/);
+  assert.match(edge, /method: 'PUT'[\s\S]*body: \{ password: newPassword \}/);
+  assert.match(edge, /\/auth\/v1\/logout[\s\S]*scope: 'global'/);
 });
 
 test('admin OS database functions are operator-only and audited', async () => {
@@ -190,7 +216,7 @@ test('home settings and log form support multiple teams without cluttering singl
   assert.doesNotMatch(html, /<details class="help-card" id="helpSection" open/);
   assert.match(html, /<details class="settings-card" id="personalSettings">/);
   assert.match(html, /class="settings-summary"/);
-  assert.match(html, /class="settings-summary-sub">チームの移籍・掛け持ち</);
+  assert.match(html, /class="settings-summary-sub">チームの移籍・掛け持ち／PIN変更</);
   assert.doesNotMatch(html, /<details class="settings-card" id="personalSettings" open/);
   assert.match(html, /KEIKO運営または参加先チームの責任者/);
   assert.match(html, /class="nav-item active" aria-current="page"/);
